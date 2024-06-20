@@ -878,7 +878,6 @@ FishingLeveling(*)
 ||                   Graphic User Interface                   ||
 #==============================================================#
 */
-;WinWaitActive "HB Nemesis"
 
 RedrawCount := 0
 bColorsCorrect := false
