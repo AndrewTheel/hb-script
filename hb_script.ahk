@@ -864,7 +864,7 @@ FishingLeveling(*)
 #==============================================================#
 */
 
-RedrawCount := 0
+RedrawCount := 0 ;TODO: improve this
 bColorsCorrect := false
 
 if (bShowGUI)
@@ -1032,6 +1032,10 @@ CheckWindowState(*)
     }
     else if (WinExistFlag == 0)  ; Window does not exist
     {
+		if (IniRead("hb_script_config.ini", "Settings", "HideSystemCursor") == "true" && bIsCursorHidden)
+		{
+			RestoreCursor()
+		}
     }
     else ;ToolTip("HB Normal")
     {
@@ -1186,4 +1190,7 @@ HotIfWinActive
 OnExit ShowCursor ; make sure to show cursor again when script exits
 
 ; ideas to implement
-; text requests for zerk, apfm, pfm, invis, etc
+; menu for text requests for zerk, apfm, pfm, invis, etc
+; eat food?
+; menu for uncommon things like: shield location set/bind, menu arrangement, etc
+; 
