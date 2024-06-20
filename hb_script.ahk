@@ -35,7 +35,7 @@ Global bDebugMode := false
 
 if (IniRead("hb_script_config.ini", "Settings", "CheckForMinimize") == "true")
 {
-	CheckForMinimize
+	CheckForMinimize()
 }
 
 if (IniRead("hb_script_config.ini", "Settings", "UseAutoPotting") == "true")
@@ -356,7 +356,7 @@ CheckForMinimize()
 		bMinimizedTipOpen := false
 	}
 
-	SetTimer CheckForMinimize, 1000 ;1x a second
+	SetTimer(CheckForMinimize(), 1000) ;1x a second
 }
 
 ; Handles checking health pool for auto pot chug
