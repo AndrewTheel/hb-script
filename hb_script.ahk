@@ -45,7 +45,7 @@ if (IniRead("hb_script_config.ini", "Settings", "CheckForMinimize") == "true")
 
 if (IniRead("hb_script_config.ini", "Settings", "UseAutoPotting") == "true")
 {
-	SetTimer AutoPot, 100 ;10x a second
+	SetTimer(AutoPot, 100) ;10x a second
 }
 
 if (IniRead("hb_script_config.ini", "Settings", "DebugMode") == "true")
@@ -272,11 +272,6 @@ class OptionsMenuManager {
         }
 
         this.DestroyOptionsGUI()
-    }
-
-    ; Method to set a custom callback for an option
-    SetOptionCallback(optionName, callbackFunc) {
-        this.optionCallbacks[optionName] := callbackFunc
     }
 
     ; Method to get the callback function for an option
