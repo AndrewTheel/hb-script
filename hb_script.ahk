@@ -4,24 +4,19 @@ CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
 CoordMode "ToolTip", "Client"
 SendMode "Event"
 
-/* Helbreath Script
-Author: Andrew
-Version: 3.0
-Date: 6/12/2024
-*/
-
-; This makes it so the script only has hotkeys function if HB Nemesis is the active window/client (attempts)
-;WinActivate "HB Nemesis"
-WinWaitActive "HB Nemesis"
-HotIfWinActive "HB Nemesis"
+WinWaitActive "HB Nemesis" ;Script waits until HB Nemesis window is active/front
+HotIfWinActive "HB Nemesis" ;Attempt to make Hotkeys only work inside the HB Nemesis window
 
 ; Global variables
 Global activeMenuManager := ""  ; Global variable to store the active MenuManager instance
 Global WinTitle := "HB Nemesis" ; Title of the window
 Global bIsCursorHidden := false
+Global bShowGUI := false
+Global bDebugMode := false
 
+; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
 #SuspendExempt
-*F1::
+*F1:: ; Toggles suspend of the script
 {
 	if A_IsSuspended
 		Suspend false
@@ -34,7 +29,7 @@ Global bIsCursorHidden := false
 
 /*
 #==============================================================#
-||                     Optional Systems                       ||
+||                      Optional Systems					  ||
 #==============================================================#
 */
 
@@ -45,32 +40,23 @@ if (IniRead("hb_script_config.ini", "Settings", "CheckForMinimize") == "true")
 
 if (IniRead("hb_script_config.ini", "Settings", "UseAutoPotting") == "true")
 {
-	SetTimer(AutoPot, 100) ;10x a second
+	SetTimer(AutoPot, 100)
 }
 
 if (IniRead("hb_script_config.ini", "Settings", "DebugMode") == "true")
 {
-	DebugMode := true ; Set to true to use mouse4 tooltip to get client coords
+	bDebugMode := true
 }
 
 if (IniRead("hb_script_config.ini", "Settings", "ShowGUI") == "true")
 {
-	ShowGUI := true
+	bShowGUI := true
 }
 
-; Create an instance of the class which executes the hotkeys to do nothing
 if (IniRead("hb_script_config.ini", "Settings", "UnbindKeys") == "true")
 {
-	UnbindKeys := HotkeyUnbindClass()
+	UnbindKeys := HotkeyUnbindClass() ; Obj instance that unbinds a bunch of keys by setting hotkeys to do nothing
 }
-
-/*
-#==============================================================#
-||                  Script Control Commands                   ||
-#==============================================================#
-*/
-
-!K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding
 
 /*
 #==============================================================#
@@ -101,10 +87,10 @@ class HotkeyUnbindClass {
 	}
 }
 
-; Handles the spell casting, info, and allows user to assign a key to a spell instead of the other way around
+; Handles spell setup and casting
 class SpellInfo
 {
-	__Initialize() { ; Initialize instance variables *Important: will flag errors if omitted*
+	__Initialize() { ; Initialize instance variables *Important: will flag errors if omitted* TODO: perhaps these just need to be class variables
 		MagicPage := ""
 		YCoord := ""
 		HotKeyName := ""
@@ -132,7 +118,7 @@ class SpellInfo
 			Sleep 50
 			BlockInput false
 
-			/*
+			/* old cast logic
 			BlockInput true
 			MouseGetPos &begin_x, &begin_y ; Get the position of the mouse
 			MouseMove -1000, -1000, 1  ; Move the mouse cursor far to the top left and then some, this resets the apps mouse coords (very useful because otherwise you constantly have to do it manually)
@@ -145,7 +131,6 @@ class SpellInfo
 	}
 }
 
-; Handles other commands
 class CommandInfo
 {
 	__Initialize() { ; Initialize instance variables *Important: will flag errors if omitted*
@@ -882,7 +867,7 @@ FishingLeveling(*)
 RedrawCount := 0
 bColorsCorrect := false
 
-if (ShowGUI)
+if (bShowGUI)
 {
 	MyGui := Gui()
 	CoordText := MyGui.Add("Text", "cLime", "XXXXX YYYYY")  ; XX & YY serve to auto-size the window.
@@ -1169,15 +1154,17 @@ ShowCursor(ExitReason, ExitCode)
 #==============================================================#
 */
 
+!K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)
+
 LWin & LButton::ToggleCursor() ; command to toggle cursor in case something goes wrong
 
-!C:: ; useful for debuggin
+!C:: ; useful for debugging
 {
 	WinMaximize("HB Nemesis")
 	;pA_Clipboard := PixelGetColor(150, 571) . " " . PixelGetColor(163, 592)
 }
 
-^+V::
+^+V:: ; TODO: move this out of debugging
 {
 	global RedrawCount
 
@@ -1193,7 +1180,6 @@ DebugCoords()
 	MouseMove 400, 300, 1
 	Sleep 50
 }
-
 
 ; Any hotkeys defined below this will work outside of HB Nemesis
 HotIfWinActive
