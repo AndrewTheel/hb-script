@@ -36,7 +36,6 @@ Global bDebugMode := false
 if (IniRead("hb_script_config.ini", "Settings", "CheckForMinimize") == "true")
 {
 	CheckForMinimize()
-	CheckForMinimize()
 }
 
 if (IniRead("hb_script_config.ini", "Settings", "UseAutoPotting") == "true")
