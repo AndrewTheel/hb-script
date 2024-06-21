@@ -35,7 +35,7 @@ Global bDebugMode := false
 
 if (IniRead("hb_script_config.ini", "Settings", "CheckForMinimize") == "true")
 {
-	CheckForMinimize
+	CheckForMinimize()
 }
 
 if (IniRead("hb_script_config.ini", "Settings", "UseAutoPotting") == "true")
@@ -73,7 +73,7 @@ if (IniRead("hb_script_config.ini", "Settings", "UnbindKeys") == "true")
 ; Therefore it is advisable to not bind these and let them do nothing
 ; Additional Note: Any hotkey defined to do nothing by this will have to be disabled before being defined again. Ex- Hotkey("1", "Off") will turn 1 off so it can be assigned again via 1::
 class HotkeyUnbindClass {
-    keys := ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "+1", "2", "+2", "3", "+3", "4", "+4", "5", "+5", "6", "+6", "7", "+7", "8", "+8", "9", "+9", "0", "+0", "-", "=", "Space", ",", ".", "/", "'", "[", "]", "\", "+-", "{}", "+=", "+q", "+w", "+e", "+r", "+t", "+y", "+u", "+i", "+o", "+p", "+a", "+s", "+d", "+f", "+g", "+h", "+j", "+k", "+l", "+z", "+x", "+c", "+v", "+b", "+n", "+m", "+Space", "+CapsLock", "+,", "+.", "+/", ";", "+;", "+'", "+[", "+]", "+\", "Volume_Up", "Volume_Down", "Volume_Mute"]
+    keys := ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "+1", "2", "+2", "3", "+3", "4", "+4", "5", "+5", "6", "+6", "7", "+7", "8", "+8", "9", "+9", "0", "+0", "-", "=", "Space", ",", ".", "/", "'", "[", "]", "\", "+-", "{", "}", "+=", "+q", "+w", "+e", "+r", "+t", "+y", "+u", "+i", "+o", "+p", "+a", "+s", "+d", "+f", "+g", "+h", "+j", "+k", "+l", "+z", "+x", "+c", "+v", "+b", "+n", "+m", "+Space", "+CapsLock", "+,", "+.", "+/", ";", "+;", "+'", "+[", "+]", "+\", "Volume_Up", "Volume_Down", "Volume_Mute"]
 
     __New() {
         ; Assign hotkeys using a loop
@@ -356,17 +356,12 @@ CheckForMinimize()
 		bMinimizedTipOpen := false
 	}
 
-	SetTimer CheckForMinimize, 1000 ;1x a second
+	SetTimer(CheckForMinimize, 1000) ;1x a second
 }
 
 ; Handles checking health pool for auto pot chug
 AutoPot()
 {
-	; FSA = Full Screen Alternative (ctrl+shift+v)
-	; colors seem to be different in FSA!!!!!!
-	; doesn't seem to work anymore without FSA
-	; Life / Mana pool x pixel coords range: 107 to 207
-
 	if WinActive("HB Nemesis")
 	{
 		static LowHPDuration := 0
@@ -453,7 +448,7 @@ SendTextMessage(str := "")
 {
 	BlockInput true
 	Send "{enter}"
-	SendText str
+	SendText(str)
 	Sleep 20
 	Send "{enter}"
 	BlockInput false
@@ -625,11 +620,11 @@ ShieldToggle(*)
 
 	if (bToggle)
 	{
-		ShieldEquip
+		ShieldEquip()
 	}
 	else
 	{
-		ShieldUnequip
+		ShieldUnequip()
 	}
 
 	bToggle := !bToggle
@@ -670,11 +665,11 @@ ArrangeWindows(*)
 
 	if (!bRun)
 	{
-		ArrangeInventory ;move inventory window
+		ArrangeInventory() ;move inventory window
 		Sleep 1000
-		ArrangeCharacter ;move character window
+		ArrangeCharacter() ;move character window
 		Sleep 1000
-		ArrangeMagicCircle ;move magic window
+		ArrangeMagicCircle() ;move magic window
 		bRun := false
 	}
 }
@@ -720,11 +715,11 @@ PretendCorpseLeveling(*)
 
 	if bIsFeigning
 	{
-		SetTimer PretendCorpseFunction, 1000
+		SetTimer(PretendCorpseFunction, 1000)
 	}
 	else
 	{
-		SetTimer PretendCorpseFunction, 0
+		SetTimer(PretendCorpseFunction, 0)
 	}
 }
 
@@ -732,7 +727,7 @@ PretendCorpseFunction(*) ; Not really meant to be binded, but can be (will execu
 {
 	;static EatFood := 0 ; handles potential broken rod
 
-	MouseGetPos &x, &y ; Get the position of the mouse (start fishign with the mouse over the poll)
+	MouseGetPos(&x, &y)
 
 	Send "{Click, x, y}"
 	Sleep 100
@@ -754,7 +749,7 @@ MagicLeveling(*) ; Magic leveling : Bind GreatHeal to F2, Magic Missle to F3, pu
     }
 	bIsLvling := true
 
-	MouseGetPos &begin_x, &begin_y ; Get the position of the mouse
+	MouseGetPos(&begin_x, &begin_y)
 
 	Loop
 	{
@@ -829,12 +824,12 @@ FishingLeveling(*)
 
 	if bIsFishing
 	{
-		CastRodFunction ; cast immediately
-		SetTimer CastRodFunction, 8300
+		CastRodFunction()
+		SetTimer(CastRodFunction, 8300)
 	}
 	else
 	{
-		SetTimer CastRodFunction, 0
+		SetTimer(CastRodFunction, 0)
 	}
 }
 
@@ -875,7 +870,7 @@ if (bShowGUI)
 	AutoPotText := MyGui.Add("Text", "cWhite", "A")  ; Autopot Staus
 
     InitializeGUI()
-	SetTimer CheckWindowState, 1000
+	SetTimer(CheckWindowState, 1000)
 }
 
 InitializeGUI()
@@ -920,7 +915,7 @@ UpdateOSD(*)
 		return  ; Exit the function if MyGui is destroyed
 	}
 
-	MouseGetPos &MouseX, &MouseY
+	MouseGetPos(&MouseX, &MouseY)
 	CoordText.Value := "X" MouseX ", Y" MouseY
 
 	if (A_IsSuspended)
@@ -1073,62 +1068,61 @@ ToggleCursor()
 
 SetSystemCursor(Cursor := "", cx := 0, cy := 0)
 {
-	global bIsCursorHidden
+    global bIsCursorHidden
 
-	static SystemCursors := Map("APPSTARTING", 32650, "ARROW", 32512, "CROSS", 32515, "HAND", 32649, "HELP", 32651, "IBEAM", 32513, "NO", 32648,
-						   "SIZEALL", 32646, "SIZENESW", 32643, "SIZENS", 32645, "SIZENWSE", 32642, "SIZEWE", 32644, "UPARROW", 32516, "WAIT", 32514)
+    static SystemCursors := Map("APPSTARTING", 32650, "ARROW", 32512, "CROSS", 32515, "HAND", 32649, "HELP", 32651, "IBEAM", 32513, "NO", 32648,
+                                "SIZEALL", 32646, "SIZENESW", 32643, "SIZENS", 32645, "SIZENWSE", 32642, "SIZEWE", 32644, "UPARROW", 32516, "WAIT", 32514)
 
-	if (Cursor = "") {
-	  AndMask := Buffer(128, 0xFF), XorMask := Buffer(128, 0)
+    if (Cursor = "") {
+        AndMask := Buffer(128, 0xFF), XorMask := Buffer(128, 0)
 
-	  for CursorName, CursorID in SystemCursors {
-		 CursorHandle := DllCall("CreateCursor", "ptr", 0, "int", 0, "int", 0, "int", 32, "int", 32, "ptr", AndMask, "ptr", XorMask, "ptr")
-		 DllCall("SetSystemCursor", "ptr", CursorHandle, "int", CursorID) ; calls DestroyCursor
+        for CursorName, CursorID in SystemCursors {
+            CursorHandle := DllCall("CreateCursor", "ptr", 0, "int", 0, "int", 0, "int", 32, "int", 32, "ptr", AndMask, "ptr", XorMask, "ptr")
+            DllCall("SetSystemCursor", "ptr", CursorHandle, "int", CursorID) ; calls DestroyCursor
+        }
+        bIsCursorHidden := true
+        return
+    }
 
-	  }
-	  bIsCursorHidden := true
-	  return
-	}
+    if (Cursor ~= "^(IDC_)?(?i:AppStarting|Arrow|Cross|Hand|Help|IBeam|No|SizeAll|SizeNESW|SizeNS|SizeNWSE|SizeWE|UpArrow|Wait)$") {
+        Cursor := RegExReplace(Cursor, "^IDC_")
 
-	if (Cursor ~= "^(IDC_)?(?i:AppStarting|Arrow|Cross|Hand|Help|IBeam|No|SizeAll|SizeNESW|SizeNS|SizeNWSE|SizeWE|UpArrow|Wait)$") {
-	  Cursor := RegExReplace(Cursor, "^IDC_")
+        if !(CursorShared := DllCall("LoadCursor", "ptr", 0, "ptr", SystemCursors[StrUpper(Cursor)], "ptr"))
+            throw Error("Error: Invalid cursor name")
 
-	  if !(CursorShared := DllCall("LoadCursor", "ptr", 0, "ptr", SystemCursors[StrUpper(Cursor)], "ptr"))
-		 throw Error("Error: Invalid cursor name")
+        for CursorName, CursorID in SystemCursors {
+            CursorHandle := DllCall("CopyImage", "ptr", CursorShared, "uint", 2, "int", cx, "int", cy, "uint", 0, "ptr")
+            DllCall("SetSystemCursor", "ptr", CursorHandle, "int", CursorID) ; calls DestroyCursor
+        }
+        bIsCursorHidden := true
+        return
+    }
 
-	  for CursorName, CursorID in SystemCursors {
-		 CursorHandle := DllCall("CopyImage", "ptr", CursorShared, "uint", 2, "int", cx, "int", cy, "uint", 0, "ptr")
-		 DllCall("SetSystemCursor", "ptr", CursorHandle, "int", CursorID) ; calls DestroyCursor
-	  }
-	  bIsCursorHidden := true
-	  return
-	}
+    if FileExist(Cursor) {
+        SplitPath Cursor,,, &Ext:="" ; auto-detect type
+        if !(uType := (Ext = "ani" || Ext = "cur") ? 2 : (Ext = "ico") ? 1 : 0)
+            throw Error("Error: Invalid file type")
 
-	if FileExist(Cursor) {
-	  SplitPath Cursor,,, &Ext:="" ; auto-detect type
-	  if !(uType := (Ext = "ani" || Ext = "cur") ? 2 : (Ext = "ico") ? 1 : 0)
-		 throw Error("Error: Invalid file type")
+        if (Ext = "ani") {
+            for CursorName, CursorID in SystemCursors {
+                CursorHandle := DllCall("LoadImage", "ptr", 0, "str", Cursor, "uint", uType, "int", cx, "int", cy, "uint", 0x10, "ptr")
+                DllCall("SetSystemCursor", "ptr", CursorHandle, "int", CursorID) ; calls DestroyCursor
+            }
+            bIsCursorHidden := true
+        } else {
+            if !(CursorShared := DllCall("LoadImage", "ptr", 0, "str", Cursor, "uint", uType, "int", cx, "int", cy, "uint", 0x8010, "ptr"))
+                throw Error("Error: Corrupted file")
 
-	  if (Ext = "ani") {
-		 for CursorName, CursorID in SystemCursors {
-			CursorHandle := DllCall("LoadImage", "ptr", 0, "str", Cursor, "uint", uType, "int", cx, "int", cy, "uint", 0x10, "ptr")
-			DllCall("SetSystemCursor", "ptr", CursorHandle, "int", CursorID) ; calls DestroyCursor
-			bIsCursorHidden := true
-		 }
-	  } else {
-		 if !(CursorShared := DllCall("LoadImage", "ptr", 0, "str", Cursor, "uint", uType, "int", cx, "int", cy, "uint", 0x8010, "ptr"))
-			throw Error("Error: Corrupted file")
+            for CursorName, CursorID in SystemCursors {
+                CursorHandle := DllCall("CopyImage", "ptr", CursorShared, "uint", 2, "int", 0, "int", 0, "uint", 0, "ptr")
+                DllCall("SetSystemCursor", "ptr", CursorHandle, "int", CursorID) ; calls DestroyCursor
+            }
+            bIsCursorHidden := true
+        }
+        return
+    }
 
-		 for CursorName, CursorID in SystemCursors {
-			CursorHandle := DllCall("CopyImage", "ptr", CursorShared, "uint", 2, "int", 0, "int", 0, "uint", 0, "ptr")
-			DllCall("SetSystemCursor", "ptr", CursorHandle, "int", CursorID) ; calls DestroyCursor
-		 }
-	  }
-	  bIsCursorHidden := true
-	  return
-	}
-
-	throw Error("Error: Invalid file path or cursor name")
+    throw Error("Error: Invalid file path or cursor name")
 }
 
 GetCursorState()
