@@ -1,18 +1,21 @@
 ﻿#Requires AutoHotkey v2.0
 
+; AHK settings
 CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
 CoordMode "ToolTip", "Client"
 SendMode "Event"
 
-WinWaitActive "HB Nemesis" ;Script waits until HB Nemesis window is active/front
-HotIfWinActive "HB Nemesis" ;Attempt to make Hotkeys only work inside the HB Nemesis window
-
 ; Global variables
+Global ConfigFile := "hb_script_config.ini"
 Global activeMenuManager := ""  ; Global variable to store the active MenuManager instance
 Global WinTitle := "HB Nemesis" ; Title of the window
 Global bIsCursorHidden := false
 Global bShowGUI := false
 Global bDebugMode := false
+
+; AHK initiatives
+WinWaitActive WinTitle ;Script waits until HB Nemesis window is active/front
+HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB Nemesis window
 
 ; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
 #SuspendExempt
@@ -22,57 +25,45 @@ Global bDebugMode := false
 		Suspend false
 	else
 		Suspend true
-
-	return
 }
 #SuspendExempt false
 
-/*
-#==============================================================#
-||                      Optional Systems					  ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Optional Systems ══════════════════════════════════════════════════════ ;
 
-if (IniRead("hb_script_config.ini", "Settings", "CheckForMinimize") == "true")
+if (IniRead(ConfigFile, "Settings", "CheckForMinimize") == "true")
 {
 	CheckForMinimize()
 }
 
-if (IniRead("hb_script_config.ini", "Settings", "UseAutoPotting") == "true")
+if (IniRead(ConfigFile, "Settings", "UseAutoPotting") == "true")
 {
 	SetTimer(AutoPot, 100)
 }
 
-if (IniRead("hb_script_config.ini", "Settings", "DebugMode") == "true")
+if (IniRead(ConfigFile, "Settings", "DebugMode") == "true")
 {
 	bDebugMode := true
 }
 
-if (IniRead("hb_script_config.ini", "Settings", "ShowGUI") == "true")
+if (IniRead(ConfigFile, "Settings", "ShowGUI") == "true")
 {
 	bShowGUI := true
 }
 
-if (IniRead("hb_script_config.ini", "Settings", "UnbindKeys") == "true")
+if (IniRead(ConfigFile, "Settings", "UnbindKeys") == "true")
 {
 	UnbindKeys := HotkeyUnbindClass() ; Obj instance that unbinds a bunch of keys by setting hotkeys to do nothing
 }
 
-/*
-#==============================================================#
-||                          Classes                           ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Classes ══════════════════════════════════════════════════════ ;
 
-; Begin by unbinding a lot of keys, this is useful as otherwise they begin typing when trying to be in combat
-; Later we assign spells to keys (ex- q is unbound, then rebound to a spell)
-; We also have to unbind shift+keys as...
-; If you try to bind a shift command to a spell and are using shift hold to run, it is possible that shift gets stuck held down. Creating a potential issue. If you hold sprint + use the stantard spell memory of F2, F3, F4 it interupts your single click sprint run
-; If you are holding mouse1 with shift also held, your F2-F4 cast commands do not interrupt. This is the same behavior as spells bound without shift versions.
-; If you do bind as shift+ spell command and are running with shift it will interrupt your sprint, even if you are holding mouse1 down.
-; Therefore it is advisable to not bind these and let them do nothing
-; Additional Note: Any hotkey defined to do nothing by this will have to be disabled before being defined again. Ex- Hotkey("1", "Off") will turn 1 off so it can be assigned again via 1::
 class HotkeyUnbindClass {
+	; Unbind keys to prevent unintended typing during combat.
+	; Rebind keys for spells (e.g., q to a spell) later in script or from config.
+	; Unbind shift+keys to avoid issues with sprint and spell casting.
+	; Caution: Binding shift+keys while sprinting may interrupt your run.
+	; Note: Disabled hotkeys must be re-enabled (e.g., Hotkey("1", "Off")) when defined as such "Hotkey::".
+
     keys := ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "+1", "2", "+2", "3", "+3", "4", "+4", "5", "+5", "6", "+6", "7", "+7", "8", "+8", "9", "+9", "0", "+0", "-", "=", "Space", ",", ".", "/", "'", "[", "]", "\", "+-", "{", "}", "+=", "+q", "+w", "+e", "+r", "+t", "+y", "+u", "+i", "+o", "+p", "+a", "+s", "+d", "+f", "+g", "+h", "+j", "+k", "+l", "+z", "+x", "+c", "+v", "+b", "+n", "+m", "+Space", "+CapsLock", "+,", "+.", "+/", ";", "+;", "+'", "+[", "+]", "+\", "Volume_Up", "Volume_Down", "Volume_Mute"]
 
     __New() {
@@ -87,9 +78,7 @@ class HotkeyUnbindClass {
 	}
 }
 
-; Handles spell setup and casting
-class SpellInfo
-{
+class SpellInfo {
 	__Initialize() { ; Initialize instance variables *Important: will flag errors if omitted* TODO: perhaps these just need to be class variables
 		MagicPage := ""
 		YCoord := ""
@@ -106,7 +95,7 @@ class SpellInfo
 
 	CastSpell(*) {
 
-		if WinActive("HB Nemesis") ; This supposedly stops the hotkey from working outside of the HB client
+		if WinActive(WinTitle) ; This supposedly stops the hotkey from working outside of the HB client
 		{
 			BlockInput true
 			MouseGetPos &begin_x, &begin_y ; Get the position of the mouse
@@ -131,12 +120,10 @@ class SpellInfo
 	}
 }
 
-class CommandInfo
-{
-	__Initialize() { ; Initialize instance variables *Important: will flag errors if omitted*
-		HotKeyName := ""
-		InputCommand := ""
-	}
+class CommandInfo {
+	; Member variables
+	HotKeyName := ""
+	InputCommand := ""
 
     __New(aKey, aCommand) { ; Constructor
         this.HotKeyName := aKey
@@ -170,7 +157,7 @@ class CommandInfo
 
 	SendCommand(*) {
 
-		if WinActive("HB Nemesis") ; This supposedly stops the hotkey from working outside of the HB client
+		if WinActive(WinTitle) ; This supposedly stops the hotkey from working outside of the HB client
 		{
 			Send this.InputCommand
 		}
@@ -180,15 +167,13 @@ class CommandInfo
 	}
 }
 
-; A class for managing menu with button options (can be clicked or use keyboard 1-9)
 class OptionsMenuManager {
     ; Member variables
     optionsGui := ""  ; Initialize as empty string
 	optionMenuLabels := Array()
     optionFunctionNames := Array()
 
-    ; Constructor with parameters
-    __New(optionNames, functionNames) {
+    __New(optionNames, functionNames) { ; Constructor
         ; Validate parameters
         if (optionNames.Length != functionNames.Length || optionNames.Length > 9) {
             MsgBox("Error: optionMenuLabels and optionFunctionNames must have the same number of elements. And not exceed 9")
@@ -242,7 +227,7 @@ class OptionsMenuManager {
 	; Method to call the function by index with validation
     CallFunction(index, *) {
         ; Validate index
-        if (index < 1 || index > this.optionFunctionNames.Length || !WinActive("HB Nemesis"))
+        if (index < 1 || index > this.optionFunctionNames.Length || !WinActive(WinTitle))
 		{
             return
         }
@@ -265,15 +250,10 @@ class OptionsMenuManager {
     }
 }
 
-/*
-#==============================================================#
-||                      Load From Config                      ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Load From Config ══════════════════════════════════════════════════════ ;
 
-LoadSpellsFromConfig()
-{
-	Section := IniRead("hb_script_config.ini", "Spells")
+LoadSpellsFromConfig() {
+	Section := IniRead(ConfigFile, "Spells")
 
 	if (Section)
 	{
@@ -293,9 +273,8 @@ LoadSpellsFromConfig()
 	}
 }
 
-LoadCommandsFromConfig(SectionName)
-{
-	Section := IniRead("hb_script_config.ini", SectionName)
+LoadCommandsFromConfig(SectionName) {
+	Section := IniRead(ConfigFile, SectionName)
 
 	if (Section)
 	{
@@ -323,17 +302,12 @@ LoadCommandsFromConfig("Messages")
 LoadCommandsFromConfig("Inventory")
 LoadCommandsFromConfig("Other")
 
-/*
-#==============================================================#
-||                    Systems/Functions                       ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Systems/Functions ══════════════════════════════════════════════════════ ;
 
-CheckForMinimize()
-{
+CheckForMinimize() {
 	static bMinimizedTipOpen := false
 
-	if (!WinActive("HB Nemesis"))
+	if (!WinActive(WinTitle))
 	{
 		if (!bMinimizedTipOpen)
 		{
@@ -359,10 +333,8 @@ CheckForMinimize()
 	SetTimer(CheckForMinimize, 1000) ;1x a second
 }
 
-; Handles checking health pool for auto pot chug
-AutoPot()
-{
-	if WinActive("HB Nemesis")
+AutoPot() {
+	if WinActive(WinTitle)
 	{
 		static LowHPDuration := 0
 		static LowManaDuration := 0
@@ -421,8 +393,7 @@ AutoPot()
 	}
 }
 
-IsColorInRange(x, y, targetColor, tolerance := 10)
-{
+IsColorInRange(x, y, targetColor, tolerance := 10) {
     ; Get the color of the pixel at (x, y)
     pixelColor := PixelGetColor(x, y, "RGB")
 
@@ -444,8 +415,18 @@ IsColorInRange(x, y, targetColor, tolerance := 10)
     }
 }
 
-SendTextMessage(str := "")
-{
+OptionsMenu(optionNames, optionFunctionNames) {
+    global activeMenuManager
+
+    if (activeMenuManager == "") {
+        activeMenuManager := OptionsMenuManager(optionNames, optionFunctionNames)
+        activeMenuManager.showOptionsDialog()
+    } else {
+        activeMenuManager.DestroyOptionsGUI()
+    }
+}
+
+SendTextMessage(str := "") {
 	BlockInput true
 	Send "{enter}"
 	SendText(str)
@@ -454,52 +435,19 @@ SendTextMessage(str := "")
 	BlockInput false
 }
 
-/*
-#==============================================================#
-||                   Bindable Functions                       ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Hotkeys and Game Actions ══════════════════════════════════════════════════════ ;
 
 #SuspendExempt
-ToggleSuspendScript(*)
-{
-	Send "{F1}"
-}
-
-SuspendScript(*)
-{
-	Suspend true
-}
-
-ResumeScript(*)
-{
-	Suspend false
-}
+ToggleSuspendScript(*) => Send "{F1}"
+SuspendScript(*) => Suspend true
+ResumeScript(*) => Suspend false
 #SuspendExempt false
 
-DoNothing(*)
-{
-}
-
-ToggleMap(*)
-{
-	send "^m"
-}
-
-OpenBag(*)
-{
-	send "{f6}"
-}
-
-ToggleRunWalk(*)
-{
-	send "^r"
-}
-
-OpenOptions(*)
-{
-	send "{F12}"
-}
+DoNothing(*) => { }
+ToggleMap(*) => Send "^m"
+OpenBag(*) => Send "{f6}"
+ToggleRunWalk(*) => Send "^r"
+OpenOptions(*) => Send "{F12}"
 
 RecruitMessage(*) => SendTextMessage("~COPS recruiting, whisper me")
 FreezeMessage(*) => SendTextMessage("This is the police! Freeze!!!")
@@ -513,64 +461,22 @@ OfficerDownMessage(*) => SendTextMessage("Officer down!")
 
 Rights1Message(*) => SendTextMessage("You have the right to remain silent.")
 Rights2Message(*) => SendTextMessage("Anything you say can and will be used against you in a court of law.")
-Rights3Message(*) => SendTextMessage("You have the right to an attorney. If you cannot afford an attorney, one will be provided for you.") ; too long
-Rights4Message(*) => SendTextMessage("Do you understand the rights I have just read to you? With these rights in mind, do you wish to speak to me?") ; too long
+Rights3Message(*) => SendTextMessage("You have the right to an attorney. If you cannot afford an attorney, one will be provided for you.") ; TODO: too long
+Rights4Message(*) => SendTextMessage("Do you understand the rights I have just read to you? With these rights in mind, do you wish to speak to me?") ; TODO: too long
 
-; cops text commands "Freeze", "You have the right to remain silent.", "Anything you say can and will be used against you in a court of law.", "You have the right to an attorney. If you cannot afford an attorney, one will be provided for you."
-; Do you understand the rights I have just read to you? With these rights in mind, do you wish to speak to me?”
-; "Get down on the ground!", "Don't move!", "You're under arrest.", "Requesting backup!", "Shots fired!", "Suspect is fleeing!","Officer down!", "Show me your hands!"
-
-; Hotkey to show the dialog when CapsLock is pressed
-
-CopsMessageMenu1(*)
-{
-	global activeMenuManager
-
-	if (activeMenuManager == "")
-	{
-		optionNames := ["1. Freeze", "2. On The Ground", "3. Dont Move", "4. UnderArrest", "5. Sus Fleeing", "6. Show Hands", "7. Shots Fire", "8. Officer Down"]
-		optionFunctionNames := ["FreezeMessage", "OnTheGroundMessage", "DontMoveMessage", "UnderArrestMessage", "SuspectFleeingMessage", "ShowHandsMessage", "ShotsFiredMessage", "OfficerDownMessage"]
-		activeMenuManager := OptionsMenuManager(optionNames, optionFunctionNames)
-		activeMenuManager.showOptionsDialog()
-	}
-	else
-	{
-		activeMenuManager.DestroyOptionsGUI()
-	}
+CopsMessageMenu1(*) {
+    OptionsMenu(["1. Freeze", "2. On The Ground", "3. Dont Move", "4. UnderArrest", "5. Sus Fleeing", "6. Show Hands", "7. Shots Fire", "8. Officer Down"],
+                ["FreezeMessage", "OnTheGroundMessage", "DontMoveMessage", "UnderArrestMessage", "SuspectFleeingMessage", "ShowHandsMessage", "ShotsFiredMessage", "OfficerDownMessage"])
 }
 
-CopsMessageMenu2(*)
-{
-	global activeMenuManager
-
-	if (activeMenuManager == "")
-	{
-		optionNames := ["1. Rights 1", "2. Rights 2", "3. Rights 3", "4. Rights 4"]
-		optionFunctionNames := ["Rights1Message", "Rights2Message", "Rights3Message", "Rights4Message"]
-		activeMenuManager := OptionsMenuManager(optionNames, optionFunctionNames)
-		activeMenuManager.showOptionsDialog()
-	}
-	else
-	{
-		activeMenuManager.DestroyOptionsGUI()
-	}
+CopsMessageMenu2(*) {
+    OptionsMenu(["1. Rights 1", "2. Rights 2", "3. Rights 3", "4. Rights 4"],
+                ["Rights1Message", "Rights2Message", "Rights3Message", "Rights4Message"])
 }
 
-LevelingMenu(*)
-{
-	global activeMenuManager
-
-	if (activeMenuManager == "")
-	{
-		optionNames := ["1. PretendCorpse", "2. MagicLeveling", "3. FishingLeveling", "4. PoisonLeveling"]
-		optionFunctionNames := ["PretendCorpseLeveling", "MagicLeveling", "FishingLeveling", "DoNothing"]
-		activeMenuManager := OptionsMenuManager(optionNames, optionFunctionNames)
-		activeMenuManager.showOptionsDialog()
-	}
-	else
-	{
-		activeMenuManager.DestroyOptionsGUI()
-	}
+LevelingMenu(*) {
+    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. FishingLeveling", "4. PoisonLeveling"],
+                ["PretendCorpseLeveling", "MagicLeveling", "FishingLeveling", "DoNothing"])
 }
 
 TamingDoubleClick(*)
@@ -616,16 +522,12 @@ ShieldToggle(*)
 {
 	static bToggle := false
 
-	DebugCoords
+	DebugCoords()
 
 	if (bToggle)
-	{
 		ShieldEquip()
-	}
 	else
-	{
 		ShieldUnequip()
-	}
 
 	bToggle := !bToggle
 }
@@ -641,10 +543,7 @@ ShieldUnequip(*)
 	BlockInput false
 }
 
-ShieldEquip(*)
-{
-	Send "{F3}"
-}
+ShieldEquip(*) => Send "{F3}"
 
 ShieldBind(*)
 {
@@ -665,11 +564,11 @@ ArrangeWindows(*)
 
 	if (!bRun)
 	{
-		ArrangeInventory() ;move inventory window
+		ArrangeInventory()
 		Sleep 1000
-		ArrangeCharacter() ;move character window
+		ArrangeCharacter()
 		Sleep 1000
-		ArrangeMagicCircle() ;move magic window
+		ArrangeMagicCircle()
 		bRun := false
 	}
 }
@@ -713,12 +612,10 @@ PretendCorpseLeveling(*)
 
 	bIsFeigning := !bIsFeigning
 
-	if bIsFeigning
-	{
+	if bIsFeigning {
 		SetTimer(PretendCorpseFunction, 1000)
 	}
-	else
-	{
+	else {
 		SetTimer(PretendCorpseFunction, 0)
 	}
 }
@@ -806,8 +703,7 @@ CastRodFunction(*) ; Not really meant to be binded, but can be (will execute one
 
 	MoveRodResetTime += 8300 ; this should roughly equal the cast rod loop
 
-	; If so much time has passed, lets move a potentially broken fishing rod out of the way
-	; 1500000 = 25 mins
+	; If so much time has passed, lets move a potentially broken fishing rod out of the way (1500000 = 25 mins)
 	if (MoveRodResetTime >= 1500000) {
 		MouseClickDrag "Left", x, y, x + 100, y, 50
 		Sleep 100
@@ -822,25 +718,18 @@ FishingLeveling(*)
 
 	bIsFishing := !bIsFishing
 
-	if bIsFishing
-	{
+	if bIsFishing {
 		CastRodFunction()
 		SetTimer(CastRodFunction, 8300)
 	}
-	else
-	{
+	else {
 		SetTimer(CastRodFunction, 0)
 	}
 }
 
-/*
-#==============================================================#
-||                 Other/Conditional Hotkeys                  ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Other/Conditional Hotkeys  ══════════════════════════════════════════════════════ ;
 
-#HotIf (IsObject(activeMenuManager) && activeMenuManager.optionsGui != "")
-{
+#HotIf (IsObject(activeMenuManager) && activeMenuManager.optionsGui != "") {
     1::activeMenuManager.CallFunction(1)
     2::activeMenuManager.CallFunction(2)
     3::activeMenuManager.CallFunction(3)
@@ -853,11 +742,7 @@ FishingLeveling(*)
 }
 #HotIf
 
-/*
-#==============================================================#
-||                   Graphic User Interface                   ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Graphic User Interface  ══════════════════════════════════════════════════════ ;
 
 RedrawCount := 0 ;TODO: improve this
 bColorsCorrect := false
@@ -873,8 +758,7 @@ if (bShowGUI)
 	SetTimer(CheckWindowState, 1000)
 }
 
-InitializeGUI()
-{
+InitializeGUI() __New(){
 	global MyGui, CoordText, StatusText, AutoPotText  ; Access the global variables
 
 	MyGui := Gui()
@@ -884,17 +768,14 @@ InitializeGUI()
 
 	CoordText := MyGui.Add("Text", "cLime", "XXXXX YYYYY")
 	CoordText.Move(290, 588)  ; Move the second text control to a different position.
-	CoordText.OnEvent("Click", DoNothing)
 
 	StatusText := MyGui.Add("Text", "cWhite", "S")  ; Initialize second text control.
     StatusText.Move(89, 557)  ; Move the second text control to a different position.
-	StatusText.OnEvent("Click", (self, info) => "")
 
 	AutoPotText := MyGui.Add("Text", "cWhite", "A")
     AutoPotText.Move(89, 570)
 
-	if (IniRead("hb_script_config.ini", "Settings", "UseAutoPotting") != "true")
-	{
+	if (IniRead(ConfigFile, "Settings", "UseAutoPotting") != "true") {
 		AutoPotText.Hidden true
 	}
 
@@ -906,8 +787,7 @@ InitializeGUI()
     UpdateOSD()  ; Make the first update immediate rather than waiting for the timer.
 }
 
-UpdateOSD(*)
-{
+UpdateOSD(*) {
 	global MyGui, CoordText, StatusText, AutoPotText, bColorsCorrect  ; Access the global variables
 
 	; Check if MyGui is destroyed
@@ -918,36 +798,21 @@ UpdateOSD(*)
 	MouseGetPos(&MouseX, &MouseY)
 	CoordText.Value := "X" MouseX ", Y" MouseY
 
-	if (A_IsSuspended)
-	{
-		StatusText.SetFont("cff9c9c") ; pastel red
-	}
-	else
-	{
-		StatusText.SetFont("c16ff58") ; pastel green
-	}
+	; First is a boolean argument, true sends the first argument, false seconds the second
+	StatusText.SetFont(A_IsSuspended ? "cff9c9c" : "c16ff58") ; pastel red if suspended, pastel green if not
 
-	if (!bColorsCorrect) ; TODO: Remove this variable and replace with a check on the HP/Mana pool colors or something
-	{
-		AutoPotText.SetFont("cff9c9c") ; pastel red
-	}
-	else
-	{
-		AutoPotText.SetFont("c16ff58") ; pastel green
-	}
+	AutoPotText.SetFont(bColorsCorrect ? "c16ff58" : "cff9c9c") ; pastel green if colors are correct, pastel red if not
 }
 
-RedrawGUI()
-{
+RedrawGUI() {
 	DestroyGUI()
 	InitializeGUI()
 }
 
-DestroyGUI()
-{
+DestroyGUI() {
     global MyGui  ; Access the global variable
-    if IsObject(MyGui)
-    {
+
+    if IsObject(MyGui) {
 		Sleep 100
 		SetTimer(UpdateOSD, 0)
         MyGui.Destroy()
@@ -955,119 +820,89 @@ DestroyGUI()
 }
 
 ; Don't show the GUI if we are minimized and put in some hacks to help ensure we are in Alt Full Screen (which has working color checking for autopot)
-CheckWindowState(*)
-{
+CheckWindowState(*) {
     global WinTitle, RedrawCount, bColorsCorrect
 
 	static bAFSEnabled := false
 	static AFSAttemts := 0
 
-    ; Get window information
-	if WinExist("HB Nemesis")
-	{
-		Style := WinGetStyle(WinTitle)
-		WinState := WinGetMinMax(WinTitle)
-		WinExistFlag := WinExist(WinTitle)
-	}
-	else
-	{
-		return
-	}
+	if !WinExist(WinTitle)
+        return
 
-    ; Check if the window is maximized
+	Style := WinGetStyle(WinTitle)
+	WinState := WinGetMinMax(WinTitle)
+	WinExistFlag := WinExist(WinTitle)
+
     if (Style & 0x01000000)  ; WS_MAXIMIZE style ToolTip("HB Maximized")
     {
-		if (IniRead("hb_script_config.ini", "Settings", "HideSystemCursor") == "true" && !bIsCursorHidden)
-		{
+		if (IniRead(ConfigFile, "Settings", "HideSystemCursor") == "true" && !bIsCursorHidden)
 			SetSystemCursor()
-		}
 
-		if (RedrawCount <= 5)
-		{
+		if (RedrawCount <= 5) {
 			RedrawGUI()
 			RedrawCount++
 		}
 
 		; Check to see if the GUI colors are correct, we check two far away pixels on the HB GUI so the cursor can't mess with this
-		if (PixelGetColor(85, 555) != "0x212021" && PixelGetColor(710, 555) != "0x212421")
-		{
+		if (PixelGetColor(85, 555) != "0x212021" && PixelGetColor(710, 555) != "0x212421") {
 			bColorsCorrect := false
 
 			; hack to fix color checking
-			if (IniRead("hb_script_config.ini", "Settings", "ColorFixHack") == "true")
-			{
-				if (AFSAttemts <= 10)
-				{
-					AFSAttemts++
-					Send "^+{V}"
-					Sleep 2000
-				}
+			if (IniRead(ConfigFile, "Settings", "ColorFixHack") == "true" && AFSAttemts <= 10) {
+				AFSAttemts++
+				Send "^+{V}"
+				Sleep 2000
 			}
 		}
-		else
-		{
+		else {
 			bColorsCorrect := true
 		}
 
     }
     else if (WinState == -1)  ; Minimized state ToolTip("HB Minimized")
     {
-		if (IniRead("hb_script_config.ini", "Settings", "HideSystemCursor") == "true" && bIsCursorHidden)
-		{
+		if (IniRead(ConfigFile, "Settings", "HideSystemCursor") == "true" && bIsCursorHidden) {
 			RestoreCursor()
 		}
 
-		if (activeMenuManager != "")
-		{
+		if (activeMenuManager != "") {
 			activeMenuManager.DestroyOptionsGUI()
 		}
 
-		DestroyGUI() ; This disables the GUI when HB is minimized
+		DestroyGUI() ; Remove the GUI when HB is minimized
 		bAFSEnabled := false
     }
     else if (WinExistFlag == 0)  ; Window does not exist
     {
-		if (IniRead("hb_script_config.ini", "Settings", "HideSystemCursor") == "true" && bIsCursorHidden)
-		{
+		if (IniRead(ConfigFile, "Settings", "HideSystemCursor") == "true" && bIsCursorHidden) {
 			RestoreCursor()
 		}
     }
     else ;ToolTip("HB Normal")
     {
 		RedrawCount := 0
-		WinMaximize("HB Nemesis")
+		WinMaximize(WinTitle)
 
 		; hack to automate alt full screen
-		if (!bAFSEnabled && IniRead("hb_script_config.ini", "Settings", "AltFullScreenHack") == "true")
-		{
+		if (!bAFSEnabled && IniRead(ConfigFile, "Settings", "AltFullScreenHack") == "true") {
 			bAFSEnabled := true
 			Send "^+{V}"
 		}
     }
 }
 
-/*
-#==============================================================#
-||                       Cursor Methods                       ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Cursor Methods  ══════════════════════════════════════════════════════ ;
 
-ToggleCursor()
-{
+ToggleCursor() {
 	global bIsCursorHidden
 
 	if (bIsCursorHidden)
-	{
 		RestoreCursor()
-	}
 	else
-	{
 		SetSystemCursor()
-	}
 }
 
-SetSystemCursor(Cursor := "", cx := 0, cy := 0)
-{
+SetSystemCursor(Cursor := "", cx := 0, cy := 0) {
     global bIsCursorHidden
 
     static SystemCursors := Map("APPSTARTING", 32650, "ARROW", 32512, "CROSS", 32515, "HAND", 32649, "HELP", 32651, "IBEAM", 32513, "NO", 32648,
@@ -1125,32 +960,19 @@ SetSystemCursor(Cursor := "", cx := 0, cy := 0)
     throw Error("Error: Invalid file path or cursor name")
 }
 
-GetCursorState()
-{
-	global bIsCursorHidden
-
-	return bIsCursorHidden
-}
-
-RestoreCursor()
-{
+RestoreCursor() {
 	global bIsCursorHidden
 
 	bIsCursorHidden := false
 	return DllCall("SystemParametersInfo", "uint", SPI_SETCURSORS := 0x57, "uint", 0, "ptr", 0, "uint", 0)
 }
 
-ShowCursor(ExitReason, ExitCode)
-{
+ShowCursor(ExitReason, ExitCode) {
 	RestoreCursor()
 	ExitApp
 }
 
-/*
-#==============================================================#
-||                          Debugging                         ||
-#==============================================================#
-*/
+; ══════════════════════════════════════════════════════  Debugging / WIP ══════════════════════════════════════════════════════ ;
 
 !K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)
 
@@ -1158,7 +980,7 @@ LWin & LButton::ToggleCursor() ; command to toggle cursor in case something goes
 
 !C:: ; useful for debugging
 {
-	WinMaximize("HB Nemesis")
+	WinMaximize(WinTitle)
 	;pA_Clipboard := PixelGetColor(150, 571) . " " . PixelGetColor(163, 592)
 }
 
@@ -1187,4 +1009,3 @@ OnExit ShowCursor ; make sure to show cursor again when script exits
 ; menu for text requests for zerk, apfm, pfm, invis, etc
 ; eat food?
 ; menu for uncommon things like: shield location set/bind, menu arrangement, etc
-; 
