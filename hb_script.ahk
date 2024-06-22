@@ -845,8 +845,12 @@ CheckWindowState(*) {
 	static bAFSEnabled := false
 	static AFSAttemts := 0
 
-	if !WinExist(WinTitle)
-        return
+	if !WinExist(WinTitle) {
+		if (IniRead(ConfigFile, "Settings", "HideSystemCursor") == "true" && bIsCursorHidden) {
+			RestoreCursor()
+		}
+		return
+	}
 
 	Style := WinGetStyle(WinTitle)
 	WinState := WinGetMinMax(WinTitle)
@@ -890,12 +894,6 @@ CheckWindowState(*) {
 
 		DestroyGUI() ; Remove the GUI when HB is minimized
 		bAFSEnabled := false
-    }
-    else if (WinExistFlag == 0)  ; Window does not exist
-    {
-		if (IniRead(ConfigFile, "Settings", "HideSystemCursor") == "true" && bIsCursorHidden) {
-			RestoreCursor()
-		}
     }
     else ;ToolTip("HB Normal")
     {
