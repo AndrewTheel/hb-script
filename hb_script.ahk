@@ -438,16 +438,16 @@ SendTextMessage(str := "") {
 ; ══════════════════════════════════════════════════════  Hotkeys and Game Actions ══════════════════════════════════════════════════════ ;
 
 #SuspendExempt
-ToggleSuspendScript(*) => Send "{F1}"
+ToggleSuspendScript(*) => Send("{F1}")
 SuspendScript(*) => Suspend true
 ResumeScript(*) => Suspend false
 #SuspendExempt false
 
 DoNothing(*) => { }
-ToggleMap(*) => Send "^m"
-OpenBag(*) => Send "{f6}"
-ToggleRunWalk(*) => Send "^r"
-OpenOptions(*) => Send "{F12}"
+ToggleMap(*) => Send("^m")
+OpenBag(*) => Send("{f6}")
+ToggleRunWalk(*) => Send("^r")
+OpenOptions(*) => Send("{F12}")
 
 RecruitMessage(*) => SendTextMessage("~COPS recruiting, whisper me")
 FreezeMessage(*) => SendTextMessage("This is the police! Freeze!!!")
@@ -458,6 +458,12 @@ SuspectFleeingMessage(*) => SendTextMessage("Suspect is fleeing!")
 ShowHandsMessage(*) => SendTextMessage("Show me your hands!")
 ShotsFiredMessage(*) => SendTextMessage("Shots fired! Shots fired! Shots fired!")
 OfficerDownMessage(*) => SendTextMessage("Officer down!")
+
+PFMMessage(*) => SendTextMessage("pfm")
+APFMMessage(*) => SendTextMessage("apfm")
+BerserkMessage(*) => SendTextMessage("zerk")
+InvisMessage(*) => SendTextMessage("invis")
+ElvesMessage(*)  => SendTextMessage("Elvs Nearby!")
 
 Rights1Message(*) => SendTextMessage("You have the right to remain silent.")
 Rights2Message(*) => SendTextMessage("Anything you say can and will be used against you in a court of law.")
@@ -477,6 +483,11 @@ CopsMessageMenu2(*) {
 LevelingMenu(*) {
     OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. FishingLeveling", "4. PoisonLeveling"],
                 ["PretendCorpseLeveling", "MagicLeveling", "FishingLeveling", "DoNothing"])
+}
+
+UncommonCommands(*) {
+    OptionsMenu(["1. Eat Food", "2. Sell Items", "3. ShieldBind", "4. ArrangeWindows"],
+                ["EatFood", "SellStackedItems", "ShieldBind", "ArrangeWindows"])
 }
 
 TamingDoubleClick(*)
@@ -517,9 +528,18 @@ SellStackedItems(*)
 	}
 }
 
+EatFood(*) {
+	BlockInput true
+	Send "{F6}"
+	Sleep 10
+	Send "{Click, 450, 385, 2}"
+	Sleep 10
+	Send "{F6}"
+	BlockInput false
+}
+
 ; Shield equip/unequip
-ShieldToggle(*)
-{
+ShieldToggle(*) {
 	static bToggle := false
 
 	DebugCoords()
@@ -532,8 +552,7 @@ ShieldToggle(*)
 	bToggle := !bToggle
 }
 
-ShieldUnequip(*)
-{
+ShieldUnequip(*) {
 	BlockInput true
 	Send "{F5}"
 	Sleep 10
@@ -543,16 +562,16 @@ ShieldUnequip(*)
 	BlockInput false
 }
 
-ShieldEquip(*) => Send "{F3}"
+ShieldEquip(*) => Send("{F3}")
 
-ShieldBind(*)
-{
+ShieldBind(*) {
+	DebugCoords()
 	BlockInput true
 	Send "{F6}"
 	Sleep 10
-	Send "{Click, 90, 171, 2}"
+	Send "{Click, 485, 385, 2}"
 	Sleep 10
-	Send "{^F3}"
+	Send "^{F3}"
 	Sleep 10
 	Send "{F6}"
 	BlockInput false
@@ -729,7 +748,7 @@ FishingLeveling(*)
 
 ; ══════════════════════════════════════════════════════  Other/Conditional Hotkeys  ══════════════════════════════════════════════════════ ;
 
-#HotIf (IsObject(activeMenuManager) && activeMenuManager.optionsGui != "") {
+#HotIf (IsObject(activeMenuManager) && activeMenuManager.optionsGui != "")
     1::activeMenuManager.CallFunction(1)
     2::activeMenuManager.CallFunction(2)
     3::activeMenuManager.CallFunction(3)
@@ -739,7 +758,6 @@ FishingLeveling(*)
 	7::activeMenuManager.CallFunction(7)
 	8::activeMenuManager.CallFunction(8)
 	9::activeMenuManager.CallFunction(9)
-}
 #HotIf
 
 ; ══════════════════════════════════════════════════════  Graphic User Interface  ══════════════════════════════════════════════════════ ;
@@ -758,7 +776,8 @@ if (bShowGUI)
 	SetTimer(CheckWindowState, 1000)
 }
 
-InitializeGUI() __New(){
+InitializeGUI()
+{
 	global MyGui, CoordText, StatusText, AutoPotText  ; Access the global variables
 
 	MyGui := Gui()
@@ -1004,8 +1023,3 @@ DebugCoords()
 ; Any hotkeys defined below this will work outside of HB Nemesis
 HotIfWinActive
 OnExit ShowCursor ; make sure to show cursor again when script exits
-
-; ideas to implement
-; menu for text requests for zerk, apfm, pfm, invis, etc
-; eat food?
-; menu for uncommon things like: shield location set/bind, menu arrangement, etc
