@@ -26,6 +26,8 @@ HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB Nemesis
 	else
 		Suspend true
 }
+
+!K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)
 #SuspendExempt false
 
 ; ══════════════════════════════════════════════════════  Optional Systems ══════════════════════════════════════════════════════ ;
@@ -99,7 +101,7 @@ class SpellInfo {
 		{
 			BlockInput true
 			MouseGetPos &begin_x, &begin_y ; Get the position of the mouse
-			DebugCoords() ; move the mouse to top left and bottom right, then center to debug screen coords
+			FixCoords() ; move the mouse to top left and bottom right, then center to debug screen coords
 			MouseClick "right" ; right-click to help ensure cast ready
 			Send this.MagicPage ; Open Magic menu tab
 			MouseClick "left", 600, this.YCoord, 1, 0 ; Click spell coords
@@ -188,7 +190,7 @@ class OptionsMenuManager {
 
 	; Function to show the dialog
     showOptionsDialog() {
-		DebugCoords()
+		FixCoords()
 
         if (this.optionsGui == "")
         {
@@ -435,12 +437,22 @@ SendTextMessage(str := "") {
 	BlockInput false
 }
 
+FixCoords()
+{
+	MouseMove -1000, -1000, 1
+	Sleep 50
+	MouseMove +3000, +3000, 1
+	Sleep 50
+	MouseMove 400, 300, 1
+	Sleep 50
+}
+
 ; ══════════════════════════════════════════════════════  Hotkeys and Game Actions ══════════════════════════════════════════════════════ ;
 
 #SuspendExempt
 ToggleSuspendScript(*) => Send("{F1}")
-SuspendScript(*) => Suspend true
-ResumeScript(*) => Suspend false
+SuspendScript(*) => Suspend(true)
+ResumeScript(*) => Suspend(false)
 #SuspendExempt false
 
 DoNothing(*) => { }
@@ -482,7 +494,7 @@ CopsMessageMenu2(*) {
 
 LevelingMenu(*) {
     OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. FishingLeveling", "4. PoisonLeveling"],
-                ["PretendCorpseLeveling", "MagicLeveling", "FishingLeveling", "DoNothing"])
+                ["PretendCorpseLeveling", "ToggleMagicLeveling", "FishingLeveling", "DoNothing"])
 }
 
 UncommonCommands(*) {
@@ -542,7 +554,7 @@ EatFood(*) {
 ShieldToggle(*) {
 	static bToggle := false
 
-	DebugCoords()
+	FixCoords()
 
 	if (bToggle)
 		ShieldEquip()
@@ -565,7 +577,7 @@ ShieldUnequip(*) {
 ShieldEquip(*) => Send("{F3}")
 
 ShieldBind(*) {
-	DebugCoords()
+	FixCoords()
 	BlockInput true
 	Send "{F6}"
 	Sleep 10
@@ -651,60 +663,79 @@ PretendCorpseFunction(*) ; Not really meant to be binded, but can be (will execu
 	Sleep 100
 }
 
-;needs work
-#MaxThreadsPerHotkey 3
-MagicLeveling(*) ; Magic leveling : Bind GreatHeal to F2, Magic Missle to F3, put inventory food over player to where mouse doesn't need to move to eat the food, close inventory and run command
-{
+ToggleMagicLeveling(*)
+{	
+	global MagicLevelingFuncBound
+
 	static bIsLvling := false
-	i := 0
 
-	if bIsLvling  ; If this is true the loop below is already running
-    {
-        bIsLvling := false  ; Signal that thread's loop to stop.
-        return  ; End this thread so that the one underneath will resume and see the change made by the line above.
-    }
-	bIsLvling := true
-
-	MouseGetPos(&begin_x, &begin_y)
-
-	Loop
-	{
-	    i++
-
-		if (!mod(i, 10)) ; heal
-		{
-			Send "{F2}"
-			Sleep 2000
-			Send "{Click, begin_x, begin_y}"
-		}
-		else if (!mod(i, 25)) ; eat food
-		{
-			Send "{F6}"
-			Sleep 100
-			Send "{Click, begin_x, begin_y, 2}"
-			Sleep 200
-			Send "{F6}"
-		}
-		else ; cast magic missle
-		{
-			Send "{F3}"
-			Sleep 2000
-			Send "{Click, begin_x, begin_y}"
-		}
-
-		BlockInput true
+	bIsLvling := !bIsLvling
+	
+	if (bIsLvling) {
+		FixCoords()
+		MouseMove(400, 290)
 		Sleep 100
-		MouseMove begin_x, begin_y ; mouse mouse back to starting point incase it accidently was moved
-		Sleep 200
-		BlockInput false
+		MagicMissileSpell := SpellInfo("^{1}", "86", "!F1")
+		CreateFoodSpell := SpellInfo("^{1}", "116", "!F1")
 
-		; This will exit the loop if we've toggled
-        if not bIsLvling  ; The user signaled the loop to stop by pressing command again
-            break  ; Break out of this loop.
+		MagicLevelingFuncBound := MagicLeveling.Bind(400, 290, MagicMissileSpell, CreateFoodSpell)
+		SetTimer(MagicLevelingFuncBound, 100)
 	}
-	bIsLvling := false
+	else
+		SetTimer(MagicLevelingFuncBound, 0)
 }
-#MaxThreadsPerHotkey 1 ;sets back to global default
+
+MagicLeveling(begin_x := 0, begin_y := 0, MagicMissileSpell := "", CreateFoodSpell := "")
+{
+	static lastEatTime := 0
+	static eatInterval := 360000   ; 6 minutes in milliseconds
+
+	static lastCreateFoodTime := 0
+	static createFoodInterval := 4320000   ; 72 minutes in milliseconds
+
+	static lastMagicMissileTime := 0
+	static magicMissileInterval := 1900  ; 1.9 seconds in milliseconds (lowest without fails)
+
+	currentTime := A_TickCount
+
+	MouseMove(400, 290)
+	Sleep 100
+
+    if (currentTime - lastEatTime >= eatInterval)
+    {
+        EatFood()
+		MouseMove(begin_x, begin_y)
+		Sleep 500
+        lastEatTime := currentTime
+        return
+    }
+
+	if (currentTime - lastCreateFoodTime >= createFoodInterval)
+    {
+        Loop 12 {
+			CreateFoodSpell.CastSpell()
+			Sleep 1500
+			Send "{Click, begin_x, begin_y}"
+		}
+
+		Loop 12 {
+			Sleep 1000	
+			Send "{Click, begin_x, begin_y}"
+		}
+		
+        lastCreateFoodTime := currentTime
+        return
+    }
+
+    if (currentTime - lastMagicMissileTime >= magicMissileInterval) ; Default action is casting magic missile
+    {
+        MagicMissileSpell.CastSpell()
+		Sleep 1000
+		Send "{Click, begin_x, begin_y}"
+        lastMagicMissileTime := currentTime
+        return
+    }
+}
 
 CastRodFunction(*) ; Not really meant to be binded, but can be (will execute one time)
 {
@@ -991,7 +1022,7 @@ ShowCursor(ExitReason, ExitCode) {
 
 ; ══════════════════════════════════════════════════════  Debugging / WIP ══════════════════════════════════════════════════════ ;
 
-!K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)
+
 
 LWin & LButton::ToggleCursor() ; command to toggle cursor in case something goes wrong
 
@@ -1008,15 +1039,7 @@ LWin & LButton::ToggleCursor() ; command to toggle cursor in case something goes
 	RedrawCount := 0
 }
 
-DebugCoords()
-{
-	MouseMove -1000, -1000, 1
-	Sleep 50
-	MouseMove +3000, +3000, 1
-	Sleep 50
-	MouseMove 400, 300, 1
-	Sleep 50
-}
+
 
 ; Any hotkeys defined below this will work outside of HB Nemesis
 HotIfWinActive
