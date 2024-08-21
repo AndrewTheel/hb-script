@@ -8,14 +8,14 @@ SendMode "Event"
 ; Global variables
 Global ConfigFile := "hb_script_config.ini"
 Global activeMenuManager := ""  ; Global variable to store the active MenuManager instance
-Global WinTitle := "HB Nemesis" ; Title of the window
+Global WinTitle := "Helbreath Olympia 18.2" ; Title of the window
 Global bIsCursorHidden := false
 Global bShowGUI := false
 Global bDebugMode := false
 
 ; AHK initiatives
-WinWaitActive WinTitle ;Script waits until HB Nemesis window is active/front
-HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB Nemesis window
+WinWaitActive WinTitle ;Script waits until HB window is active/front
+HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB window
 
 ; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
 #SuspendExempt
@@ -1041,6 +1041,6 @@ LWin & LButton::ToggleCursor() ; command to toggle cursor in case something goes
 
 
 
-; Any hotkeys defined below this will work outside of HB Nemesis
+; Any hotkeys defined below this will work outside of HB
 HotIfWinActive
 OnExit ShowCursor ; make sure to show cursor again when script exits
