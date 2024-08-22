@@ -8,14 +8,40 @@ SendMode "Event"
 ; Global variables
 Global ConfigFile := "hb_script_config.ini"
 Global activeMenuManager := ""  ; Global variable to store the active MenuManager instance
-Global WinTitle := "HB Nemesis" ; Title of the window
+Global WinTitle := "Helbreath Olympia 18.2" ; Title of the window
 Global bIsCursorHidden := false
 Global bShowGUI := false
 Global bDebugMode := false
+/*
+Global ScreenResolution
+Global SpellHorizontalPos
+Global ScriptActiveIndicatorPos
+Global CoordsIndicatorPos
+Global AutoPotHealthIndicatorPos
+Global AutoPotManaIndicatorPos
+Global StartAutoPotHealthPos
+Global StartAutoPotManaPos
+Global HighHealthPos
+Global HighManaPos
+*/
+
+; Global variables from config
+SpellHorizontalPos := IniRead(ConfigFile, "Settings", "SpellHorizontalPos")
+ScreenResolution := StrSplit(IniRead(ConfigFile, "Settings", "ScreenResolution"), ",")
+ScriptActiveIndicatorPos := StrSplit(IniRead(ConfigFile, "Settings", "ScriptActiveIndicatorPos"), ",")
+CoordsIndicatorPos := StrSplit(IniRead(ConfigFile, "Settings", "CoordsIndicatorPos"), ",")
+
+AutoPotHealthIndicatorPos := StrSplit(IniRead(ConfigFile, "Settings", "AutoPotHealthIndicatorPos"), ",")
+StartAutoPotHealthPos := StrSplit(IniRead(ConfigFile, "Settings", "StartAutoPotHealthPos"), ",")
+HighHealthPos := StrSplit(IniRead(ConfigFile, "Settings", "HighHealthPos"), ",")
+
+AutoPotManaIndicatorPos := StrSplit(IniRead(ConfigFile, "Settings", "AutoPotManaIndicatorPos"), ",")
+StartAutoPotManaPos := StrSplit(IniRead(ConfigFile, "Settings", "StartAutoPotManaPos"), ",")
+HighManaPos := StrSplit(IniRead(ConfigFile, "Settings", "HighManaPos"), ",")
 
 ; AHK initiatives
-WinWaitActive WinTitle ;Script waits until HB Nemesis window is active/front
-HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB Nemesis window
+WinWaitActive WinTitle ;Script waits until HB window is active/front
+HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB window
 
 ; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
 #SuspendExempt
@@ -96,15 +122,23 @@ class SpellInfo {
     }
 
 	CastSpell(*) {
+		Global SpellHorizontalPos
 
 		if WinActive(WinTitle) ; This supposedly stops the hotkey from working outside of the HB client
 		{
 			BlockInput true
 			MouseGetPos &begin_x, &begin_y ; Get the position of the mouse
-			FixCoords() ; move the mouse to top left and bottom right, then center to debug screen coords
-			MouseClick "right" ; right-click to help ensure cast ready
+
+			;FixCoords() ; move the mouse to top left and bottom right, then center to debug screen coords
+			;MouseClick "right" ; right-click to help ensure cast ready
+
+			if (GetKeyState("LButton", "P")) ; if we are holding down m1, like when we are chasing someone, the cast should interrupt the run so the cast doesn't fail
+			{
+				Send("{LButton up}")
+			}
+
 			Send this.MagicPage ; Open Magic menu tab
-			MouseClick "left", 600, this.YCoord, 1, 0 ; Click spell coords
+			MouseClick "left", SpellHorizontalPos, this.YCoord, 1, 0 ; Click spell coords
 			MouseMove begin_x, begin_y ; Move mouse back to original position
 			Sleep 50
 			BlockInput false
@@ -335,13 +369,16 @@ CheckForMinimize() {
 	SetTimer(CheckForMinimize, 1000) ;1x a second
 }
 
+Global bTryHPPotting := true
+Global bTryManaPotting := true
+
 AutoPot() {
+	Global bTryHPPotting, bTryManaPotting, StartAutoPotHealthPos, StartAutoPotManaPos, HighHealthPos, HighManaPos
+
 	if WinActive(WinTitle)
 	{
 		static LowHPDuration := 0
 		static LowManaDuration := 0
-		static bTryHPPotting := true
-		static bTryManaPotting := true
 
 		ColorHPLowFSA := "0x313131"
 		ColorManaLowFSA := "0x424142"
@@ -350,7 +387,7 @@ AutoPot() {
 		;A_Clipboard := PixelGetColor(150, 571) . " " . PixelGetColor(163, 592)
 
 		; Check low HP
-		if IsColorInRange(149, 570, ColorHPLowFSA, 35) && IsColorInRange(111, 567, ColorHPLowFSA, 35)
+		if IsColorInRange(StartAutoPotHealthPos[1], StartAutoPotHealthPos[2], ColorHPLowFSA, 35) && IsColorInRange(HighHealthPos[1], HighHealthPos[2], ColorHPLowFSA, 35)
 		{
 			if (bTryHPPotting)
 			{
@@ -372,7 +409,7 @@ AutoPot() {
 		}
 
 		; Check low Mana
-		if IsColorInRange(163, 592, ColorManaLowFSA, 35) && IsColorInRange(111, 587, ColorManaLowFSA, 35)
+		if IsColorInRange(StartAutoPotManaPos[1], StartAutoPotManaPos[2], ColorManaLowFSA, 35) && IsColorInRange(HighManaPos[1], HighManaPos[2], ColorManaLowFSA, 35)
 		{
 			if (bTryManaPotting)
 			{
@@ -653,8 +690,6 @@ PretendCorpseLeveling(*)
 
 PretendCorpseFunction(*) ; Not really meant to be binded, but can be (will execute one time)
 {
-	;static EatFood := 0 ; handles potential broken rod
-
 	MouseGetPos(&x, &y)
 
 	Send "{Click, x, y}"
@@ -793,15 +828,13 @@ FishingLeveling(*)
 
 ; ══════════════════════════════════════════════════════  Graphic User Interface  ══════════════════════════════════════════════════════ ;
 
-RedrawCount := 0 ;TODO: improve this
-bColorsCorrect := false
-
 if (bShowGUI)
 {
 	MyGui := Gui()
 	CoordText := MyGui.Add("Text", "cLime", "XXXXX YYYYY")  ; XX & YY serve to auto-size the window.
 	StatusText := MyGui.Add("Text", "cWhite", "S")  ; Script status
-	AutoPotText := MyGui.Add("Text", "cWhite", "A")  ; Autopot Staus
+	HealthPotText := MyGui.Add("Text", "cWhite", "H")  ; Autopot Staus
+	ManaPotText := MyGui.Add("Text", "cWhite", "M")  ; Autopot Staus
 
     InitializeGUI()
 	SetTimer(CheckWindowState, 1000)
@@ -809,28 +842,32 @@ if (bShowGUI)
 
 InitializeGUI()
 {
-	global MyGui, CoordText, StatusText, AutoPotText  ; Access the global variables
+	global MyGui, CoordText, StatusText, HealthPotText, ManaPotText, ScreenResolution, ScriptActiveIndicatorPos, CoordsIndicatorPos, AutoPotHealthIndicatorPos, AutoPotManaIndicatorPos  ; Access the global variables
 
 	MyGui := Gui()
-	MyGui.Opt("+AlwaysOnTop +ToolWindow -Caption Disabled E0x8000000") ;E0x8000000 makes it so you cannot click the GUI stuff (Disabled might be unessary)
+	MyGui.Opt("+AlwaysOnTop +ToolWindow -Caption Disabled E0x8000000") ;E0x8000000 makes it so you cannot click the GUI stuff (Disabled might be unnecessary)
 	MyGui.BackColor := "EEAA99"
-	MyGui.SetFont("s7", "Arial")
+	MyGui.SetFont("s12", "Arial")
 
 	CoordText := MyGui.Add("Text", "cLime", "XXXXX YYYYY")
-	CoordText.Move(290, 588)  ; Move the second text control to a different position.
+	CoordText.Move(CoordsIndicatorPos[1], CoordsIndicatorPos[2])  ; Move the second text control to a different position.
 
 	StatusText := MyGui.Add("Text", "cWhite", "S")  ; Initialize second text control.
-    StatusText.Move(89, 557)  ; Move the second text control to a different position.
+    StatusText.Move(ScriptActiveIndicatorPos[1], ScriptActiveIndicatorPos[2])  ; Move the second text control to a different position.
 
-	AutoPotText := MyGui.Add("Text", "cWhite", "A")
-    AutoPotText.Move(89, 570)
+	HealthPotText := MyGui.Add("Text", "cWhite", "H")
+    HealthPotText.Move(AutoPotHealthIndicatorPos[1], AutoPotHealthIndicatorPos[2])
+
+	ManaPotText := MyGui.Add("Text", "cWhite", "M")
+    ManaPotText.Move(AutoPotManaIndicatorPos[1], AutoPotManaIndicatorPos[2])
 
 	if (IniRead(ConfigFile, "Settings", "UseAutoPotting") != "true") {
-		AutoPotText.Hidden true
+		HealthPotText.Hidden true
+		ManaPotText.Hidden true
 	}
 
 	WinSetTransColor(MyGui.BackColor " 150", MyGui)
-	MyGui.Show("x0 y0 w800 h600 NA NoActivate")  ; NoActivate avoids deactivating the currently active window.
+	MyGui.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate")  ; NoActivate avoids deactivating the currently active window.
 
     ; Set up a timer to update the OSD
     SetTimer(UpdateOSD, 200)
@@ -838,7 +875,7 @@ InitializeGUI()
 }
 
 UpdateOSD(*) {
-	global MyGui, CoordText, StatusText, AutoPotText, bColorsCorrect  ; Access the global variables
+	global MyGui, CoordText, StatusText, HealthPotText, ManaPotText, bTryHPPotting, bTryManaPotting  ; Access the global variables
 
 	; Check if MyGui is destroyed
 	if (!IsObject(MyGui) || MyGui = "") {
@@ -850,8 +887,8 @@ UpdateOSD(*) {
 
 	; First is a boolean argument, true sends the first argument, false seconds the second
 	StatusText.SetFont(A_IsSuspended ? "cff9c9c" : "c16ff58") ; pastel red if suspended, pastel green if not
-
-	AutoPotText.SetFont(bColorsCorrect ? "c16ff58" : "cff9c9c") ; pastel green if colors are correct, pastel red if not
+	HealthPotText.SetFont(bTryHPPotting ? "c16ff58" : "cff9c9c") ; pastel green if colors are correct, pastel red if not
+	ManaPotText.SetFont(bTryManaPotting ? "c16ff58" : "cff9c9c") ; pastel green if colors are correct, pastel red if not
 }
 
 RedrawGUI() {
@@ -871,10 +908,9 @@ DestroyGUI() {
 
 ; Don't show the GUI if we are minimized and put in some hacks to help ensure we are in Alt Full Screen (which has working color checking for autopot)
 CheckWindowState(*) {
-    global WinTitle, RedrawCount, bColorsCorrect
+    global WinTitle
 
-	static bAFSEnabled := false
-	static AFSAttemts := 0
+	static RedrawCount := 0
 
 	if !WinExist(WinTitle) {
 		if (IniRead(ConfigFile, "Settings", "HideSystemCursor") == "true" && bIsCursorHidden) {
@@ -892,29 +928,16 @@ CheckWindowState(*) {
 		if (IniRead(ConfigFile, "Settings", "HideSystemCursor") == "true" && !bIsCursorHidden)
 			SetSystemCursor()
 
-		if (RedrawCount <= 5) {
+		if (RedrawCount < 3)
+		{
 			RedrawGUI()
 			RedrawCount++
 		}
-
-		; Check to see if the GUI colors are correct, we check two far away pixels on the HB GUI so the cursor can't mess with this
-		if (PixelGetColor(85, 555) != "0x212021" && PixelGetColor(710, 555) != "0x212421") {
-			bColorsCorrect := false
-
-			; hack to fix color checking
-			if (IniRead(ConfigFile, "Settings", "ColorFixHack") == "true" && AFSAttemts <= 10) {
-				AFSAttemts++
-				Send "^+{V}"
-				Sleep 2000
-			}
-		}
-		else {
-			bColorsCorrect := true
-		}
-
     }
     else if (WinState == -1)  ; Minimized state ToolTip("HB Minimized")
     {
+		RedrawCount := 0
+
 		if (IniRead(ConfigFile, "Settings", "HideSystemCursor") == "true" && bIsCursorHidden) {
 			RestoreCursor()
 		}
@@ -924,18 +947,11 @@ CheckWindowState(*) {
 		}
 
 		DestroyGUI() ; Remove the GUI when HB is minimized
-		bAFSEnabled := false
     }
     else ;ToolTip("HB Normal")
     {
 		RedrawCount := 0
 		WinMaximize(WinTitle)
-
-		; hack to automate alt full screen
-		if (!bAFSEnabled && IniRead(ConfigFile, "Settings", "AltFullScreenHack") == "true") {
-			bAFSEnabled := true
-			Send "^+{V}"
-		}
     }
 }
 
@@ -1032,15 +1048,6 @@ LWin & LButton::ToggleCursor() ; command to toggle cursor in case something goes
 	;pA_Clipboard := PixelGetColor(150, 571) . " " . PixelGetColor(163, 592)
 }
 
-^+V:: ; TODO: move this out of debugging
-{
-	global RedrawCount
-
-	RedrawCount := 0
-}
-
-
-
-; Any hotkeys defined below this will work outside of HB Nemesis
+; Any hotkeys defined below this will work outside of HB
 HotIfWinActive
 OnExit ShowCursor ; make sure to show cursor again when script exits
