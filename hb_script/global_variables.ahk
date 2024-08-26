@@ -6,6 +6,7 @@ Global bShowGUI := false
 Global bDebugMode := false
 Global CastingEffectSpell := ""
 Global Effects := []
+Global stopFlag := false  ; Flag to stop loops
 
 ; Global variables from config
 Global SpellHorizontalPos := IniRead(ConfigFile, "Coords", "SpellHorizontalPos")

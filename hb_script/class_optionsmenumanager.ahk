@@ -65,14 +65,14 @@ class OptionsMenuManager {
 
         funcName := this.optionFunctionNames[index]
 
+        this.DestroyOptionsGUI()  
+
         ; Try to call the function and handle any errors
         try {
             %funcName%.Call()
         } catch as e {
             MsgBox("Error: Failed to execute function '" funcName "'.`n" e.Message)
         }
-
-        this.DestroyOptionsGUI()
     }
 
     ; Method to get the callback function for an option

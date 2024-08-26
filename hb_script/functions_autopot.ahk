@@ -6,11 +6,11 @@ AutoPot() {
 		static LowHPDuration := 0
 		static LowManaDuration := 0
 
-		ColorHPLowFSA := "0x313131"
+		ColorHPLowFSA := "0x5A5553"
 		ColorManaLowFSA := "0x424142"
 
-		;ToolTip "HP: " . PixelGetColor(149, 570) . "Mana: " . PixelGetColor(163, 592)
-		;A_Clipboard := PixelGetColor(150, 571) . " " . PixelGetColor(163, 592)
+		;ToolTip "HP_Start: " . PixelGetColor(StartAutoPotManaPos[1], StartAutoPotManaPos[2]) . " HP_High: " . PixelGetColor(HighManaPos[1], HighManaPos[2])
+		;A_Clipboard := PixelGetColor(StartAutoPotManaPos[1], StartAutoPotManaPos[2]) . " " . PixelGetColor(HighManaPos[1], HighManaPos[2])
 
 		; Check low HP
 		if IsColorInRange(StartAutoPotHealthPos[1], StartAutoPotHealthPos[2], ColorHPLowFSA, 35) && IsColorInRange(HighHealthPos[1], HighHealthPos[2], ColorHPLowFSA, 35)

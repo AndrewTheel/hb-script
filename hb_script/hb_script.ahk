@@ -5,6 +5,7 @@ CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
 CoordMode "ToolTip", "Client"
 SendMode "Event"
 
+#Include Gdip_All.ahk
 #Include global_variables.ahk
 
 ; AHK initiatives
@@ -22,6 +23,7 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #Include functions_autopot.ahk
 #Include functions_leveling.ahk
 #Include functions_messages.ahk
+#Include functions_detection.ahk
 #Include gui_main.ahk
 
 #SuspendExempt
@@ -33,6 +35,13 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 		Suspend false
 	else
 		Suspend true
+}
+
+~Escape::
+{
+	global stopFlag
+
+	stopFlag := true
 }
 
 ~LButton:: ; ~ means the button should behave as normal in addition to this code
@@ -125,8 +134,8 @@ RequestMenu(*) {
 }
 
 LevelingMenu(*) {
-    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. PoisonLeveling"],
-                ["PretendCorpseLeveling", "ToggleMagicLeveling", "DoNothing"])
+    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. SlimeLeveling"],
+                ["PretendCorpseLeveling", "ToggleMagicLeveling", "SlimeLeveling"])
 }
 
 UncommonCommands(*) {
@@ -180,6 +189,12 @@ EatFood(*) {
 	;pA_Clipboard := PixelGetColor(150, 571) . " " . PixelGetColor(163, 592)
 }
 
+ReturnInputs(*)
+{
+	BlockInput false
+	BlockInput "MouseMoveOff"
+}
+
 ; Any hotkeys defined below this will work outside of HB
 HotIfWinActive
-;OnExit DoNothing
+OnExit ReturnInputs()

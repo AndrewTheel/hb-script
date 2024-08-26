@@ -1,4 +1,3 @@
-
 PretendCorpseLeveling(*)
 {
 	static bIsFeigning := false
@@ -94,4 +93,131 @@ MagicLeveling(begin_x := 0, begin_y := 0, MagicMissileSpell := "", CreateFoodSpe
         lastMagicMissileTime := currentTime
         return
     }
+}
+
+FindMovement()
+{
+	CenterX := ScreenResolution[1] / 2
+	CenterY := ScreenResolution[2] / 2
+
+	XOffsets := [-80, 0, 80]
+	YOffsets := [-70, 0, 70]
+	
+	RightDownCoords := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
+	LeftDownCoords := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
+	LeftUpCoords := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
+	RightUpCoords := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
+	UpCoords := [CenterX + XOffsets[2], CenterY + YOffsets[1]]
+	DownCoords := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
+	LeftCoords := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
+	RightCoords := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
+
+	AdjacentSquares := [RightDownCoords, LeftDownCoords, LeftUpCoords, RightUpCoords, DownCoords, LeftCoords, RightCoords] ; Don't include UpCoords as the player character is always moving
+
+	Coords := [0, 0]
+
+	for square in AdjacentSquares {
+		pixelColor := PixelGetColor(square[1], square[2])
+
+		sleepTime := Random(10, 1000) ; Generate a random sleep time between 10 and 1000 milliseconds
+		Sleep(sleepTime) ; Sleep for the randomly generated time
+
+		pixelColor2 := PixelGetColor(square[1], square[2])
+
+		if (pixelColor != pixelColor2)
+		{
+			Coords := [square[1], square[2]] ;Movement detected, return with coords
+		}
+	}
+
+	if (Random(1, 20) = 1)  ; 1/20 chance
+	{
+		Coords := UpCoords
+	}
+
+	if (Coords[1] != 0)
+	{
+		return Coords
+	}
+	else
+	{
+		return false
+	}
+}
+
+PickupAdjacentItems()
+{
+	; might need to unhold RButton down
+	; what about monsters blocking movement?
+	; what about useless items such as small pots?
+	; lots of issues that will break this functionality
+
+	; move to an adjacent square (maybe top left?)
+	; pickup
+	; then down 1
+	; pickup
+	; then down 1
+	; pickup
+	; then right 1
+	; pickup
+	; then right 1
+	; pickup
+	; then up 1
+	; pickup
+	; then up 1
+	; pickup
+	; then left 1
+	; pickup
+}
+
+SlimeLeveling(*)
+{
+	global stopFlag 
+
+	CenterX := ScreenResolution[1] / 2
+	CenterY := ScreenResolution[2] / 2
+	MouseSpeed := 10
+
+	StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
+	Interval_PickUp := 60000    ; 60 seconds in milliseconds
+
+	dz_offset := 2 ; this value will end up creating a *2 sized square zone to check
+
+	if WinActive(WinTitle) ; This supposedly stops the hotkey from working outside of the HB client
+	{
+		BlockInput "MouseMove"
+		MouseMove CenterX, CenterY  ;Move mouse to center screen
+		Send("{RButton down}")
+
+		Loop {
+			MovementCoords := FindMovement()
+		
+    		ElapsedTime_PickUp := A_TickCount - StartTime_PickUp ; Calculate elapsed time
+
+			if (MovementCoords)
+			{
+				MouseMove MovementCoords[1], MovementCoords[2], MouseSpeed
+			}
+			else
+			{
+				if (ElapsedTime_PickUp >= Interval_PickUp) ; time to pickup items
+				{
+					PickupAdjacentItems()
+					StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
+				}
+				else 
+				{
+					MouseMove CenterX, CenterY					
+				}
+			}
+
+			if (stopFlag) {
+				stopFlag := false
+				Break
+			}
+		}
+
+		Send("{RButton up}")
+		BlockInput "MouseMoveOff"
+	}
 }
