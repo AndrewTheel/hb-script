@@ -5,7 +5,6 @@ CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
 CoordMode "ToolTip", "Client"
 SendMode "Event"
 
-#Include Gdip_All.ahk
 #Include global_variables.ahk
 
 ; AHK initiatives
@@ -23,7 +22,6 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #Include functions_autopot.ahk
 #Include functions_leveling.ahk
 #Include functions_messages.ahk
-#Include functions_detection.ahk
 #Include gui_main.ahk
 
 #SuspendExempt
@@ -197,4 +195,4 @@ ReturnInputs(*)
 
 ; Any hotkeys defined below this will work outside of HB
 HotIfWinActive
-OnExit ReturnInputs()
+;OnExit ReturnInputs()
