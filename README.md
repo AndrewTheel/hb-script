@@ -1,2 +1,2 @@
-# hb-nemesis-script
-Script for handling ease of play for HB Nemesis
+# hb-script
+Script for handling ease of play for HB
