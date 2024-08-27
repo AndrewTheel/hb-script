@@ -5,13 +5,21 @@ class OptionsMenuManager {
     optionFunctionNames := Array()
 
     __New(optionNames, functionNames) { ; Constructor
+        maxLength := 16 ; Adjust this value based on your GUI constraints
+
         ; Validate parameters
         if (optionNames.Length != functionNames.Length || optionNames.Length > 9) {
             MsgBox("Error: optionMenuLabels and optionFunctionNames must have the same number of elements. And not exceed 9")
             return
         }
 
-		for index, optionName in optionNames {
+        ; Process each option name
+        for index, optionName in optionNames {
+            ; Clamp the option name if it exceeds the maximum length
+            if StrLen(optionName) > maxLength {
+                optionName := SubStr(optionName, 1, maxLength) . "..." ; Truncate and add ellipsis
+            }
+
             this.optionMenuLabels.Push(optionName)
             this.optionFunctionNames.Push(functionNames[index])
         }
@@ -27,7 +35,7 @@ class OptionsMenuManager {
 			for index, optionName in this.optionMenuLabels
             {
 				BoundFunc := ObjBindMethod(this, "CallFunction", index)
-				btn := this.optionsGui.AddButton("w" CtPixel(9.76, "X") " h" CtPixel(1.73, "Y") " Left", optionName).OnEvent("Click", BoundFunc)
+				btn := this.optionsGui.AddButton("w" CtPixel(11.5, "X") " h" CtPixel(1.75, "Y") " Left", optionName).OnEvent("Click", BoundFunc)
             }
 
             WinSetTransColor(this.optionsGui.BackColor " 150", this.optionsGui)

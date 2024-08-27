@@ -100,8 +100,11 @@ FindMovement()
 	CenterX := ScreenResolution[1] / 2
 	CenterY := ScreenResolution[2] / 2
 
-	XOffsets := [-80, 0, 80]
-	YOffsets := [-70, 0, 70]
+	XOffset := CtPixel(SquarePercentageX, "X")
+	YOffset := CtPixel(SquarePercentageY, "Y")
+
+	XOffsets := [-XOffset, 0, XOffset]
+	YOffsets := [-YOffset, 0, YOffset]
 	
 	RightDownCoords := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
 	LeftDownCoords := [CenterX + XOffsets[1], CenterY + YOffsets[3]]

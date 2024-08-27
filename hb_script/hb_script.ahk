@@ -203,7 +203,7 @@ RequestMenu(*) {
 }
 
 LevelingMenu(*) {
-    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. SlimeLeveling"],
+    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. SlimeLeveling 5343211456"],
                 ["PretendCorpseLeveling", "ToggleMagicLeveling", "SlimeLeveling"])
 }
 
