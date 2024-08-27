@@ -5,24 +5,24 @@ CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
 CoordMode "ToolTip", "Client"
 SendMode "Event"
 
-#Include global_variables.ahk
+#Include includes\global_variables.ahk
 
 ; AHK initiatives
 WinWaitActive WinTitle ;Script waits until HB window is active/front
 HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB window
 SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was initially launched from as its working directory
 
-#Include load_from_ini.ahk
-#Include class_commandinfo.ahk
-#Include class_hotkeyunbind.ahk
-#Include class_optionsmenumanager.ahk
-#Include class_spellinfo.ahk
-#Include class_statuseffectindicator.ahk
-#Include class_repbutton.ahk
-#Include functions_autopot.ahk
-#Include functions_leveling.ahk
-#Include functions_messages.ahk
-#Include gui_main.ahk
+#Include includes\load_from_ini.ahk
+#Include includes\class_commandinfo.ahk
+#Include includes\class_hotkeyunbind.ahk
+#Include includes\class_optionsmenumanager.ahk
+#Include includes\class_spellinfo.ahk
+#Include includes\class_statuseffectindicator.ahk
+#Include includes\class_repbutton.ahk
+#Include includes\functions_autopot.ahk
+#Include includes\functions_leveling.ahk
+#Include includes\functions_messages.ahk
+#Include includes\gui_main.ahk
 
 #SuspendExempt
 !K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)

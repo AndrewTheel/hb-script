@@ -1,7 +1,4 @@
 class StatusEffectIndicator {
-    static statusWidth := 32
-    static statusHeight := 32
-    static offset := 32
     static instances := []
 
     __New(iconPath, initialTime, guiTitle) {
@@ -9,6 +6,9 @@ class StatusEffectIndicator {
         this._timeRemaining := initialTime
         this._isActive := false
         this.guiTitle := guiTitle
+        this.statusWidth := 32
+        this.statusHeight := 32
+        this.offset := 7
         this.CreateGui()
         SetTimer(this.UpdateTimer.Bind(this), 1000)  ; Set a timer to call UpdateTimer every second
         StatusEffectIndicator.instances.Push(this)  ; Track this instance
@@ -24,10 +24,10 @@ class StatusEffectIndicator {
         this.Gui := Gui("+AlwaysOnTop +ToolWindow -Caption E0x8000000 -Border")
         this.Gui.BackColor := "EEAA99"
 		WinSetTransColor("EEAA99", this.Gui.Hwnd)
-        this.Gui.Add("Picture", "x0 y0 w" . (StatusEffectIndicator.statusWidth) . " h" . (StatusEffectIndicator.statusHeight / 2), this.iconPath)  ; Add icon with fixed size
+        this.Gui.Add("Picture", "x" this.offset " y0 w" . (this.statusWidth - 2 * this.offset) . " h" . (this.statusHeight / 2), this.iconPath)  ; Add icon with fixed size
         
         ; Add text control for timer with default text '00'
-        this.StatusText := this.Gui.Add("Text", "x0 y" . (StatusEffectIndicator.statusHeight / 2) . " w" . StatusEffectIndicator.statusWidth " h32 Center", "0000")
+        this.StatusText := this.Gui.Add("Text", "x0 y" . (this.statusHeight / 2) . " w" . this.statusWidth " h32 Center", "0000")
         this.StatusText.SetFont("s" CalculateFontSize(1) " cYellow", "Segoe UI")  ; Set font size, color, and font
         
         ; Show the GUI to get its Hwnd and set the position
@@ -48,12 +48,12 @@ class StatusEffectIndicator {
 
         ; Calculate the position based on the index
         ; Since AutoHotkey arrays are 1-based, adjust index by subtracting 1
-        return (index - 1) * StatusEffectIndicator.offset
+        return (index - 1) * this.statusWidth
     }
 
     ShowIndicator() {       
         ; Show the GUI
-        this.Gui.Show("x" . this.GetPosition() " y0 w" . StatusEffectIndicator.statusWidth " h" . StatusEffectIndicator.statusHeight " NA NoActivate")
+        this.Gui.Show("x" . this.GetPosition() " y0 w" . this.statusWidth " h" . this.statusHeight " NA NoActivate")
         
         ; Ensure the window stays on top and non-interactive
         WinSetAlwaysOnTop(1, this.Gui.Hwnd)
