@@ -48,7 +48,7 @@ class RepButton {
 
     ShowIndicator() {       
         ; Show the GUI
-        this.Gui.Show("x2350 y1350 w" . RepButton.statusWidth + 500 . " h" . RepButton.statusHeight + 500 . " NA NoActivate")
+        this.Gui.Show("x" CtPixel(91.7968, "X") " y" CtPixel(93.75, "Y") " w" RepButton.statusWidth + 500 " h" RepButton.statusHeight + 500 " NA NoActivate")
       
         ; Ensure the window stays on top
         WinSetAlwaysOnTop(1, this.Gui.Hwnd)

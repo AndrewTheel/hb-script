@@ -31,7 +31,7 @@ class SpellInfo {
 			}
 
 			Send this.MagicPage ; Open Magic menu tab
-			MouseClick "left", SpellHorizontalPos, this.YCoord, 1, 0 ; Click spell coords
+			MouseClick "left", CtPixel(SpellHorizontalPos, "X"), CtPixel(this.YCoord, "Y"), 1, 0
 			MouseMove begin_x, begin_y ; Move mouse back to original position
 			Sleep 50
 			BlockInput false

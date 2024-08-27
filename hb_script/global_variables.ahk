@@ -7,21 +7,20 @@ Global bDebugMode := false
 Global CastingEffectSpell := ""
 Global Effects := []
 Global stopFlag := false  ; Flag to stop loops
+Global SquarePercentageX := 4
+Global SquarePercentageY := 5.35
 
-; Global variables from config
-Global SpellHorizontalPos := IniRead(ConfigFile, "Coords", "SpellHorizontalPos")
+Global SpellHorizontalPos := 62.5
+Global ScriptActiveIndicatorPos := [6.9,92.9166]
+Global CoordsIndicatorPos := [35.0,95.1]
+Global AutoPotHealthIndicatorPos := [10.31,93.0]
+Global AutoPotManaIndicatorPos := [10.31,96.7]
+
+; From ConfigFile
 Global ScreenResolution := StrSplit(IniRead(ConfigFile, "Coords", "ScreenResolution"), ",")
-Global ScriptActiveIndicatorPos := StrSplit(IniRead(ConfigFile, "Coords", "ScriptActiveIndicatorPos"), ",")
-Global CoordsIndicatorPos := StrSplit(IniRead(ConfigFile, "Coords", "CoordsIndicatorPos"), ",")
-
-Global AutoPotHealthIndicatorPos := StrSplit(IniRead(ConfigFile, "Coords", "AutoPotHealthIndicatorPos"), ",")
-Global StartAutoPotHealthPos := StrSplit(IniRead(ConfigFile, "Coords", "StartAutoPotHealthPos"), ",")
-Global HighHealthPos := StrSplit(IniRead(ConfigFile, "Coords", "HighHealthPos"), ",")
-
-Global AutoPotManaIndicatorPos := StrSplit(IniRead(ConfigFile, "Coords", "AutoPotManaIndicatorPos"), ",")
-Global StartAutoPotManaPos := StrSplit(IniRead(ConfigFile, "Coords", "StartAutoPotManaPos"), ",")
-Global HighManaPos := StrSplit(IniRead(ConfigFile, "Coords", "HighManaPos"), ",")
 
 ; Global AutoPot()
 Global bTryHPPotting := true
 Global bTryManaPotting := true
+Global AutoPotLifeAtPercent := IniRead(ConfigFile, "AutoPot", "AutoPotLifeAtPercent")
+Global AutoPotManaAtPercent := IniRead(ConfigFile, "AutoPot", "AutoPotManaAtPercent")

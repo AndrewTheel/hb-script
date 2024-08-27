@@ -1,32 +1,70 @@
 AutoPot() {
-	Global bTryHPPotting, bTryManaPotting, StartAutoPotHealthPos, StartAutoPotManaPos, HighHealthPos, HighManaPos
+	Global bTryHPPotting, bTryManaPotting
+
+	Static bCalculatedPixelLocations := false
+	Static LowHPPos := [0, 0]
+	Static MidHPPos := [0, 0]
+	Static HighHPPos := [0, 0]
+
+	Static LowManaPos := [0, 0]
+	Static MidManaPos := [0, 0]
+	Static HighManaPos := [0, 0]
+
+	if (!bCalculatedPixelLocations) ; avoid calc these so often
+	{
+		LowHPPos[1] := CtPixel(13.5, "X")
+		LowHPPos[2] := CtPixel(94.1, "Y")
+
+		MidHPPos[1] := CtPixel(13.0 + (12.5 * (AutoPotLifeAtPercent * 0.01)), "X") ; 12.5 is roughly the horizontal % of screen the healthbar takes up, 13% is where it starts, 25.5% is where it ends
+		MidHPPos[2] := CtPixel(93.3, "Y") ;93.3 may need tweaking depending on res (we can't use the middle value as "poisoned" status can get in the way!)
+
+		HighHPPos[1] := CtPixel(25.0, "X")
+		HighHPPos[2] := CtPixel(94.1, "Y")
+
+		;mana
+
+		LowManaPos[1] := CtPixel(13.5, "X")
+		LowManaPos[2] := CtPixel(97.8, "Y")
+
+		MidManaPos[1] := CtPixel(13.0 + (12.5 * (AutoPotManaAtPercent * 0.01)), "X") ; 12.5 is roughly the horizontal % of screen the healthbar takes up, 13% is where it starts, 25.5% is where it ends
+		MidManaPos[2] := CtPixel(97.8, "Y") ;93.3 may need tweaking depending on res
+
+		HighManaPos[1] := CtPixel(25.0, "X")
+		HighManaPos[2] := CtPixel(97.8, "Y")
+
+		bCalculatedPixelLocations := true
+	}
 
 	if WinActive(WinTitle)
 	{
 		static LowHPDuration := 0
 		static LowManaDuration := 0
 
-		ColorHPLowFSA := "0x5A5553"
-		ColorManaLowFSA := "0x424142"
-
+		LifeRed := "0xd83c2b"
+		ManaBlue := "0x3e45d8"
+		EmptyGrey := "0x5e5b58"
+		
 		;ToolTip "HP_Start: " . PixelGetColor(StartAutoPotManaPos[1], StartAutoPotManaPos[2]) . " HP_High: " . PixelGetColor(HighManaPos[1], HighManaPos[2])
 		;A_Clipboard := PixelGetColor(StartAutoPotManaPos[1], StartAutoPotManaPos[2]) . " " . PixelGetColor(HighManaPos[1], HighManaPos[2])
 
-		; Check low HP
-		if IsColorInRange(StartAutoPotHealthPos[1], StartAutoPotHealthPos[2], ColorHPLowFSA, 35) && IsColorInRange(HighHealthPos[1], HighHealthPos[2], ColorHPLowFSA, 35)
-		{
-			if (bTryHPPotting)
+		; Check to make sure the low HP area is actually red (this can help prevent the system from randomly drinking pots, esp after minimize)
+		if IsColorInRange(LowHPPos[1], LowHPPos[2], LifeRed, 35) 
+		{	; Now make sure we are not on full health && we don't have health at desired %
+			if IsColorInRange(HighHPPos[1], HighHPPos[2], EmptyGrey, 35) && !IsColorInRange(MidHPPos[1], MidHPPos[2], LifeRed, 35)
 			{
-				Send "{Insert}"
-				Sleep 20
-			}
+				if (bTryHPPotting)
+				{
+					Send "{Insert}"
+					Sleep 20
+				}
 
-			if (LowHPDuration >= 3000) ; Check if we've been at Low HP for a long time (more than 2 seconds)
-			{
-				bTryHPPotting := false
-			}
+				if (LowHPDuration >= 3000) ; Check if we've been at Low HP for a long time (more than 2 seconds)
+				{
+					bTryHPPotting := false
+				}
 
-			LowHPDuration += 100 ;milliseconds
+				LowHPDuration += 100 ;milliseconds
+			}
 		}
 		else
 		{
@@ -35,20 +73,23 @@ AutoPot() {
 		}
 
 		; Check low Mana
-		if IsColorInRange(StartAutoPotManaPos[1], StartAutoPotManaPos[2], ColorManaLowFSA, 35) && IsColorInRange(HighManaPos[1], HighManaPos[2], ColorManaLowFSA, 35)
-		{
-			if (bTryManaPotting)
+		if IsColorInRange(LowManaPos[1], LowManaPos[2], ManaBlue, 35) 
+		{	; Now make sure we are not on full mana && we don't have mana at desired %
+			if IsColorInRange(HighManaPos[1], HighManaPos[2], EmptyGrey, 35) && !IsColorInRange(MidManaPos[1], MidManaPos[2], ManaBlue, 35)
 			{
-				Send "{Delete}"
-				Sleep 20
-			}
+				if (bTryManaPotting)
+				{
+					Send "{Delete}"
+					Sleep 20
+				}
 
-			if (LowManaDuration >= 3000) ; Check if we've been at Low Mana for a long time (more than 2 seconds)
-			{
-				bTryManaPotting := false
-			}
+				if (LowManaDuration >= 3000) ; Check if we've been at Low Mana for a long time (more than 2 seconds)
+				{
+					bTryManaPotting := false
+				}
 
-			LowManaDuration += 100 ;milliseconds
+				LowManaDuration += 100 ;milliseconds
+			}
 		}
 		else
 		{

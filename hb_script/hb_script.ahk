@@ -37,9 +37,13 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 
 ~Escape::
 {
-	global stopFlag
+	global stopFlag, activeMenuManager
 
 	stopFlag := true
+
+    if (activeMenuManager != "") {
+        activeMenuManager.DestroyOptionsGUI()
+    }	
 }
 
 ~LButton:: ; ~ means the button should behave as normal in addition to this code
@@ -76,6 +80,35 @@ ResumeScript(*) => Suspend(false)
 #SuspendExempt false
 
 ; ══════════════════════════════════════════════════════  Systems/Functions ══════════════════════════════════════════════════════ ;
+
+CtPixel(percent, axis) {
+    ScreenResolutionX := ScreenResolution[1] + 0  ; Cast to number
+    ScreenResolutionY := ScreenResolution[2] + 0  ; Cast to number
+
+    if (axis = "X") {
+        return Round((percent / 100) * ScreenResolutionX)
+    } else if (axis = "Y") {
+        return Round((percent / 100) * ScreenResolutionY)
+    }
+}
+
+CtPercent(pixel, axis) {
+    ScreenResolutionX := ScreenResolution[1] + 0  ; Cast to number
+    ScreenResolutionY := ScreenResolution[2] + 0  ; Cast to number
+
+    if (axis = "X") {
+        return (pixel / ScreenResolutionX) * 100
+    } else if (axis = "Y") {
+        return (pixel / ScreenResolutionY) * 100
+    }
+}
+
+; CctPixels function: Converts percentage coordinates to pixel coordinates
+CctPixels(x, y) {
+    pixelX := CtPixel(x, "X")  ; Convert x percentage to pixels
+    pixelY := CtPixel(y, "Y")  ; Convert y percentage to pixels
+    return [pixelX, pixelY]    ; Return array with both pixel values
+}
 
 DoNothing(*) => { } ; A placeholder function used when a method is required, but no action is needed.
 

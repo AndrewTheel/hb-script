@@ -1,8 +1,9 @@
 SendTextMessage(str := "") {
 	BlockInput true
 	Send "{enter}"
+	Sleep 5
 	SendText(str)
-	Sleep 20
+	Sleep 10
 	Send "{enter}"
 	BlockInput false
 }

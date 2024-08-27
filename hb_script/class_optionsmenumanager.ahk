@@ -27,13 +27,16 @@ class OptionsMenuManager {
 			for index, optionName in this.optionMenuLabels
             {
 				BoundFunc := ObjBindMethod(this, "CallFunction", index)
-				btn := this.optionsGui.AddButton("w250 h25 Left", optionName).OnEvent("Click", BoundFunc)
+				btn := this.optionsGui.AddButton("w" CtPixel(9.76, "X") " h" CtPixel(1.73, "Y") " Left", optionName).OnEvent("Click", BoundFunc)
             }
 
             WinSetTransColor(this.optionsGui.BackColor " 150", this.optionsGui)
 
             MouseGetPos &xPos, &yPos ; Get the position of the mouse
-            this.optionsGui.Show("x" xPos + 35 " y" yPos + 35 " NA NoActivate")
+            X := xPos + (CtPixel(SquarePercentageX, "X") / 2)
+            Y := yPos + (CtPixel(SquarePercentageY, "Y") / 2)
+
+            this.optionsGui.Show("x" X " y" Y " NA NoActivate")
         }
         else
         {
