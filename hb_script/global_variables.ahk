@@ -1,5 +1,7 @@
 ; Global variables
-Global ConfigFile := "hb_script_config.ini"
+Global ConfigFile := "hb_script_config_chris.ini"
+
+; Variouis Script Variables
 Global activeMenuManager := ""  ; Global variable to store the active MenuManager instance
 Global WinTitle := "Helbreath Olympia 18.2" ; Title of the window
 Global bShowGUI := false

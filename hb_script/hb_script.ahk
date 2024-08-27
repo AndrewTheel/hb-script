@@ -27,13 +27,9 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #SuspendExempt
 !K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)
 
-*F1:: ; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
-{
-	if A_IsSuspended
-		Suspend false
-	else
-		Suspend true
-}
+; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
+*F1:: A_IsSuspended ? Suspend(false) : Suspend(true)
+*`:: A_IsSuspended ? Suspend(false) : Suspend(true)
 
 ~Escape::
 {
@@ -152,6 +148,48 @@ OptionsMenu(optionNames, optionFunctionNames) {
     }
 }
 
+; add this function to the beginning of functions that will often be used in combat
+RemoveHolds(*) {
+    Send("{Ctrl up}")
+    Send("{Alt up}")
+    Send("{Shift up}")
+}
+
+PretendCorpse(*) {
+	RemoveHolds()
+
+	BlockInput true
+	MouseClick "right"
+	Sleep 10
+	MouseClick "right"
+	Sleep 10
+	Send "{F8}"
+	Sleep 10
+	MouseClick "left", CtPixel(26.6666, "X"), CtPixel(26.7592, "Y")
+	Sleep 10
+	BlockInput false
+}
+
+EatFood(*) {
+	BlockInput true
+	Send "{F6}"
+	Sleep 10
+	MouseClick "left", CtPixel(93.0, "X"), CtPixel(55.2, "Y"), 2, 0
+	Sleep 10
+	Send "{F6}"
+	BlockInput false
+}
+
+TakeInvisPot(*) {
+	BlockInput true
+	Send "{F6}"
+	Sleep 10
+	MouseClick "left", CtPixel(37.1875, "X"), CtPixel(30.6481, "Y"), 2, 0
+	Sleep 10
+	Send "{F6}"
+	BlockInput false
+}
+
 ; ══════════════════════════════════════════════════════  Hotkeys and Game Actions ══════════════════════════════════════════════════════ ;
 
 ToggleMap(*) => Send("^m")
@@ -185,17 +223,6 @@ SellStackedItems(*)
 		Click "Up"
 		Send "{F6}" ; Toggles on the inventory menu
 	}
-}
-
-; needs work
-EatFood(*) {
-	BlockInput true
-	Send "{F6}"
-	Sleep 10
-	Send "{Click, 450, 385, 2}"
-	Sleep 10
-	Send "{F6}"
-	BlockInput false
 }
 
 ; ══════════════════════════════════════════════════════  Other/Conditional Hotkeys  ══════════════════════════════════════════════════════ ;

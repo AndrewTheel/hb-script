@@ -119,7 +119,7 @@ FindMovement()
 	for square in AdjacentSquares {
 		pixelColor := PixelGetColor(square[1], square[2])
 
-		sleepTime := Random(10, 1000) ; Generate a random sleep time between 10 and 1000 milliseconds
+		sleepTime := Random(10, 150) ; Generate a random sleep time between 10 and 1000 milliseconds
 		Sleep(sleepTime) ; Sleep for the randomly generated time
 
 		pixelColor2 := PixelGetColor(square[1], square[2])
