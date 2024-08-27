@@ -1,6 +1,6 @@
 class RepButton {
-    static statusWidth := 128
-    static statusHeight := 64
+    static statusWidth := 50
+    static statusHeight := 25
 
     __New(RepCoolDownTime) {
         this._repCountDown := 1
@@ -34,7 +34,7 @@ class RepButton {
                
         ; Add text control for timer with default text '00'
         this.StatusText := this.Gui.Add("Text", "x0 y" . RepButton.statusHeight . " w" . RepButton.statusWidth . " h24 Center", "00")
-        this.StatusText.SetFont("s12 cYellow", "Arial")  ; Set font size, color, and font
+        this.StatusText.SetFont("s" CalculateFontSize(1) " cYellow", "Arial")  ; Set font size, color, and font
         this.StatusText.Visible := false
 
         ; Show the GUI to get its Hwnd and set the position

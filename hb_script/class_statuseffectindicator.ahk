@@ -1,7 +1,7 @@
 class StatusEffectIndicator {
-    static statusWidth := 100
-    static statusHeight := 100
-    static offset := StatusEffectIndicator.statusWidth + 10
+    static statusWidth := 32
+    static statusHeight := 32
+    static offset := 32
     static instances := []
 
     __New(iconPath, initialTime, guiTitle) {
@@ -24,11 +24,11 @@ class StatusEffectIndicator {
         this.Gui := Gui("+AlwaysOnTop +ToolWindow -Caption E0x8000000 -Border")
         this.Gui.BackColor := "EEAA99"
 		WinSetTransColor("EEAA99", this.Gui.Hwnd)
-        this.Gui.Add("Picture", "w" . (StatusEffectIndicator.statusWidth - 8) . " h" . (StatusEffectIndicator.statusHeight / 2 - 8), this.iconPath)  ; Add icon with fixed size
+        this.Gui.Add("Picture", "x0 y0 w" . (StatusEffectIndicator.statusWidth) . " h" . (StatusEffectIndicator.statusHeight / 2), this.iconPath)  ; Add icon with fixed size
         
         ; Add text control for timer with default text '00'
-        this.StatusText := this.Gui.Add("Text", "x0 y" . (StatusEffectIndicator.statusHeight / 2) . " w" . StatusEffectIndicator.statusWidth " h32 Center", "00")
-        this.StatusText.SetFont("s12 cYellow", "Arial")  ; Set font size, color, and font
+        this.StatusText := this.Gui.Add("Text", "x0 y" . (StatusEffectIndicator.statusHeight / 2) . " w" . StatusEffectIndicator.statusWidth " h32 Center", "0000")
+        this.StatusText.SetFont("s" CalculateFontSize(1) " cYellow", "Segoe UI")  ; Set font size, color, and font
         
         ; Show the GUI to get its Hwnd and set the position
         this.ShowIndicator()
