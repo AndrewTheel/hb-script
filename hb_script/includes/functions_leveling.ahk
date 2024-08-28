@@ -212,7 +212,7 @@ SlimeLeveling(*)
 					PickupAdjacentItems()
 					StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
 				}
-				else if (ElapsedTime >= Interval_EatFood)
+				else if (ElapsedTime_EatFood >= Interval_EatFood)
 				{
 					MouseGetPos(&x, &y)
 					EatFood()
