@@ -53,7 +53,7 @@ class StatusEffectIndicator {
 
     ShowIndicator() {       
         ; Show the GUI
-        this.Gui.Show("x" . this.GetPosition() " y0 w" . this.statusWidth " h" . this.statusHeight " NA NoActivate")
+        this.Gui.Show("x" . this.GetPosition() " y4 w" . this.statusWidth " h" . this.statusHeight " NA NoActivate")
         
         ; Ensure the window stays on top and non-interactive
         WinSetAlwaysOnTop(1, this.Gui.Hwnd)
