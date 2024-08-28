@@ -205,24 +205,25 @@ SlimeLeveling(*)
 			{
 				MouseMove MovementCoords[1], MovementCoords[2], MouseSpeed
 			}
-			else
+
+			if (ElapsedTime_PickUp >= Interval_PickUp) ; time to pickup items
 			{
-				if (ElapsedTime_PickUp >= Interval_PickUp) ; time to pickup items
-				{
-					PickupAdjacentItems()
-					StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
-				}
-				else if (ElapsedTime_EatFood >= Interval_EatFood)
-				{
-					MouseGetPos(&x, &y)
-					EatFood()
-					MouseMove CenterX, CenterY
-					StartTime_EatFood := A_TickCount
-				}
-				else 
-				{
-					MouseMove CenterX, CenterY
-				}
+				PickupAdjacentItems()
+				StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
+			}
+			else if (ElapsedTime_EatFood >= Interval_EatFood)
+			{
+				Send("{RButton up}")
+				EatFood()
+				Sleep 100
+				MouseMove CenterX, CenterY
+				Sleep 100
+				StartTime_EatFood := A_TickCount
+				Send("{RButton down}")
+			}
+			else 
+			{
+				MouseMove CenterX, CenterY
 			}
 
 			if (stopFlag) {

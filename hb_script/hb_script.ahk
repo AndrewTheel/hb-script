@@ -29,7 +29,6 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 
 ; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
 *F1:: A_IsSuspended ? Suspend(false) : Suspend(true)
-*`:: A_IsSuspended ? Suspend(false) : Suspend(true)
 
 ~Escape::
 {

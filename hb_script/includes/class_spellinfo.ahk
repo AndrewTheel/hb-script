@@ -30,11 +30,22 @@ class SpellInfo {
 				Send("{LButton up}")
 			}
 
+			if (GetKeyState("RButton", "P")) ; if we are holding down m1, like when we are chasing someone, the cast should interrupt the run so the cast doesn't fail
+			{
+				Send("{RButton up}")
+			}
+
 			Send this.MagicPage ; Open Magic menu tab
-			MouseClick "left", CtPixel(SpellHorizontalPos, "X"), CtPixel(this.YCoord, "Y"), 1, 0
-			MouseMove begin_x, begin_y ; Move mouse back to original position
-			Sleep 50
+			Sleep 5
+			MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(this.YCoord, "Y"), 0
+			;MouseClick "left", CtPixel(SpellHorizontalPos, "X"), CtPixel(this.YCoord, "Y"), 1, 0
+			Sleep 5
+			Send "{Click}"
+			MouseMove begin_x, begin_y, 0 ; Move mouse back to original position
+			Sleep 5
 			BlockInput false
+
+			RemoveHolds()
 
 			if (this.SpellEffectDuration != "")
 			{	
