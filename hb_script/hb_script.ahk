@@ -164,8 +164,9 @@ PretendCorpse(*) {
 	Sleep 10
 	Send "{F8}"
 	Sleep 10
-	MouseClick "left", CtPixel(26.6666, "X"), CtPixel(26.7592, "Y")
+	MouseClick "left", CtPixel(67, "X"), CtPixel(48, "Y")
 	Sleep 10
+	Send "{F8}"
 	BlockInput false
 }
 
@@ -183,7 +184,7 @@ TakeInvisPot(*) {
 	BlockInput true
 	Send "{F6}"
 	Sleep 10
-	MouseClick "left", CtPixel(37.1875, "X"), CtPixel(30.6481, "Y"), 2, 0
+	MouseClick "left", CtPixel(90, "X"), CtPixel(55.2, "Y"), 2, 0
 	Sleep 10
 	Send "{F6}"
 	BlockInput false
@@ -197,8 +198,8 @@ ToggleRunWalk(*) => Send("^r")
 OpenOptions(*) => Send("{F12}")
 
 RequestMenu(*) {
-    OptionsMenu(["1. PFM", "2. AMP", "3. Zerk", "4. Invies", "5. Enemies!"],
-                ["PFMMessage", "APFMMessage", "BerserkMessage", "InvisMessage", "EnemiesMessage"])
+    OptionsMenu(["1. AMP", "2. Zerk", "3. Invis", "4. Enemies!"],
+                ["APFMMessage", "BerserkMessage", "InvisMessage", "EnemiesMessage"])
 }
 
 LevelingMenu(*) {

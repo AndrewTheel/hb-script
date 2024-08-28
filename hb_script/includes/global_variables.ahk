@@ -1,5 +1,5 @@
 ; Global variables
-Global ConfigFile := "hb_script_config_andrew.ini"
+Global ConfigFile := "hb_script_config_chris.ini"
 
 ; Variouis Script Variables
 Global activeMenuManager := ""  ; Global variable to store the active MenuManager instance

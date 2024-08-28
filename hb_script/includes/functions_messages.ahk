@@ -8,10 +8,9 @@ SendTextMessage(str := "") {
 	BlockInput false
 }
 
-PFMMessage(*) => SendTextMessage("pfm")
 APFMMessage(*) => SendTextMessage("000")
 BerserkMessage(*) => SendTextMessage("zerk")
-InvisMessage(*) => SendTextMessage("invis")
-EnemiesMessage(*)  => SendTextMessage("Ares Nearby!")
-HasteMessage(*)  => SendTextMessage("haste")
+InvisMessage(*) => SendTextMessage("invis plz")
+EnemiesMessage(*)  => SendTextMessage("Ares care!")
+HasteMessage(*)  => SendTextMessage("haste plz")
 CheckRepMessage(*) => SendTextMessage("/checkrep")
