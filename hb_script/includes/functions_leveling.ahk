@@ -122,7 +122,7 @@ FindMovement()
 	for square in AdjacentSquares {
 		pixelColor := PixelGetColor(square[1], square[2])
 
-		sleepTime := Random(10, 150) ; Generate a random sleep time between 10 and 1000 milliseconds
+		sleepTime := Random(1, 50) ; Generate a random sleep time between 10 and 1000 milliseconds
 		Sleep(sleepTime) ; Sleep for the randomly generated time
 
 		pixelColor2 := PixelGetColor(square[1], square[2])
@@ -184,6 +184,9 @@ SlimeLeveling(*)
 	StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
 	Interval_PickUp := 60000    ; 60 seconds in milliseconds
 
+	StartTime_EatFood := A_TickCount  ; Capture the start time in milliseconds
+	Interval_EatFood := 900000    ; 60 seconds in milliseconds
+
 	dz_offset := 2 ; this value will end up creating a *2 sized square zone to check
 
 	if WinActive(WinTitle) ; This supposedly stops the hotkey from working outside of the HB client
@@ -195,7 +198,8 @@ SlimeLeveling(*)
 		Loop {
 			MovementCoords := FindMovement()
 		
-    		ElapsedTime_PickUp := A_TickCount - StartTime_PickUp ; Calculate elapsed time
+    		ElapsedTime_PickUp := A_TickCount - StartTime_PickUp
+			ElapsedTime_EatFood := A_TickCount - StartTime_EatFood
 
 			if (MovementCoords)
 			{
@@ -208,9 +212,16 @@ SlimeLeveling(*)
 					PickupAdjacentItems()
 					StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
 				}
+				else if (ElapsedTime >= Interval_EatFood)
+				{
+					MouseGetPos(&x, &y)
+					EatFood()
+					MouseMove CenterX, CenterY
+					StartTime_EatFood := A_TickCount
+				}
 				else 
 				{
-					MouseMove CenterX, CenterY					
+					MouseMove CenterX, CenterY
 				}
 			}
 
