@@ -1,3 +1,7 @@
+; Setup variables for pixels in center of each adjacent square
+CenterX := ScreenResolution[1] / 2
+CenterY := ScreenResolution[2] / 2
+
 PretendCorpseLeveling(*)
 {
 	static bIsFeigning := false
@@ -95,97 +99,322 @@ MagicLeveling(begin_x := 0, begin_y := 0, MagicMissileSpell := "", CreateFoodSpe
     }
 }
 
-FindMovement()
-{
-	CenterX := ScreenResolution[1] / 2
-	CenterY := ScreenResolution[2] / 2
+; Function to shuffle an array
+RandomizeArray(&arr) {
+	for i, _ in arr {
+        rndIndex := Random(1, arr.Length) ; Generate a random index between 1 and the length of the array
+        ; Swap the current element with the random one
+        temp := arr[i]
+        arr[i] := arr[rndIndex]
+        arr[rndIndex] := temp
+    }
+}
 
+FindAdjacentMovement()
+{
+	; Calculate pixel offsets for each direction
 	XOffset := CtPixel(SquarePercentageX, "X")
 	YOffset := CtPixel(SquarePercentageY, "Y")
 
+	; Create offset arrays (AHK arrays start from index 1)
 	XOffsets := [-XOffset, 0, XOffset]
 	YOffsets := [-YOffset, 0, YOffset]
-	
-	RightDownCoords := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
-	LeftDownCoords := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
-	LeftUpCoords := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
-	RightUpCoords := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
-	UpCoords := [CenterX + XOffsets[2], CenterY + YOffsets[1]]
-	DownCoords := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
-	LeftCoords := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
-	RightCoords := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
 
-	AdjacentSquares := [RightDownCoords, LeftDownCoords, LeftUpCoords, RightUpCoords, DownCoords, LeftCoords, RightCoords] ; Don't include UpCoords as the player character is always moving
+	; Define coordinates for each direction using valid object literal syntax
+	directions := Object()
+	directions.RightDown := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
+	directions.LeftDown := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
+	directions.LeftUp := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
+	directions.RightUp := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
+	directions.Up := [CenterX + XOffsets[2], CenterY + YOffsets[1]]
+	directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
+	directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
+	directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
 
+	AdjacentSquares := [directions.RightDown, directions.LeftDown, directions.LeftUp, directions.RightUp, directions.Up, directions.Down, directions.Left, directions.Right] ; Don't include UpCoords as the player character is always moving
 	Coords := [0, 0]
 
+	; Shuffle the AdjacentSquares array to randomize iteration order
+	RandomizeArray(&AdjacentSquares) ; Pass by reference
+
+	; Check each adjacent square for pixel changes
 	for square in AdjacentSquares {
 		pixelColor := PixelGetColor(square[1], square[2])
-
-		sleepTime := Random(1, 50) ; Generate a random sleep time between 10 and 1000 milliseconds
-		Sleep(sleepTime) ; Sleep for the randomly generated time
-
+		Sleep(1)
 		pixelColor2 := PixelGetColor(square[1], square[2])
 
-		if (pixelColor != pixelColor2)
-		{
+		if (pixelColor != pixelColor2) {
 			Coords := [square[1], square[2]] ;Movement detected, return with coords
+			return Coords
 		}
 	}
 
-	if (Random(1, 20) = 1)  ; 1/20 chance
-	{
-		Coords := UpCoords
-	}
-
-	if (Coords[1] != 0)
-	{
-		return Coords
-	}
-	else
-	{
-		return false
-	}
+	return false
 }
 
-PickupAdjacentItems()
+CheckPixelMovement(x, y)
 {
-	; might need to unhold RButton down
-	; what about monsters blocking movement?
-	; what about useless items such as small pots?
-	; lots of issues that will break this functionality
+	pixelColor := PixelGetColor(x, y)
+	Sleep(1)
+	pixelColor2 := PixelGetColor(x, y)
 
-	; move to an adjacent square (maybe top left?)
-	; pickup
-	; then down 1
-	; pickup
-	; then down 1
-	; pickup
-	; then right 1
-	; pickup
-	; then right 1
-	; pickup
-	; then up 1
-	; pickup
-	; then up 1
-	; pickup
-	; then left 1
-	; pickup
+	if (pixelColor != pixelColor2)
+	{
+		return true ; movement detected
+	}
+
+	return false ; no movement detected at pixel
 }
 
+ ; 1 = 8
+ ; 2 = 16
+ ; 3 = 24 squares 
+ ; 4 = 32 squares
+ ; 5 = 40
+ ; 6 = 48
+
+FindAndMove(distance := 2)
+{
+    ; Initialize an empty array for the coordinates
+    coords := []
+
+    ; Calculate the pixel offset for the given distance
+    XOffset := CtPixel(SquarePercentageX * distance, "X")
+    YOffset := CtPixel(SquarePercentageY * distance, "Y")
+
+    ; Top and Bottom sides
+    x := -distance
+    while (x <= distance) {
+        coords.Push([CenterX + CtPixel(SquarePercentageX * x, "X"), CenterY - YOffset]) ; Top side
+        coords.Push([CenterX + CtPixel(SquarePercentageX * x, "X"), CenterY + YOffset]) ; Bottom side
+        x++
+    }
+
+    ; Left and Right sides
+    y := -(distance - 1)
+    while (y <= (distance - 1)) {
+        coords.Push([CenterX - XOffset, CenterY + CtPixel(SquarePercentageY * y, "Y")]) ; Left side
+        coords.Push([CenterX + XOffset, CenterY + CtPixel(SquarePercentageY * y, "Y")]) ; Right side
+        y++
+    }
+
+    ; Check each square for pixel changes
+    for coord in coords {
+        pixelColor := PixelGetColor(coord[1], coord[2])
+        Sleep(1)
+        pixelColor2 := PixelGetColor(coord[1], coord[2])
+
+        if (pixelColor != pixelColor2) {
+            ; Move the mouse and click at the detected coordinate
+            MouseClick "left", coord[1], coord[2], 1, 1
+            Sleep 500
+            MouseMove CenterX, CenterY
+            Sleep 300 * distance
+            return
+        }
+    }
+}
+
+MoveNearby(distance := 3, direction := "any") {
+    Static i := 0
+    Static UnmovedSquares := []
+
+	; Calculate pixel offsets for each direction
+	XOffset := CtPixel(SquarePercentageX * distance, "X")
+	YOffset := CtPixel(SquarePercentageY * distance, "Y")
+
+	; Create offset arrays (AHK arrays start from index 1)
+	XOffsets := [-XOffset, 0, XOffset]
+	YOffsets := [-YOffset, 0, YOffset]
+
+	; Define coordinates for each direction using valid object literal syntax
+	directions := Object()
+	directions.RightDown := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
+	directions.LeftDown := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
+	directions.LeftUp := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
+	directions.RightUp := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
+	directions.Up := [CenterX + XOffsets[2], CenterY + YOffsets[1]]
+	directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
+	directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
+	directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
+
+	Coords := []
+	bShouldMove := false
+
+    ; Handle 'any' direction by randomizing adjacent squares
+    if (direction == "any") {
+        if (i == 0) {
+            UnmovedSquares := [directions.RightDown, directions.LeftDown, directions.LeftUp, directions.RightUp, directions.Up, directions.Down, directions.Left, directions.Right]
+            RandomizeArray(&UnmovedSquares) ; Shuffle the array to randomize the order
+        }
+        ; Get the next coordinate and remove it from UnmovedSquares
+		if (UnmovedSquares.Length > 0)
+		{
+			Coords := UnmovedSquares.Pop()
+			bShouldMove := true
+		}
+    } else {
+        ; Handle specific direction
+        Coords := directions.%direction%
+		bShouldMove := true
+    }
+
+    ; Perform mouse actions
+	if (bShouldMove)
+	{
+		MouseClick "left", Coords[1], Coords[2], 1, 1
+		Sleep 500
+		MouseMove CenterX, CenterY
+		Sleep 400 * distance
+	}
+
+    ; Reset the counter when all squares have been moved to
+    if (direction == "any" && UnmovedSquares.Length == 0) {
+        i := 0
+    } else if (direction == "any") {
+        i++
+    }
+}
+
+CastBerserk(*)
+{
+	Global Effects
+
+	MoveNearby(3)
+	Send "^{6}" ; Open Magic menu tab
+	Sleep 5
+	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(35.7638, "Y"), 0
+	Sleep 5
+	Send "{Click}"
+	Sleep 5
+	MouseMove CenterX, CenterY
+	Sleep 1800
+	Send "{Click}"
+	Sleep 500
+
+	Effects.Push(StatusEffectIndicator("images\Berserk.png", 60, ""))
+}
+
+RandomBehavior(*) {
+    ; Define the odds for each case
+    odds := [100, 50, 25, 5]
+
+    ; Calculate the total odds
+    totalOdds := 0
+    for each, odd in odds
+        totalOdds += odd
+
+    ; Generate a random number between 1 and totalOdds
+    rand := Random(1, totalOdds)
+
+    ; Determine which case to execute based on the random number
+    cumulativeOdds := 0
+    for index, odd in odds {
+        cumulativeOdds += odd
+        if (rand <= cumulativeOdds) {
+            Switch index {
+                Case 1:
+                    AttackInCricles()
+                    return
+                Case 2:
+                    RunInCircles()
+                    return
+                Case 3:
+                    LookBackAndForth()
+                    return
+                Case 4:
+                    GoInvisibleAndWait()
+                    return
+            }
+        }
+    }
+}
+
+; Function to run in circles
+RunInCircles() {
+    MoveNearby(4, "RightDown")
+	MoveNearby(4, "RightUp")
+	MoveNearby(5, "LeftUp")
+	MoveNearby(5, "LeftDown")
+}
+
+AttackInCricles() {
+	; Calculate pixel offsets for each direction
+	XOffset := CtPixel(SquarePercentageX, "X")
+	YOffset := CtPixel(SquarePercentageY, "Y")
+
+	; Create offset arrays (AHK arrays start from index 1)
+	XOffsets := [-XOffset, 0, XOffset]
+	YOffsets := [-YOffset, 0, YOffset]
+
+	; Define coordinates for each direction using valid object literal syntax
+	directions := Object()
+	directions.RightDown := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
+	directions.LeftDown := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
+	directions.LeftUp := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
+	directions.RightUp := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
+	directions.Up := [CenterX + XOffsets[2], CenterY + YOffsets[1]]
+	directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
+	directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
+	directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
+
+	AdjacentSquares := [directions.RightDown, directions.Right, directions.RightUp, directions.Up, directions.LeftUp, directions.Left, directions.LeftDown, directions.Down]
+    Sleep 100
+	Send("{RButton down}")
+	
+	Loop Random(1,3) {
+		for square in AdjacentSquares {
+			MouseMove square[1], square[2]
+			Sleep 10
+		}
+	}
+
+	MouseMove CenterX, CenterY
+
+	Send("{RButton up}")
+	Sleep 100
+}
+
+LookBackAndForth() {
+    Sleep 10
+	Send("{RButton down}")
+	
+	Loop Random(1,5)
+	{
+		MouseMove CtPixel(25, "X"), CtPixel(50, "Y")
+		Sleep 10
+		MouseMove CtPixel(75, "X"), CtPixel(50, "Y")
+		Sleep 10
+	}
+
+	Send("{RButton up}")
+	Sleep 10
+}
+
+; Function to go invisible and wait for an interval
+GoInvisibleAndWait() {
+}
+  
 SlimeLeveling(*)
 {
 	global stopFlag 
 
-	CenterX := ScreenResolution[1] / 2
-	CenterY := ScreenResolution[2] / 2
 	MouseSpeed := 10
+	LastIdleTime := A_TickCount
+	ElapsedTime_IdleTime := 0
+	FindAndMove_Distance := 2
+	
+	StartTime_BerserkTime := A_TickCount
+	Interval_BerserkTime := 60000
 
-	StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
-	Interval_PickUp := 60000    ; 60 seconds in milliseconds
+	StartTime_MoveTime := A_TickCount  ; Capture the start time in milliseconds
+	Interval_MoveTime := 10000
 
 	StartTime_EatFood := A_TickCount  ; Capture the start time in milliseconds
-	Interval_EatFood := 900000    ; 60 seconds in milliseconds
+	Interval_EatFood := 300000
+
+	StartTime_RandomBehavior := A_TickCount  ; Capture the start time in milliseconds
+	Interval_RandomBehavior := 15000
 
 	dz_offset := 2 ; this value will end up creating a *2 sized square zone to check
 
@@ -195,21 +424,36 @@ SlimeLeveling(*)
 		MouseMove CenterX, CenterY  ;Move mouse to center screen
 		Send("{RButton down}")
 
-		Loop {
-			MovementCoords := FindMovement()
-		
-    		ElapsedTime_PickUp := A_TickCount - StartTime_PickUp
-			ElapsedTime_EatFood := A_TickCount - StartTime_EatFood
+		SendTextMessage("/shiftpickup")
 
+		Loop {
+			ElapsedTime_EatFood := A_TickCount - StartTime_EatFood
+			ElapsedTime_BerserkTime := A_TickCount - StartTime_BerserkTime
+			ElapsedTime_RandomBehavior := A_TickCount - StartTime_RandomBehavior
+
+			MovementCoords := FindAdjacentMovement()
 			if (MovementCoords)
 			{
 				MouseMove MovementCoords[1], MovementCoords[2], MouseSpeed
+
+				Loop {
+					Sleep 100
+				} Until !CheckPixelMovement(MovementCoords[1], MovementCoords[2])
 			}
 
-			if (ElapsedTime_PickUp >= Interval_PickUp) ; time to pickup items
+			ElapsedTime_IdleTime := A_TickCount - LastIdleTime
+
+			if (ElapsedTime_IdleTime > 1000)
 			{
-				PickupAdjacentItems()
-				StartTime_PickUp := A_TickCount  ; Capture the start time in milliseconds
+				Send("{RButton up}")
+				FindAndMove(FindAndMove_Distance)
+				Send("{RButton down}")
+
+				FindAndMove_Distance++
+				if (FindAndMove_Distance > 5)
+					FindAndMove_Distance := 2 ; Reset the distance back to 2 when it reaches 6
+
+				LastIdleTime := A_TickCount
 			}
 			else if (ElapsedTime_EatFood >= Interval_EatFood)
 			{
@@ -218,20 +462,37 @@ SlimeLeveling(*)
 				Sleep 100
 				MouseMove CenterX, CenterY
 				Sleep 100
-				StartTime_EatFood := A_TickCount
 				Send("{RButton down}")
+				StartTime_EatFood := A_TickCount
 			}
-			else 
+			else if (ElapsedTime_BerserkTime >= Interval_BerserkTime)
+			{
+				Send("{RButton up}")
+				CastBerserk()
+				Send("{RButton down}")
+				Interval_BerserkTime := Random(61000,70000)
+				StartTime_BerserkTime := A_TickCount
+			}
+			else if (ElapsedTime_RandomBehavior >= Interval_RandomBehavior)
+			{
+				Send("{RButton up}")
+				RandomBehavior()
+				Send("{RButton down}")
+				Interval_RandomBehavior := Random(5000,20000)
+				StartTime_RandomBehavior := A_TickCount
+			}
+			else
 			{
 				MouseMove CenterX, CenterY
 			}
-
+		
 			if (stopFlag) {
 				stopFlag := false
 				Break
 			}
 		}
 
+		SendTextMessage("/shiftpickup")
 		Send("{RButton up}")
 		BlockInput "MouseMoveOff"
 	}
