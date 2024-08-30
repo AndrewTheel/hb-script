@@ -174,7 +174,7 @@ EatFood(*) {
 	BlockInput true
 	Send "{F6}"
 	Sleep 10
-	MouseClick "left", CtPixel(93.0, "X"), CtPixel(55.2, "Y"), 2, 0
+	MouseClick "left", CtPixel(93.0, "X"), CtPixel(55.2, "Y"), 2
 	Sleep 10
 	Send "{F6}"
 	BlockInput false
@@ -184,7 +184,7 @@ TakeInvisPot(*) {
 	BlockInput true
 	Send "{F6}"
 	Sleep 10
-	MouseClick "left", CtPixel(90, "X"), CtPixel(55.2, "Y"), 2, 0
+	MouseClick "left", CtPixel(90, "X"), CtPixel(55.2, "Y"), 2
 	Sleep 10
 	Send "{F6}"
 	BlockInput false

@@ -206,7 +206,7 @@ FindAndMove(distance := 2)
 
         if (pixelColor != pixelColor2) {
             ; Move the mouse and click at the detected coordinate
-            MouseClick "left", coord[1], coord[2], 1, 1
+            MouseClick "left", coord[1], coord[2]
             Sleep 500
             MouseMove CenterX, CenterY
             Sleep 300 * distance
@@ -262,7 +262,7 @@ MoveNearby(distance := 3, direction := "any") {
     ; Perform mouse actions
 	if (bShouldMove)
 	{
-		MouseClick "left", Coords[1], Coords[2], 1, 1
+		MouseClick "left", Coords[1], Coords[2]
 		Sleep 500
 		MouseMove CenterX, CenterY
 		Sleep 400 * distance
