@@ -152,6 +152,34 @@ FindAdjacentMovement()
 	return false
 }
 
+RandomAdjacent()
+{
+	; Calculate pixel offsets for each direction
+	XOffset := CtPixel(SquarePercentageX, "X")
+	YOffset := CtPixel(SquarePercentageY, "Y")
+
+	; Create offset arrays (AHK arrays start from index 1)
+	XOffsets := [-XOffset, 0, XOffset]
+	YOffsets := [-YOffset, 0, YOffset]
+
+	; Define coordinates for each direction using valid object literal syntax
+	directions := Object()
+	directions.RightDown := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
+	directions.LeftDown := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
+	directions.LeftUp := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
+	directions.RightUp := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
+	directions.Up := [CenterX + XOffsets[2], CenterY + YOffsets[1]]
+	directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
+	directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
+	directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
+
+	AdjacentSquares := [directions.RightDown, directions.LeftDown, directions.LeftUp, directions.RightUp, directions.Up, directions.Down, directions.Left, directions.Right] ; Don't include UpCoords as the player character is always moving
+
+	; Get a random index within the array bounds
+    RandomIndex := Random(1, AdjacentSquares.Length)
+    return AdjacentSquares[RandomIndex]
+}
+
 CheckPixelMovement(x, y)
 {
 	pixelColor := PixelGetColor(x, y)
@@ -173,8 +201,14 @@ CheckPixelMovement(x, y)
  ; 5 = 40
  ; 6 = 48
 
-FindAndMove(distance := 2)
+FindAndMove(*)
 {
+	Static distance := 2
+
+	TempGui := Gui()
+	TempGui.Opt("+AlwaysOnTop +ToolWindow -Caption Disabled E0x8000000") ;E0x8000000 makes it so you cannot click the GUI stuff (Disabled might be unnecessary)
+	TempGui.BackColor := "EEAA99"
+
     ; Initialize an empty array for the coordinates
     coords := []
 
@@ -198,6 +232,14 @@ FindAndMove(distance := 2)
         y++
     }
 
+    ; Create a text control for each coordinate in coords
+    for coord in coords {
+        TempGui.Add("Text", "x" coord[1] " y" coord[2] " w15 h15 Center cFuchsia", " .")
+    }
+
+	WinSetTransColor(TempGui.BackColor " 200", TempGui)
+    TempGui.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate") ; Show the GUI without activating it
+
     ; Check each square for pixel changes
     for coord in coords {
         pixelColor := PixelGetColor(coord[1], coord[2])
@@ -206,13 +248,32 @@ FindAndMove(distance := 2)
 
         if (pixelColor != pixelColor2) {
             ; Move the mouse and click at the detected coordinate
-            MouseClick "left", coord[1], coord[2]
-            Sleep 500
+			MouseMove coord[1], coord[2], 0
+			Sleep 10
+			Send("{LButton down}")
+			Sleep 10
+			Send("{LButton up}")
+            Sleep 200
             MouseMove CenterX, CenterY
             Sleep 300 * distance
+
+			TempGui.Destroy()
+			distance := 2
             return
         }
     }
+
+	TempGui.Destroy()
+
+	if (distance < 6)
+	{
+		distance++
+		FindAndMove()
+	}
+	else
+	{
+		distance := 2
+	}
 }
 
 MoveNearby(distance := 3, direction := "any") {
@@ -262,10 +323,14 @@ MoveNearby(distance := 3, direction := "any") {
     ; Perform mouse actions
 	if (bShouldMove)
 	{
-		MouseClick "left", Coords[1], Coords[2]
-		Sleep 500
-		MouseMove CenterX, CenterY
-		Sleep 400 * distance
+		MouseMove Coords[1], Coords[2], 0
+		Sleep 10
+		Send("{LButton down}")
+		Sleep 10
+		Send("{LButton up}")
+		Sleep 10
+		MouseMove CenterX, CenterY	
+		Sleep 300 * distance
 	}
 
     ; Reset the counter when all squares have been moved to
@@ -282,14 +347,17 @@ CastBerserk(*)
 
 	MoveNearby(3)
 	Send "^{6}" ; Open Magic menu tab
-	Sleep 5
+	Sleep 10
 	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(35.7638, "Y"), 0
 	Sleep 5
-	Send "{Click}"
-	Sleep 5
+	Send("{LButton down}")
+	Sleep 10
+	Send("{LButton up}")
 	MouseMove CenterX, CenterY
 	Sleep 1800
-	Send "{Click}"
+	Send("{LButton down}")
+	Sleep 10
+	Send("{LButton up}")
 	Sleep 500
 
 	Effects.Push(StatusEffectIndicator("images\Berserk.png", 60, ""))
@@ -381,9 +449,9 @@ LookBackAndForth() {
 	
 	Loop Random(1,5)
 	{
-		MouseMove CtPixel(25, "X"), CtPixel(50, "Y")
+		MouseMove CtPixel((50 - SquarePercentageX), "X"), CtPixel(50, "Y")
 		Sleep 10
-		MouseMove CtPixel(75, "X"), CtPixel(50, "Y")
+		MouseMove CtPixel((50 + SquarePercentageX), "X"), CtPixel(50, "Y")
 		Sleep 10
 	}
 
@@ -402,7 +470,6 @@ SlimeLeveling(*)
 	MouseSpeed := 10
 	LastIdleTime := A_TickCount
 	ElapsedTime_IdleTime := 0
-	FindAndMove_Distance := 2
 	
 	StartTime_BerserkTime := A_TickCount
 	Interval_BerserkTime := 60000
@@ -431,6 +498,13 @@ SlimeLeveling(*)
 			ElapsedTime_BerserkTime := A_TickCount - StartTime_BerserkTime
 			ElapsedTime_RandomBehavior := A_TickCount - StartTime_RandomBehavior
 
+			if (Random(1, 10) > 6)
+			{
+				MovementCoords := RandomAdjacent()
+				MouseMove MovementCoords[1], MovementCoords[2]
+				Continue
+			}
+
 			MovementCoords := FindAdjacentMovement()
 			if (MovementCoords)
 			{
@@ -440,50 +514,46 @@ SlimeLeveling(*)
 					Sleep 100
 				} Until !CheckPixelMovement(MovementCoords[1], MovementCoords[2])
 			}
-
-			ElapsedTime_IdleTime := A_TickCount - LastIdleTime
-
-			if (ElapsedTime_IdleTime > 1000)
-			{
-				Send("{RButton up}")
-				FindAndMove(FindAndMove_Distance)
-				Send("{RButton down}")
-
-				FindAndMove_Distance++
-				if (FindAndMove_Distance > 5)
-					FindAndMove_Distance := 2 ; Reset the distance back to 2 when it reaches 6
-
-				LastIdleTime := A_TickCount
-			}
-			else if (ElapsedTime_EatFood >= Interval_EatFood)
-			{
-				Send("{RButton up}")
-				EatFood()
-				Sleep 100
-				MouseMove CenterX, CenterY
-				Sleep 100
-				Send("{RButton down}")
-				StartTime_EatFood := A_TickCount
-			}
-			else if (ElapsedTime_BerserkTime >= Interval_BerserkTime)
-			{
-				Send("{RButton up}")
-				CastBerserk()
-				Send("{RButton down}")
-				Interval_BerserkTime := Random(61000,70000)
-				StartTime_BerserkTime := A_TickCount
-			}
-			else if (ElapsedTime_RandomBehavior >= Interval_RandomBehavior)
-			{
-				Send("{RButton up}")
-				RandomBehavior()
-				Send("{RButton down}")
-				Interval_RandomBehavior := Random(5000,20000)
-				StartTime_RandomBehavior := A_TickCount
-			}
 			else
 			{
 				MouseMove CenterX, CenterY
+
+				ElapsedTime_IdleTime := A_TickCount - LastIdleTime
+
+				if (ElapsedTime_IdleTime > 1000)
+				{
+					Send("{RButton up}")
+					FindAndMove()
+					Send("{RButton down}")
+
+					LastIdleTime := A_TickCount
+				}
+				else if (ElapsedTime_EatFood >= Interval_EatFood)
+				{
+					Send("{RButton up}")
+					EatFood()
+					Sleep 100
+					MouseMove CenterX, CenterY
+					Sleep 100
+					Send("{RButton down}")
+					StartTime_EatFood := A_TickCount
+				}
+				else if (ElapsedTime_BerserkTime >= Interval_BerserkTime)
+				{
+					Send("{RButton up}")
+					CastBerserk()
+					Send("{RButton down}")
+					Interval_BerserkTime := Random(61000,70000)
+					StartTime_BerserkTime := A_TickCount
+				}
+				else if (ElapsedTime_RandomBehavior >= Interval_RandomBehavior)
+				{
+					Send("{RButton up}")
+					RandomBehavior()
+					Send("{RButton down}")
+					Interval_RandomBehavior := Random(5000,20000)
+					StartTime_RandomBehavior := A_TickCount
+				}
 			}
 		
 			if (stopFlag) {
