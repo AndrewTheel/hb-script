@@ -341,11 +341,60 @@ MoveNearby(distance := 3, direction := "any") {
     }
 }
 
+StoneGolemPit()
+{
+	MoveNearby(distance := 6, direction := "Right")
+	CastBerserk()
+	MoveNearby(distance := 6, direction := "Left")
+}
+
+CastInvis(*)
+{
+	Global Effects
+
+	Send "^{4}" ; Open Magic menu tab
+	Sleep 10
+	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(41.73, "Y"), 0
+	Sleep 5
+	Send("{LButton down}")
+	Sleep 10
+	Send("{LButton up}")
+	MouseMove CenterX, CenterY
+	Sleep 1800
+	Send("{LButton down}")
+	Sleep 10
+	Send("{LButton up}")
+	Sleep 500
+
+	Effects.Push(StatusEffectIndicator("images\Invis.png", 60, ""))
+}
+
+
+CastPFM(*)
+{
+	Global Effects
+
+	Send "^{4}" ; Open Magic menu tab
+	Sleep 10
+	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(44.72, "Y"), 0
+	Sleep 5
+	Send("{LButton down}")
+	Sleep 10
+	Send("{LButton up}")
+	MouseMove CenterX, CenterY
+	Sleep 1800
+	Send("{LButton down}")
+	Sleep 10
+	Send("{LButton up}")
+	Sleep 500
+
+	Effects.Push(StatusEffectIndicator("images\PFM.png", 60, ""))
+}
+
 CastBerserk(*)
 {
 	Global Effects
 
-	MoveNearby(3)
 	Send "^{6}" ; Open Magic menu tab
 	Sleep 10
 	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(35.7638, "Y"), 0
@@ -363,9 +412,10 @@ CastBerserk(*)
 	Effects.Push(StatusEffectIndicator("images\Berserk.png", 60, ""))
 }
 
-RandomBehavior(*) {
+RandomBehavior(x1 := 100, x2 := 50, x3 := 25, x4:= 0) {
     ; Define the odds for each case
-    odds := [100, 50, 25, 5]
+    odds := [x1, x2, x3, x4]
+	;odds := [100, 50, 25, 5]
 
     ; Calculate the total odds
     totalOdds := 0
@@ -463,7 +513,99 @@ LookBackAndForth() {
 GoInvisibleAndWait() {
 }
   
-SlimeLeveling(*)
+StoneGolemLeveling(*)
+{
+	global stopFlag 
+
+	MouseSpeed := 10
+	LastIdleTime := A_TickCount
+	ElapsedTime_IdleTime := 0
+	
+	StartTime_MoveTime := A_TickCount  ; Capture the start time in milliseconds
+	Interval_MoveTime := 10000
+
+	StartTime_EatFood := A_TickCount  ; Capture the start time in milliseconds
+	Interval_EatFood := 300000
+
+	StartTime_RandomBehavior := A_TickCount  ; Capture the start time in milliseconds
+	Interval_RandomBehavior := 15000
+
+	StartTime_StoneGolemPit := A_TickCount
+	Interval_StoneGolemPit := 55000
+
+	dz_offset := 2 ; this value will end up creating a *2 sized square zone to check
+
+	if WinActive(WinTitle) ; This supposedly stops the hotkey from working outside of the HB client
+	{
+		BlockInput "MouseMove"
+		MouseMove CenterX, CenterY  ;Move mouse to center screen
+		SendTextMessage("/shiftpickup")
+		Send("{RButton down}")
+
+		Loop {
+			ElapsedTime_EatFood := A_TickCount - StartTime_EatFood
+			ElapsedTime_RandomBehavior := A_TickCount - StartTime_RandomBehavior
+			ElapsedTime_StoneGolemPit := A_TickCount - StartTime_StoneGolemPit
+
+			if (ElapsedTime_StoneGolemPit >= Interval_StoneGolemPit)
+			{
+				Send("{RButton up}")
+				StoneGolemPit()
+				Send("{RButton down}")
+				StartTime_StoneGolemPit := A_TickCount
+			}
+			else
+			{
+				MovementCoords := FindAdjacentMovement()
+				if (MovementCoords)
+				{
+					MouseMove MovementCoords[1], MovementCoords[2], MouseSpeed
+
+					Loop {
+						Sleep 100
+					} Until !CheckPixelMovement(MovementCoords[1], MovementCoords[2])
+				}
+				else
+				{
+					MouseMove CenterX, CenterY
+
+					ElapsedTime_IdleTime := A_TickCount - LastIdleTime
+
+					if (ElapsedTime_EatFood >= Interval_EatFood)
+					{
+						Send("{RButton up}")
+						EatFood()
+						Sleep 100
+						MouseMove CenterX, CenterY
+						Sleep 100
+						Send("{RButton down}")
+						StartTime_EatFood := A_TickCount
+					}
+					else if (ElapsedTime_RandomBehavior >= Interval_RandomBehavior)
+					{
+						Send("{RButton up}")
+						RandomBehavior(100, 0, 0, 0)
+						Send("{RButton down}")
+						Interval_RandomBehavior := Random(5000,15000)
+						StartTime_RandomBehavior := A_TickCount
+					}
+					
+				}
+			}	
+		
+			if (stopFlag) {
+				stopFlag := false
+				Break
+			}
+		}
+
+		SendTextMessage("/shiftpickup")
+		Send("{RButton up}")
+		BlockInput "MouseMoveOff"
+	}
+}
+
+ScorpionLeveling(*)
 {
 	global stopFlag 
 
@@ -483,6 +625,9 @@ SlimeLeveling(*)
 	StartTime_RandomBehavior := A_TickCount  ; Capture the start time in milliseconds
 	Interval_RandomBehavior := 15000
 
+	StartTime_StoneGolemPit := A_TickCount
+	Interval_StoneGolemPit := 55000
+
 	dz_offset := 2 ; this value will end up creating a *2 sized square zone to check
 
 	if WinActive(WinTitle) ; This supposedly stops the hotkey from working outside of the HB client
@@ -497,13 +642,16 @@ SlimeLeveling(*)
 			ElapsedTime_EatFood := A_TickCount - StartTime_EatFood
 			ElapsedTime_BerserkTime := A_TickCount - StartTime_BerserkTime
 			ElapsedTime_RandomBehavior := A_TickCount - StartTime_RandomBehavior
+			ElapsedTime_StoneGolemPit := A_TickCount - StartTime_StoneGolemPit
 
+			/*
 			if (Random(1, 10) > 6)
 			{
 				MovementCoords := RandomAdjacent()
 				MouseMove MovementCoords[1], MovementCoords[2]
 				Continue
 			}
+			*/
 
 			MovementCoords := FindAdjacentMovement()
 			if (MovementCoords)
@@ -520,7 +668,7 @@ SlimeLeveling(*)
 
 				ElapsedTime_IdleTime := A_TickCount - LastIdleTime
 
-				if (ElapsedTime_IdleTime > 1000)
+				if (ElapsedTime_IdleTime > 10000)
 				{
 					Send("{RButton up}")
 					FindAndMove()
@@ -538,6 +686,7 @@ SlimeLeveling(*)
 					Send("{RButton down}")
 					StartTime_EatFood := A_TickCount
 				}
+				/*
 				else if (ElapsedTime_BerserkTime >= Interval_BerserkTime)
 				{
 					Send("{RButton up}")
@@ -546,13 +695,21 @@ SlimeLeveling(*)
 					Interval_BerserkTime := Random(61000,70000)
 					StartTime_BerserkTime := A_TickCount
 				}
+				*/
 				else if (ElapsedTime_RandomBehavior >= Interval_RandomBehavior)
 				{
 					Send("{RButton up}")
 					RandomBehavior()
 					Send("{RButton down}")
-					Interval_RandomBehavior := Random(5000,20000)
+					Interval_RandomBehavior := Random(5000,15000)
 					StartTime_RandomBehavior := A_TickCount
+				}
+				else if (ElapsedTime_StoneGolemPit >= Interval_StoneGolemPit)
+				{
+					Send("{RButton up}")
+					StoneGolemPit()
+					Send("{RButton down}")
+					StartTime_StoneGolemPit := A_TickCount
 				}
 			}
 		

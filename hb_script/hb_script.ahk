@@ -203,13 +203,18 @@ RequestMenu(*) {
 }
 
 LevelingMenu(*) {
-    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. SlimeLeveling 5343211456"],
-                ["PretendCorpseLeveling", "ToggleMagicLeveling", "SlimeLeveling"])
+    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. StoneGolemPit", "4. ScorpionPit"],
+                ["PretendCorpseLeveling", "ToggleMagicLeveling", "StoneGolemLeveling", "ScorpionLeveling"])
 }
 
 UncommonCommands(*) {
     OptionsMenu(["1. Eat Food", "2. Sell Items"],
                 ["EatFood", "SellStackedItems"])
+}
+
+ReputationMenu(*) {
+	OptionsMenu(["1. TradeRep", "2. Rep Player", "3. AFK Rep"],
+				["traderep", "rep+ menu", "toggle rep afk mode"])
 }
 
 ; Sell/deposit 12 items (use by putting inventory over sell/deposit window at the bottom, hold mouse over the items you want to deposit alt+s
