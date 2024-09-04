@@ -24,6 +24,7 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #Include includes\functions_autopot.ahk
 #Include includes\functions_leveling.ahk
 #Include includes\functions_messages.ahk
+#Include includes\functions_traderep.ahk
 
 ; GUI (cannot reside in global_variables as thes require all includes)
 Global HUD := GUIManager()
@@ -237,7 +238,7 @@ UncommonCommands(*) {
 
 ReputationMenu(*) {
 	OptionsMenu(["1. TradeRep", "2. Rep Player", "3. AFK Rep"],
-				["traderep", "rep+ menu", "toggle rep afk mode"])
+				["traderep", "rep+ menu", "ActivateAutoTradeRep"])
 }
 
 ; Sell/deposit 12 items (use by putting inventory over sell/deposit window at the bottom, hold mouse over the items you want to deposit alt+s
@@ -269,11 +270,13 @@ SellStackedItems(*)
 
 ; ══════════════════════════════════════════════════════  Debugging / WIP ══════════════════════════════════════════════════════ ;
 
+/*
 !C:: ; useful for debugging
 {
 	;WinMaximize(WinTitle)
 	;pA_Clipboard := PixelGetColor(150, 571) . " " . PixelGetColor(163, 592)
 }
+*/
 
 ReturnInputs(*)
 {

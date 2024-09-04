@@ -10,21 +10,22 @@ class GUIManager {
     }
 
     InitializeGUI() {
-        this.CoordText := gGUI.Add("Text", "cLime Center", "XXXXXXXX YYYYYYYY")
+        this.CoordText := gGUI.Add("Text", "x" CtPixel(28.3, "X") " y" CtPixel(95.1, "Y") " w" CtPixel(21.2, "X") " cLime Center", "XXXXXXXX YYYYYYYY")
         this.CoordText.SetFont("s" CalculateFontSize(1) " bold", "Segoe UI")
-        this.CoordText.Move(CtPixel(CoordsIndicatorPos[1], "X"), CtPixel(CoordsIndicatorPos[2], "Y"))
 
-        this.StatusText := gGUI.Add("Text", "cWhite", "Script")
+        this.StatusText := gGUI.Add("Text", "x" CtPixel(6.9, "X") " y" CtPixel(92.9166, "Y") " cWhite", "Script")
         this.StatusText.SetFont("s" CalculateFontSize(1) " bold", "Segoe UI")
-        this.StatusText.Move(CtPixel(ScriptActiveIndicatorPos[1], "X"), CtPixel(ScriptActiveIndicatorPos[2], "Y"))
 
-        this.HealthPotText := gGUI.Add("Text", "cWhite", "H")
+        this.HealthPotText := gGUI.Add("Text", "x" CtPixel(10.31, "X") " y" CtPixel(93, "Y") " cWhite", "H")
         this.HealthPotText.SetFont("s" CalculateFontSize(1) " bold", "Segoe UI")
-        this.HealthPotText.Move(CtPixel(AutoPotHealthIndicatorPos[1], "X"), CtPixel(AutoPotHealthIndicatorPos[2], "Y"))
 
-        this.ManaPotText := gGUI.Add("Text", "cWhite", "M")
+        this.ManaPotText := gGUI.Add("Text", "x" CtPixel(10.31, "X") " y" CtPixel(96.7, "Y") " cWhite", "M")
         this.ManaPotText.SetFont("s" CalculateFontSize(1) " bold", "Segoe UI")
-        this.ManaPotText.Move(CtPixel(AutoPotManaIndicatorPos[1], "X"), CtPixel(AutoPotManaIndicatorPos[2], "Y"))
+
+        this.AutoTradeRepText := gGUI.Add("Text", "cWhite", "Auto Trade Repping")
+        this.AutoTradeRepText.SetFont("s" CalculateFontSize(1) " bold", "Segoe UI")
+        this.AutoTradeRepText.Move(CtPixel(90, "X"), CtPixel(90, "Y"))
+        this.AutoTradeRepText.Visible := false
 
         ;this.MyBtn := gGUI.Add("Button", "x400 y570 w30 h20", "TradeRep")
         ;this.MyBtn.SetFont("s" CalculateFontSize(1) " bold", "Segoe UI")
@@ -38,8 +39,8 @@ class GUIManager {
         }
 
         if (IniRead(ConfigFile, "Settings", "UseAutoPotting") != "true") {
-            this.HealthPotText.Hidden(true)
-            this.ManaPotText.Hidden(true)
+            this.HealthPotText.Visible := false
+            this.ManaPotText.Visible := false
         }
     
         SetTimer(this.UpdateOSD.Bind(this), 200)
@@ -55,6 +56,13 @@ class GUIManager {
                     control.Visible := true
                 }
             }
+        }
+
+        if (bAutoTradeRepping) {
+            this.AutoTradeRepText.Visible := true
+        }
+        else {
+            this.AutoTradeRepText.Visible := false
         }
     
         MouseGetPos(&MouseX, &MouseY)
