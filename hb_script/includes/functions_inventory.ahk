@@ -8,18 +8,6 @@ EatFood(*) {
 	BlockInput false
 }
 
-EquipShield1(*) {
-    Item10()
-}
-
-EquipWeapon1(*) {
-    Item9()
-}
-
-EquipWeapon2(*) {
-    Item8()
-}
-
 Item1(*) {
     BlockInput true
     Send "{F6}"
