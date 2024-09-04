@@ -110,6 +110,24 @@ RandomizeArray(&arr) {
     }
 }
 
+Chance(percentage) {
+    return Random(1, 100) <= percentage
+}
+
+CheckPixelMovement(x, y)
+{
+	pixelColor := PixelGetColor(x, y)
+	Sleep(1)
+	pixelColor2 := PixelGetColor(x, y)
+
+	if (pixelColor != pixelColor2)
+	{
+		return true ; movement detected
+	}
+
+	return false ; no movement detected at pixel
+}
+
 FindAdjacentMovement()
 {
 	; Calculate pixel offsets for each direction
@@ -126,7 +144,7 @@ FindAdjacentMovement()
 	directions.LeftDown := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
 	directions.LeftUp := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
 	directions.RightUp := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
-	directions.Up := [CenterX + XOffsets[2], CenterY + YOffsets[1]]
+	directions.Up := [CenterX + XOffsets[2], CenterY + (YOffsets[1] * 2)]
 	directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
 	directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
 	directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
@@ -180,18 +198,77 @@ RandomAdjacent()
     return AdjacentSquares[RandomIndex]
 }
 
-CheckPixelMovement(x, y)
+CriticalStrikeNearby()
 {
-	pixelColor := PixelGetColor(x, y)
-	Sleep(1)
-	pixelColor2 := PixelGetColor(x, y)
+	Static distance := 2
 
-	if (pixelColor != pixelColor2)
+	TempGui := Gui()
+	TempGui.Opt("+AlwaysOnTop +ToolWindow -Caption Disabled E0x8000000") ;E0x8000000 makes it so you cannot click the GUI stuff (Disabled might be unnecessary)
+	TempGui.BackColor := "EEAA99"
+
+    ; Initialize an empty array for the coordinates
+    coords := []
+
+    ; Calculate the pixel offset for the given distance
+    XOffset := CtPixel(SquarePercentageX * distance, "X")
+    YOffset := CtPixel(SquarePercentageY * distance, "Y")
+
+    ; Top and Bottom sides
+    x := -distance
+    while (x <= distance) {
+        coords.Push([CenterX + CtPixel(SquarePercentageX * x, "X"), CenterY - YOffset]) ; Top side
+        coords.Push([CenterX + CtPixel(SquarePercentageX * x, "X"), CenterY + YOffset]) ; Bottom side
+        x++
+    }
+
+    ; Left and Right sides
+    y := -(distance - 1)
+    while (y <= (distance - 1)) {
+        coords.Push([CenterX - XOffset, CenterY + CtPixel(SquarePercentageY * y, "Y")]) ; Left side
+        coords.Push([CenterX + XOffset, CenterY + CtPixel(SquarePercentageY * y, "Y")]) ; Right side
+        y++
+    }
+
+    ; Create a text control for each coordinate in coords
+    for coord in coords {
+        TempGui.Add("Text", "x" coord[1] " y" coord[2] " w15 h15 Center cFuchsia", " .")
+    }
+
+	WinSetTransColor(TempGui.BackColor " 200", TempGui)
+    TempGui.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate") ; Show the GUI without activating it
+
+    ; Check each square for pixel changes
+    for coord in coords {
+        pixelColor := PixelGetColor(coord[1], coord[2])
+        Sleep(1)
+        pixelColor2 := PixelGetColor(coord[1], coord[2])
+
+        if (pixelColor != pixelColor2) {
+            ; Move the mouse and critical strike location (by hold alt + rmb)
+			MouseMove coord[1], coord[2], 0
+			Sleep 10
+			Send("{Alt down}")
+			Sleep 10
+			Send("{Alt up}")
+            Sleep 1000
+
+			TempGui.Destroy()
+			distance := 2
+            return
+        }
+    }
+
+	TempGui.Destroy()
+
+	if (distance < 4)
 	{
-		return true ; movement detected
+		distance++
+		CriticalStrikeNearby()
 	}
-
-	return false ; no movement detected at pixel
+	else
+	{
+		distance := 2
+	}
 }
 
  ; 1 = 8
@@ -201,7 +278,7 @@ CheckPixelMovement(x, y)
  ; 5 = 40
  ; 6 = 48
 
-FindAndMove(*)
+FindAndMove(bVariableRunWalk := false, MaxDistance := 6)
 {
 	Static distance := 2
 
@@ -255,7 +332,16 @@ FindAndMove(*)
 			Send("{LButton up}")
             Sleep 200
             MouseMove CenterX, CenterY
-            Sleep 300 * distance
+            Loop distance {
+				if (bVariableRunWalk && Chance(50)) {
+					Send "{Shift down}"
+					Sleep 300  ; Small delay to simulate holding Shift
+					Send "{Shift up}"
+				}
+				else {
+					Sleep 300
+				}
+			}
 
 			TempGui.Destroy()
 			distance := 2
@@ -265,10 +351,10 @@ FindAndMove(*)
 
 	TempGui.Destroy()
 
-	if (distance < 6)
+	if (distance < MaxDistance)
 	{
 		distance++
-		FindAndMove()
+		FindAndMove(, MaxDistance)
 	}
 	else
 	{
@@ -432,7 +518,9 @@ RandomBehavior(x1 := 100, x2 := 50, x3 := 25, x4:= 0) {
         if (rand <= cumulativeOdds) {
             Switch index {
                 Case 1:
-                    AttackInCricles()
+					Send("{RButton down}")
+					AttackInCircles()
+					Send("{RButton up}")
                     return
                 Case 2:
                     RunInCircles()
@@ -449,14 +537,22 @@ RandomBehavior(x1 := 100, x2 := 50, x3 := 25, x4:= 0) {
 }
 
 ; Function to run in circles
-RunInCircles() {
+RunInCircles(bAlwaysRun := true) {
+	if (bAlwaysRun) {
+		Send("^{R}")
+	}
+
     MoveNearby(4, "RightDown")
 	MoveNearby(4, "RightUp")
 	MoveNearby(5, "LeftUp")
 	MoveNearby(5, "LeftDown")
+
+	if (bAlwaysRun) {
+		Send("^{R}")
+	}
 }
 
-AttackInCricles() {
+AttackInCircles(_Speed := 25, _SpeedVariance := 20) {
 	; Calculate pixel offsets for each direction
 	XOffset := CtPixel(SquarePercentageX, "X")
 	YOffset := CtPixel(SquarePercentageY, "Y")
@@ -477,19 +573,15 @@ AttackInCricles() {
 	directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
 
 	AdjacentSquares := [directions.RightDown, directions.Right, directions.RightUp, directions.Up, directions.LeftUp, directions.Left, directions.LeftDown, directions.Down]
-    Sleep 100
-	Send("{RButton down}")
 	
 	Loop Random(1,3) {
 		for square in AdjacentSquares {
-			MouseMove square[1], square[2]
-			Sleep 10
+			MouseMove square[1], square[2], 0
+			Sleep Max(0, _Speed + Random(-_SpeedVariance, _SpeedVariance))
 		}
 	}
 
 	MouseMove CenterX, CenterY
-
-	Send("{RButton up}")
 	Sleep 100
 }
 
@@ -605,9 +697,11 @@ StoneGolemLeveling(*)
 	}
 }
 
-ScorpionLeveling(*)
+PublicPitLeveling(*)
 {
 	global stopFlag 
+
+	Static bAlt := false
 
 	MouseSpeed := 10
 	LastIdleTime := A_TickCount
@@ -615,9 +709,6 @@ ScorpionLeveling(*)
 	
 	StartTime_BerserkTime := A_TickCount
 	Interval_BerserkTime := 60000
-
-	StartTime_MoveTime := A_TickCount  ; Capture the start time in milliseconds
-	Interval_MoveTime := 10000
 
 	StartTime_EatFood := A_TickCount  ; Capture the start time in milliseconds
 	Interval_EatFood := 300000
@@ -644,22 +735,20 @@ ScorpionLeveling(*)
 			ElapsedTime_RandomBehavior := A_TickCount - StartTime_RandomBehavior
 			ElapsedTime_StoneGolemPit := A_TickCount - StartTime_StoneGolemPit
 
-			/*
-			if (Random(1, 10) > 6)
-			{
-				MovementCoords := RandomAdjacent()
-				MouseMove MovementCoords[1], MovementCoords[2]
-				Continue
-			}
-			*/
-
 			MovementCoords := FindAdjacentMovement()
 			if (MovementCoords)
 			{
 				MouseMove MovementCoords[1], MovementCoords[2], MouseSpeed
 
+				if (Chance(8)) {
+					Send("{Alt down}")
+					Sleep 10
+					Send("{Alt up}")
+					Continue
+				}
+
 				Loop {
-					Sleep 100
+					Sleep 200
 				} Until !CheckPixelMovement(MovementCoords[1], MovementCoords[2])
 			}
 			else
@@ -668,10 +757,36 @@ ScorpionLeveling(*)
 
 				ElapsedTime_IdleTime := A_TickCount - LastIdleTime
 
-				if (ElapsedTime_IdleTime > 10000)
+				if (Chance(60)) {
+					MovementCoords := RandomAdjacent()
+					MouseMove MovementCoords[1], MovementCoords[2]
+					Continue
+				}
+
+				if (Chance(10)) {
+					Send("^{R}")
+					Continue
+				}
+
+				if (Chance(25)) {
+					FindAndMove(true, 3)
+					Continue
+				}
+
+				if (Chance(20)) {
+					AttackInCircles()
+					Continue
+				}
+
+				if (ElapsedTime_IdleTime > 20000)
 				{
+					if (Chance(50)) {
+						CriticalStrikeNearby()
+						Continue
+					}
+
 					Send("{RButton up}")
-					FindAndMove()
+					FindAndMove(true)
 					Send("{RButton down}")
 
 					LastIdleTime := A_TickCount
@@ -686,30 +801,28 @@ ScorpionLeveling(*)
 					Send("{RButton down}")
 					StartTime_EatFood := A_TickCount
 				}
-				/*
 				else if (ElapsedTime_BerserkTime >= Interval_BerserkTime)
 				{
 					Send("{RButton up}")
+					if (bAlt) {
+						MoveNearby(distance := 3, direction := "Right")
+					}
+					else {
+						MoveNearby(distance := 3, direction := "Left")
+					}
+					bAlt := !bAlt
 					CastBerserk()
 					Send("{RButton down}")
-					Interval_BerserkTime := Random(61000,70000)
+					Interval_BerserkTime := Random(61000,120000)
 					StartTime_BerserkTime := A_TickCount
 				}
-				*/
 				else if (ElapsedTime_RandomBehavior >= Interval_RandomBehavior)
 				{
 					Send("{RButton up}")
-					RandomBehavior()
+					RandomBehavior(70, 30, 80, 0)
 					Send("{RButton down}")
-					Interval_RandomBehavior := Random(5000,15000)
+					Interval_RandomBehavior := Random(8000,25000)
 					StartTime_RandomBehavior := A_TickCount
-				}
-				else if (ElapsedTime_StoneGolemPit >= Interval_StoneGolemPit)
-				{
-					Send("{RButton up}")
-					StoneGolemPit()
-					Send("{RButton down}")
-					StartTime_StoneGolemPit := A_TickCount
 				}
 			}
 		
