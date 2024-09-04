@@ -82,10 +82,7 @@ ResumeScript(*) => Suspend(false)
 ; ══════════════════════════════════════════════════════  Systems/Functions ══════════════════════════════════════════════════════ ;
 
 CheckWindowState() {
-	; Check window state and manage GUI accordingly
-	global activeMenuManager
-
-	static RedrawCount := 0
+	static bMinimizedTipOpen := false
 
 	if !WinExist(WinTitle) {
 		return
@@ -96,28 +93,33 @@ CheckWindowState() {
 
 	if (Style & 0x01000000)  ; WS_MAXIMIZE style
 	{
+		bMinimizedTipOpen := false
 		gGUI.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate")
-		WinSetAlwaysOnTop(1, gGUI.Hwnd)
-
-		if (RedrawCount < 3) {
-			;gGUI.Maximize()
-			
-			RedrawCount++
-		}            
+		WinSetAlwaysOnTop(1, gGUI.Hwnd)          
 	} 
 	else if (WinState == -1)  ; Minimized state
 	{
-		RedrawCount := 0
+		gGUI.Hide()
 
 		if (activeMenuManager != "") {
 			activeMenuManager.DestroyOptionsGUI()
-		}
+		}	
 
-		gGUI.Hide()
-		;gGUI.Minimize()
+		if (!bMinimizedTipOpen) {
+			; Display a prompt dialog box
+			MsgBoxResult := MsgBox("Do you want to close the script?",, "YesNo")
+
+			; Check the user's response
+			if (MsgBoxResult = "Yes")
+				ExitApp()
+			else if (MsgBoxResult = "No")
+				bMinimizedTipOpen := true
+		}
+		else {
+			ToolTip "HB Script is still running!"
+		}	
 	} 
 	else {
-		RedrawCount := 0
 		WinMaximize(WinTitle)
 	}
 }
@@ -166,35 +168,6 @@ CctPixels(x, y) {
 }
 
 DoNothing(*) => { } ; A placeholder function used when a method is required, but no action is needed.
-
-CheckForMinimize() {
-	static bMinimizedTipOpen := false
-
-	if (!WinActive(WinTitle))
-	{
-		if (!bMinimizedTipOpen)
-		{
-			; Display a prompt dialog box
-			MsgBoxResult := MsgBox("Do you want to close the script?",, "YesNo")
-
-			; Check the user's response
-			if (MsgBoxResult = "Yes")
-				ExitApp()
-			else if (MsgBoxResult = "No")
-				bMinimizedTipOpen := true
-		}
-		else
-		{
-			ToolTip "HB Script is still running!"
-		}
-	}
-	else
-	{
-		bMinimizedTipOpen := false
-	}
-
-	SetTimer(CheckForMinimize, 1000) ;1x a second
-}
 
 OptionsMenu(optionNames, optionFunctionNames) {
     global activeMenuManager

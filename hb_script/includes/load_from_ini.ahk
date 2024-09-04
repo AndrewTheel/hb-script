@@ -1,10 +1,5 @@
 ; ══════════════════════════════════════════════════════  Optional Systems ══════════════════════════════════════════════════════ ;
 
-if (IniRead(ConfigFile, "Settings", "CheckForMinimize") == "true")
-{
-	CheckForMinimize()
-}
-
 if (IniRead(ConfigFile, "Settings", "UseAutoPotting") == "true")
 {
 	SetTimer(AutoPot, 100)

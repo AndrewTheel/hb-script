@@ -23,6 +23,7 @@ Global AutoPotManaIndicatorPos := [10.31,96.7]
 
 ; Gameplay 
 Global EquipStaffOnCast := IniRead(ConfigFile, "Gameplay", "EquipStaffOnCast")
+Global EquipWeaponAfterCase := IniRead(ConfigFile, "Gameplay", "EquipWeaponAfterCase")
 Global bStaffEquipped := false
 
 ; From ConfigFile

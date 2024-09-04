@@ -35,6 +35,11 @@ class SpellInfo {
 				Send("{RButton up}")
 			}
 
+			if (EquipStaffOnCast)
+			{
+				;equip staff
+			}
+
 			Send this.MagicPage ; Open Magic menu tab
 			Sleep 10
 			MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(this.YCoord, "Y"), 0
@@ -45,7 +50,10 @@ class SpellInfo {
 			MouseMove begin_x, begin_y, 0 ; Move mouse back to original position
 			BlockInput "MouseMoveOff"
 
-			;RemoveHolds() ; not needed as we are only blocking mouse now
+			if (EquipWeaponAfterCase)
+			{
+				;equip weapon
+			}
 
 			if (this.SpellEffectDuration != "")
 			{	
