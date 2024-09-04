@@ -15,11 +15,6 @@ if (IniRead(ConfigFile, "Settings", "DebugMode") == "true")
 	bDebugMode := true
 }
 
-if (IniRead(ConfigFile, "Settings", "ShowGUI") == "true")
-{
-	bShowGUI := true
-}
-
 if (IniRead(ConfigFile, "Settings", "UnbindKeys") == "true")
 {
 	UnbindKeys := HotkeyUnbindClass() ; Obj instance that unbinds a bunch of keys by setting hotkeys to do nothing

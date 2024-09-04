@@ -1,8 +1,9 @@
 class RepButton {
-    static statusWidth := 50
-    static statusHeight := 25
-
     __New(RepCoolDownTime) {
+        this.X := CtPixel(91.7968, "X")
+        this.Y := CtPixel(93.75, "Y")
+        this.statusWidth := 50
+        this.statusHeight := 25
         this._repCountDown := 1
         this._isReady := true
         this._CoolDownTime := RepCoolDownTime
@@ -10,7 +11,7 @@ class RepButton {
         this.readyicon := "images\RepReady.png"
         this.usedicon := "images\RepUsed.png"
 
-        this.CreateGui()
+        this.InitializeGUI()
         SetTimer(this.UpdateButton.Bind(this), 1000)  ; Set a timer to call UpdateTimer every second
     }
 
@@ -19,40 +20,24 @@ class RepButton {
         return this._isReady
     }
     
-    CreateGui() {
-        this.Gui := Gui("+AlwaysOnTop +ToolWindow -Caption E0x8000000 -Border")
-        this.Gui.BackColor := "EEAA99"
-		WinSetTransColor("EEAA99", this.Gui.Hwnd)
-
+    InitializeGUI() {
         ; Add the first picture for the 'ready' icon
-        this.PictureReady := this.Gui.Add("Picture", "x0 y0 w" RepButton.statusWidth " h" RepButton.statusHeight, this.readyicon)
+        this.PictureReady := gGUI.Add("Picture", "x" this.X " y" this.Y " w" this.statusWidth " h" this.statusHeight, this.readyicon)
         this.PictureReady.Visible := true  ; Initially show this picture
         
         ; Add the second picture for the 'used' icon
-        this.PictureUsed := this.Gui.Add("Picture", "x0 y0 w" RepButton.statusWidth " h" RepButton.statusHeight, this.usedicon)
+        this.PictureUsed := gGUI.Add("Picture", "x" this.X " y" this.Y " w" this.statusWidth " h" this.statusHeight, this.usedicon)
         this.PictureUsed.Visible := false  ; Initially hide this picture
                
         ; Add text control for timer with default text '00'
-        this.StatusText := this.Gui.Add("Text", "x0 y" . RepButton.statusHeight . " w" . RepButton.statusWidth . " h24 Center", "00")
+        this.StatusText := gGUI.Add("Text", "x" this.X " y" this.Y + this.statusHeight " w" . this.statusWidth . " h24 Center", "00")
         this.StatusText.SetFont("s" CalculateFontSize(1) " cYellow", "Arial")  ; Set font size, color, and font
         this.StatusText.Visible := false
-
-        ; Show the GUI to get its Hwnd and set the position
-        this.ShowIndicator()
 
         ; Add a click event for the button
         BoundFunc := ObjBindMethod(this, "ButtonClick")
         this.PictureReady.OnEvent("Click", BoundFunc)
         this.PictureUsed.OnEvent("Click", BoundFunc)
-    }
-
-    ShowIndicator() {       
-        ; Show the GUI
-        this.Gui.Show("x" CtPixel(91.7968, "X") " y" CtPixel(93.75, "Y") " w" RepButton.statusWidth + 500 " h" RepButton.statusHeight + 500 " NA NoActivate")
-      
-        ; Ensure the window stays on top
-        WinSetAlwaysOnTop(1, this.Gui.Hwnd)
-        WinSetExStyle("+0x80000", this.Gui.Hwnd)  ; WS_EX_NOACTIVATE
     }
     
     StartTiming() {
@@ -60,17 +45,12 @@ class RepButton {
         this.PictureReady.Visible := false ; Hide the 'ready' icon
         this.PictureUsed.Visible := true  ; Show the 'used' icon
         this.StatusText.Visible := true
-        WinSetTransColor("EEAA99 200", this.Gui.Hwnd)
+        ;WinSetTransColor("EEAA99 200", gGUI.Hwnd)
         this._repCountDown := this._CoolDownTime * 60 ; Set the cooldown period here
         this.StatusText.Text := this._repCountDown
     }
 
-    UpdateButton() {
-        static bAlt := true
-
-        ; Refocus the GUI
-        this.ShowIndicator()
-        
+    UpdateButton() {      
         if (!this._isReady) { ; If not ready to click
             this._repCountDown := this._repCountDown - 1
             this.StatusText.Text := this.FormatDuration(this._repCountDown)  ; Update the text control with the new time
@@ -81,16 +61,6 @@ class RepButton {
                 this.PictureReady.Visible := true ; Hide the 'ready' icon
                 this.PictureUsed.Visible := false ; Show the 'used' icon
             }
-        }
-        else {        
-            if (bAlt) {
-                WinSetTransColor("EEAA99 175", this.Gui.Hwnd)     
-            }
-            else {
-                WinSetTransColor("EEAA99 255", this.Gui.Hwnd)        
-            }
-
-            bAlt := !bAlt
         }
     }
 
@@ -113,5 +83,3 @@ class RepButton {
         }
     }
 }
-
-RepButtonInst := RepButton(60) ; in minutes

@@ -13,16 +13,21 @@ HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB window
 SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was initially launched from as its working directory
 
 #Include includes\load_from_ini.ahk
+#Include includes\class_GUIManager.ahk
 #Include includes\class_commandinfo.ahk
 #Include includes\class_hotkeyunbind.ahk
 #Include includes\class_optionsmenumanager.ahk
 #Include includes\class_spellinfo.ahk
 #Include includes\class_statuseffectindicator.ahk
 #Include includes\class_repbutton.ahk
+#Include includes\functions_inventory.ahk
 #Include includes\functions_autopot.ahk
 #Include includes\functions_leveling.ahk
 #Include includes\functions_messages.ahk
-#Include includes\gui_main.ahk
+
+; GUI (cannot reside in global_variables as thes require all includes)
+Global HUD := GUIManager()
+Global RepButtonInst := RepButton(60) ; in minutes
 
 #SuspendExempt
 !K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)
@@ -75,6 +80,61 @@ ResumeScript(*) => Suspend(false)
 #SuspendExempt false
 
 ; ══════════════════════════════════════════════════════  Systems/Functions ══════════════════════════════════════════════════════ ;
+
+CheckWindowState() {
+	; Check window state and manage GUI accordingly
+	global activeMenuManager
+
+	static RedrawCount := 0
+
+	if !WinExist(WinTitle) {
+		return
+	}
+
+	Style := WinGetStyle(WinTitle)
+	WinState := WinGetMinMax(WinTitle)
+
+	if (Style & 0x01000000)  ; WS_MAXIMIZE style
+	{
+		gGUI.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate")
+		WinSetAlwaysOnTop(1, gGUI.Hwnd)
+
+		if (RedrawCount < 3) {
+			;gGUI.Maximize()
+			
+			RedrawCount++
+		}            
+	} 
+	else if (WinState == -1)  ; Minimized state
+	{
+		RedrawCount := 0
+
+		if (activeMenuManager != "") {
+			activeMenuManager.DestroyOptionsGUI()
+		}
+
+		gGUI.Hide()
+		;gGUI.Minimize()
+	} 
+	else {
+		RedrawCount := 0
+		WinMaximize(WinTitle)
+	}
+}
+
+SetTimer(CheckWindowState, 1000)
+
+CalculateFontSize(percentOfHeight) {
+    ScreenHeight := ScreenResolution[2] + 0  ; Get the screen height
+    return Round((percentOfHeight / 100) * ScreenHeight)  ; Calculate font size as a percentage of height
+}
+
+ToggleDebugMode(*)
+{
+	Global bDebugMode
+
+	bDebugMode := !bDebugMode
+}
 
 CtPixel(percent, axis) {
     ScreenResolutionX := ScreenResolution[1] + 0  ; Cast to number
@@ -170,16 +230,6 @@ PretendCorpse(*) {
 	BlockInput false
 }
 
-EatFood(*) {
-	BlockInput true
-	Send "{F6}"
-	Sleep 10
-	MouseClick "left", CtPixel(93.0, "X"), CtPixel(55.2, "Y"), 2
-	Sleep 10
-	Send "{F6}"
-	BlockInput false
-}
-
 TakeInvisPot(*) {
 	BlockInput true
 	Send "{F6}"
@@ -208,8 +258,8 @@ LevelingMenu(*) {
 }
 
 UncommonCommands(*) {
-    OptionsMenu(["1. Eat Food", "2. Sell Items"],
-                ["EatFood", "SellStackedItems"])
+    OptionsMenu(["1. Toggle Debug", "2. Eat Food", "3. Sell Items"],
+                ["ToggleDebugMode", "EatFood", "SellStackedItems"])
 }
 
 ReputationMenu(*) {
