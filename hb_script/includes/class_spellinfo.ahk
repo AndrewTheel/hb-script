@@ -18,7 +18,7 @@ class SpellInfo {
     }
 
 	CastSpell(*) {
-		Global SpellHorizontalPos, CastingEffectSpell
+		Global CastingEffectSpell
 
 		if WinActive(WinTitle) ; This supposedly stops the hotkey from working outside of the HB client
 		{
@@ -35,11 +35,6 @@ class SpellInfo {
 				Send("{RButton up}")
 			}
 
-			if (EquipStaffOnCast)
-			{
-				;equip staff
-			}
-
 			Send this.MagicPage ; Open Magic menu tab
 			Sleep 10
 			MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(this.YCoord, "Y"), 0
@@ -49,11 +44,6 @@ class SpellInfo {
 			Send("{LButton up}")
 			MouseMove begin_x, begin_y, 0 ; Move mouse back to original position
 			BlockInput "MouseMoveOff"
-
-			if (EquipWeaponAfterCase)
-			{
-				;equip weapon
-			}
 
 			if (this.SpellEffectDuration != "")
 			{	

@@ -9,15 +9,15 @@ EatFood(*) {
 }
 
 EquipShield1(*) {
-
+    Item10()
 }
 
 EquipWeapon1(*) {
-
+    Item9()
 }
 
 EquipWeapon2(*) {
-
+    Item8()
 }
 
 Item1(*) {
