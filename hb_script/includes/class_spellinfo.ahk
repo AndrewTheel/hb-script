@@ -7,7 +7,8 @@ class SpellInfo {
 		SpellEffectDuration := ""
 	}
 
-    __New(aMagicPage, aCoord, aHK, eImg := "", eDuration := "") { ; Constructor
+    __New(aSpellName, aMagicPage, aCoord, aHK, eImg := "", eDuration := "") { ; Constructor
+		this.SpellName := aSpellName
         this.MagicPage := aMagicPage
         this.YCoord := aCoord
 		this.HotKeyName := aHK
