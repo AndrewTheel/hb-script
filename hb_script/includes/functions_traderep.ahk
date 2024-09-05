@@ -90,6 +90,7 @@ AutoTradeRep(*) {
     LastRepElapsedTime += 1000
 
     if (LastRepElapsedTime < RepCoolDownTime) {
+        ;ToolTip "Waiting: rep cool down: " LastRepElapsedTime
         return ; Return if we are still on rep cooldown
     }
     else { ; Ready to rep
@@ -115,6 +116,7 @@ AutoTradeRep(*) {
 			MouseMove begin_x, begin_y, 0 ; Move mouse back to original position
 			BlockInput "MouseMoveOff"
 
+            LastRepMessageElapsedTime := RepMessageInterval
             LastRepElapsedTime := 0
             RepButtonInst.StartTiming()
         }
