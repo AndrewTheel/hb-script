@@ -47,14 +47,14 @@ CheckPixelColors() { ; Function to check if the specified pixels match the given
     return true
 }
 
-ActivateAutoTradeRep(*) {
+ActivateAutoTradeRep() {
     SwitchToPeaceMode() ; Make sure we are in peace mode
-    Sleep 1000
+    Sleep 100
 
     myGui := Gui("+AlwaysOnTop +ToolWindow -Caption E0x8000000 -Border")
 
     ; Add the UpDown control and other components to the GUI
-    myGui.Add("Text", "ASdddf", "Set Delay Time (seconds):")
+    myGui.Add("Text",, "Set Delay Time (seconds):")
     UpDownButton := myGui.Add("UpDown", "Range1-3000", 5)
     OKButton := myGui.Add("Button", "Default vOKButton", "OK")
     OKButton.OnEvent("Click", (*) => BeginTradeButtonSubmit(myGui, UpDownButton))
@@ -106,6 +106,8 @@ AutoTradeRep(*) {
     Static bTypedInTrade := false
     Static LastRepElapsedTime := RepCoolDownTime
     Static LastRepMessageElapsedTime := RepMessageInterval
+    Static RandomTime := 0
+    Static RandomDelay := 0
 
     if (stopFlag) {
         bAutoTradeRepping := false
@@ -116,11 +118,14 @@ AutoTradeRep(*) {
 
     LastRepElapsedTime += 1000
 
-    if (LastRepElapsedTime < RepCoolDownTime + Random(1, 300000)) {
+    if (LastRepElapsedTime < RepCoolDownTime + RandomDelay) {
+        RandomDelay := Random(1, 300000)
         return ; Return if we are still on rep cooldown
     }
     else { ; Ready to rep
-        if (LastRepMessageElapsedTime > RepMessageInterval + Random(-300000, 300000)) {
+        if (LastRepMessageElapsedTime > RepMessageInterval + RandomTime) {
+            RandomTime := Random(-300000, 300000)
+
             if (!bTypedInTrade)
             {
                 SendTextMessage("%Trade rep") ; First one to make sure we are in % trade chat!
