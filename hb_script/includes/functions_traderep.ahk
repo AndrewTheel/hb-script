@@ -28,6 +28,8 @@ PeaceModeTR_Pixel.Push(CtPixel(94.3, "Y"))
 ; Example color codes to match
 Global ExpectedColors := ["0x7B7352", "0x8C7329", "0x7B7352", "0x9C8439"]
 Global PeaceModeColors := ["0x272727", "0x3D3D3D"]
+
+DelayStartUpDown := ""
    
 CheckPixelColors() { ; Function to check if the specified pixels match the given colors
     ActualColors := []
@@ -46,12 +48,36 @@ CheckPixelColors() { ; Function to check if the specified pixels match the given
 }
 
 ActivateAutoTradeRep(*) {
-    Global bAutoTradeRepping
+    SwitchToPeaceMode() ; Make sure we are in peace mode
+    Sleep 1000
+
+    myGui := Gui("+AlwaysOnTop +ToolWindow -Caption E0x8000000 -Border")
+
+    ; Add the UpDown control and other components to the GUI
+    myGui.Add("Text", "ASdddf", "Set Delay Time (seconds):")
+    UpDownButton := myGui.Add("UpDown", "Range1-3000", 5)
+    OKButton := myGui.Add("Button", "Default vOKButton", "OK")
+    OKButton.OnEvent("Click", (*) => BeginTradeButtonSubmit(myGui, UpDownButton))
+
+    ; Show the GUI
+    myGui.Show("x" ScreenResolution[1] / 2 " y" ScreenResolution[2] / 2 " NA NoActivate")
+    
+    ; Ensure the window stays on top and non-interactive
+    WinSetAlwaysOnTop(1, myGui.Hwnd)
+    WinSetExStyle("+0x80000", myGui.Hwnd)  ; WS_EX_NOACTIVATE
+}
+
+BeginTradeButtonSubmit(myGui, UpDownButton) {
+    global bAutoTradeRepping
 
     bAutoTradeRepping := true   
-    SwitchToPeaceMode() ;Make sure we are in peace mode
-    Sleep 2000
-    SetTimer(AutoTradeRep, 1000)
+    DelayTime := UpDownButton.Value  ; Accessing UpDown control's value directly
+    myGui.Destroy()
+
+    if (DelayTime >= 1) { ; Check if the delay time is valid and proceed
+        Sleep DelayTime * 1000  ; Convert seconds to milliseconds
+        SetTimer(AutoTradeRep, 1000)
+    } 
 }
 
 SwitchToPeaceMode()
@@ -77,6 +103,7 @@ SwitchToPeaceMode()
 AutoTradeRep(*) {
     Global stopFlag, bAutoTradeRepping
 
+    Static bTypedInTrade := false
     Static LastRepElapsedTime := RepCoolDownTime
     Static LastRepMessageElapsedTime := RepMessageInterval
 
@@ -89,14 +116,20 @@ AutoTradeRep(*) {
 
     LastRepElapsedTime += 1000
 
-    if (LastRepElapsedTime < RepCoolDownTime) {
-        ;ToolTip "Waiting: rep cool down: " LastRepElapsedTime
+    if (LastRepElapsedTime < RepCoolDownTime + Random(1, 300000)) {
         return ; Return if we are still on rep cooldown
     }
     else { ; Ready to rep
-        if (LastRepMessageElapsedTime > RepMessageInterval) {
-            ; We can send a trade rep request
-            SendTextMessage("%Trade Rep")
+        if (LastRepMessageElapsedTime > RepMessageInterval + Random(-300000, 300000)) {
+            if (!bTypedInTrade)
+            {
+                SendTextMessage("%Trade rep") ; First one to make sure we are in % trade chat!
+            }
+            else
+            {
+                RandomTradeRepMessage := GetRandomTradeRep()
+                SendTextMessage(RandomTradeRepMessage)
+            }
             LastRepMessageElapsedTime := 0
         }
         else {
@@ -105,11 +138,10 @@ AutoTradeRep(*) {
 
         ; Lets check to see if we have a trade request dialog we should accept
         if (CheckPixelColors()) {
-            ; Click accept
             BlockInput "MouseMove"
 			MouseGetPos &begin_x, &begin_y ; Get the position of the mouse
 			MouseMove CtPixel(45, "X"), CtPixel(63, "Y"), 0
-			Sleep 5
+			Sleep 800
 			Send("{LButton down}")
 			Sleep 10
 			Send("{LButton up}")
@@ -121,6 +153,49 @@ AutoTradeRep(*) {
             RepButtonInst.StartTiming()
         }
     }
+}
+
+GetRandomTradeRep() {
+    ; Define the messages and their weights
+    messages := [
+        {msg: "Trade Rep", weight: 70},
+        {msg: "Trade rep", weight: 50},
+        {msg: "trad erep", weight: 10},
+        {msg: "trade rep\", weight: 5},
+        {msg: "trade rep", weight: 5},
+        {msg: "traderep", weight: 5},
+        {msg: "trader ep", weight: 5},
+        {msg: "Trad rep", weight: 5},
+        {msg: "Trade repp", weight: 5},
+        {msg: "Trade rep pls", weight: 5},
+        {msg: "TradE rep", weight: 5},
+        {msg: "Trade REP", weight: 5},
+        {msg: "TRADE REP", weight: 5},
+        {msg: "trade repo", weight: 5},
+        {msg: "Can I get a trade rep?", weight: 5},
+        {msg: "Rep trade?", weight: 5},
+        {msg: "TRade Rep", weight: 15},
+        {msg: "rtRade Prep", weight: 1},
+        {msg: "trade the rep", weight: 5},
+        {msg: "trade reep", weight: 5},
+        {msg: "tradee rep", weight: 1},
+        {msg: "TRADE REP", weight: 5}
+    ]
+
+    totalWeight := 0
+    weightedList := []
+    
+    ; Prepare a weighted list
+    for message in messages {
+        totalWeight += message.weight
+        Loop message.weight {
+            weightedList.Push(message.msg)
+        }
+    }
+
+    ; Generate a random index based on the total weight
+    randomIndex := Random(1, totalWeight)
+    return weightedList[randomIndex]
 }
 
 /*
