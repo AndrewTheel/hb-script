@@ -526,20 +526,20 @@ BasicLeveling(myGUI, Duration)
 			else {
 				MouseMove CenterX, CenterY
 
-				if ((A_TickCount - LastAttackTime) >= 2000) {
+				if ((A_TickCount - LastAttackTime) >= 7000) {
 					if (FindAndMove(dist)) {
 						dist := 2
 					}
 					else {
-						dist++
+						dist := Min(++dist, 6)
 					}
 					LastAttackTime := A_TickCount
 				}
 				else {
-					if (Chance(50)) {
+					if (Chance(5)) {
 						MoveNearby(Random(1,2))
 					}
-					else if (Chance(5)) {
+					else if (Chance(1)) {
 						MoveNearby(Random(1,3))
 						MoveNearby(1)
 					}
