@@ -227,8 +227,8 @@ RequestMenu(*) {
 }
 
 LevelingMenu(*) {
-    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. StoneGolemPit", "4. PublicPitLeveling"],
-                ["PretendCorpseLeveling", "ToggleMagicLeveling", "StoneGolemLeveling", "PublicPitLeveling"])
+    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. Basic Leveling"],
+                ["PretendCorpseLeveling", "ToggleMagicLeveling", "BeginBasicLeveling"])
 }
 
 UncommonCommands(*) {
