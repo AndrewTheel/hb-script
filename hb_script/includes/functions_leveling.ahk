@@ -371,7 +371,7 @@ CastRecall(*)
 	Sleep 500
 }
 
-RandomBehavior(x1 := 100, x2 := 10, x3 := 50, x4:= 0) {
+RandomBehavior(x1 := 80, x2 := 100, x3 := 30, x4:= 0) {
     ; Define the odds for each case
     odds := [x1, x2, x3, x4]
 
@@ -406,12 +406,24 @@ RandomBehavior(x1 := 100, x2 := 10, x3 := 50, x4:= 0) {
     }
 }
 
-; Function to run in circles
-RunInCircles(bAlwaysRun := true) {
-    MoveNearby(3, "RightDown")
-	MoveNearby(3, "RightUp")
-	MoveNearby(3, "LeftUp")
-	MoveNearby(3, "LeftDown")
+RunInCircles() {
+    patterns := [
+        ["RightDown", "RightUp", "LeftUp", "LeftDown"],
+        ["Right", "Down", "Left", "Up"],
+		["Up", "Down"],
+		["Left", "Right"],
+		["LeftDown", "Right", "LeftUp"],
+        ["Left", "RightUp", "RightDown", "Left"],
+		["Right", "LeftUp", "LeftDown", "Right"]
+    ]
+    
+    ; Choose a random pattern
+    selectedPattern := patterns[A_Index := Random(1, patterns.Length)]
+
+    ; Execute the selected pattern
+    for _, direction in selectedPattern {
+        MoveNearby(3, direction)
+    }
 }
 
 AttackInCircles(_Speed := 250, _SpeedVariance := 200) {
@@ -526,7 +538,7 @@ BasicLeveling(myGUI, Duration)
 			else {
 				MouseMove CenterX, CenterY
 
-				if ((A_TickCount - LastAttackTime) >= 7000) {
+				if ((A_TickCount - LastAttackTime) >= 25000) {
 					if (FindAndMove(dist)) {
 						dist := 2
 					}
@@ -534,15 +546,6 @@ BasicLeveling(myGUI, Duration)
 						dist := Min(++dist, 6)
 					}
 					LastAttackTime := A_TickCount
-				}
-				else {
-					if (Chance(5)) {
-						MoveNearby(Random(1,2))
-					}
-					else if (Chance(1)) {
-						MoveNearby(Random(1,3))
-						MoveNearby(1)
-					}
 				}
 
 				if ((A_TickCount - Last_RandomBehavior) >= Random(10000,30000)) {
