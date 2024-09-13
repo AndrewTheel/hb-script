@@ -371,7 +371,7 @@ CastRecall(*)
 	Sleep 500
 }
 
-RandomBehavior(x1 := 80, x2 := 100, x3 := 30, x4:= 0) {
+RandomBehavior(x1 := 80, x2 := 10, x3 := 30, x4:= 0) {
     ; Define the odds for each case
     odds := [x1, x2, x3, x4]
 
@@ -410,11 +410,8 @@ RunInCircles() {
     patterns := [
         ["RightDown", "RightUp", "LeftUp", "LeftDown"],
         ["Right", "Down", "Left", "Up"],
-		["Up", "Down"],
-		["Left", "Right"],
-		["LeftDown", "Right", "LeftUp"],
-        ["Left", "RightUp", "RightDown", "Left"],
-		["Right", "LeftUp", "LeftDown", "Right"]
+        ["Left", "RightUp", "RightDown"],
+		["Right", "LeftUp", "LeftDown"]
     ]
     
     ; Choose a random pattern
@@ -422,7 +419,7 @@ RunInCircles() {
 
     ; Execute the selected pattern
     for _, direction in selectedPattern {
-        MoveNearby(3, direction)
+        MoveNearby(2, direction)
     }
 }
 
