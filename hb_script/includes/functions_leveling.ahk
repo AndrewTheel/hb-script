@@ -522,7 +522,8 @@ BasicLeveling(myGUI, Duration)
 					if (i > 20) {
 						Send("{Alt down}")
 					}
-					else if (i > 100) {
+					
+					if (i > 100) {
 						break
 					}
 					Sleep 100
