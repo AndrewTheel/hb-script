@@ -1,26 +1,3 @@
-; Setup variables for pixels in center of each adjacent square
-CenterX := ScreenResolution[1] / 2
-CenterY := ScreenResolution[2] / 2
-
-; Calculate pixel offsets for each direction
-XOffset := CtPixel(SquarePercentageX, "X")
-YOffset := CtPixel(SquarePercentageY, "Y")
-
-; Create offset arrays (AHK arrays start from index 1)
-XOffsets := [-XOffset, 0, XOffset]
-YOffsets := [-YOffset, 0, YOffset]
-
-; Define coordinates for each direction using valid object literal syntax  1 = 8 ; 2 = 16 ; 3 = 24 squares  ; 4 = 32 squares ; 5 = 40 ; 6 = 48
-directions := Object()
-directions.RightDown := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
-directions.LeftDown := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
-directions.LeftUp := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
-directions.RightUp := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
-directions.Up := [CenterX + XOffsets[2], CenterY + (YOffsets[1])]
-directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
-directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
-directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
-
 PretendCorpseLeveling(*)
 {
 	static bIsFeigning := false
@@ -274,7 +251,12 @@ MoveNearby(distance := 3, direction := "any") {
         Coords := directions.%direction% ; Handle specific direction
     }
 
-	MouseMove Coords[1], Coords[2], 0
+	MoveToPosition(Coords[1], Coords[2], distance)
+}
+
+MoveToPosition(x, y, distance := 1)
+{
+	MouseMove x, y, 0
 	Sleep 10
 	Send("{LButton down}")
 	Sleep 10
@@ -522,7 +504,7 @@ BasicLeveling(myGUI, Duration)
 					if (i > 20) {
 						Send("{Alt down}")
 					}
-					
+
 					if (i > 100) {
 						break
 					}

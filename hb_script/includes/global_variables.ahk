@@ -22,6 +22,23 @@ Global bAutoTradeRepping := false
 
 ; From ConfigFile
 Global ScreenResolution := StrSplit(IniRead(ConfigFile, "Coords", "ScreenResolution"), ",")
+Global CenterX := ScreenResolution[1] / 2
+Global CenterY := ScreenResolution[2] / 2
+
+; Calculate pixel offsets for adjacent square positions
+XOffset := CtPixel(SquarePercentageX, "X")
+YOffset := CtPixel(SquarePercentageY, "Y")
+XOffsets := [-XOffset, 0, XOffset]
+YOffsets := [-YOffset, 0, YOffset]
+directions := Object() ; Define coordinates for each adjacent square using valid object literal syntax
+directions.RightDown := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
+directions.LeftDown := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
+directions.LeftUp := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
+directions.RightUp := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
+directions.Up := [CenterX + XOffsets[2], CenterY + (YOffsets[1])]
+directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
+directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
+directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
 
 ; Global AutoPot()
 Global bTryHPPotting := true
@@ -43,3 +60,9 @@ InventorySlotPos.Push([CtPixel(92.875, "X"), CtPixel(78.333, "Y")]) ; Item 7
 InventorySlotPos.Push([CtPixel(92.875, "X"), CtPixel(67.333, "Y")])  ; Item 8
 InventorySlotPos.Push([CtPixel(89.25, "X"), CtPixel(67.333, "Y")])  ; Item 9
 InventorySlotPos.Push([CtPixel(85.6255, "X"), CtPixel(67.333, "Y")])  ; Item 10
+InventorySlotPos.Push([CtPixel(82.001, "X"), CtPixel(67.333, "Y")])  ; Item 11
+InventorySlotPos.Push([CtPixel(78.3765, "X"), CtPixel(67.333, "Y")])  ; Item 12
+InventorySlotPos.Push([CtPixel(74.752, "X"), CtPixel(67.333, "Y")])  ; Item 13
+InventorySlotPos.Push([CtPixel(71.1275, "X"), CtPixel(67.333, "Y")])  ; Item 14
+
+

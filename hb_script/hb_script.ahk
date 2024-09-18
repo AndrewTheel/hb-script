@@ -23,6 +23,7 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #Include includes\functions_inventory.ahk
 #Include includes\functions_autopot.ahk
 #Include includes\functions_leveling.ahk
+#Include includes\functions_farming.ahk
 #Include includes\functions_messages.ahk
 #Include includes\functions_traderep.ahk
 
@@ -227,8 +228,8 @@ RequestMenu(*) {
 }
 
 LevelingMenu(*) {
-    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. Basic Leveling"],
-                ["PretendCorpseLeveling", "ToggleMagicLeveling", "BeginBasicLeveling"])
+    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. Basic Leveling", "4. Farming"],
+                ["PretendCorpseLeveling", "ToggleMagicLeveling", "BeginBasicLeveling", "StartFarming"])
 }
 
 UncommonCommands(*) {
