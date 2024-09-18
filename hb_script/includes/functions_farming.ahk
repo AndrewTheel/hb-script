@@ -48,20 +48,8 @@ SowFields() {
         PickupProduce()
         GetInFarmSpot()
 
-        ; Handle Hoe Cycling
         if (!Mod(A_Index, 2)) {
-            HoeIndex++
-
-            if (HoeIndex > 3) {
-                HoeIndex := 1
-            }
-
-            funcName := "Item" . HoeIndex
-
-            if (funcName) { ; Call the function if it exists
-                %funcName%.Call()
-            }
-            Sleep 100
+            CycleTool() ; cycle tool every other loop
         }
 
         if (stopFlag) {
@@ -69,6 +57,22 @@ SowFields() {
             Break
         }
     } Until (bNeedSeeds)
+}
+
+CycleTool() {
+    Static Index
+
+    Index++
+
+    if (Index > 3) {
+        Index := 1
+    }
+    funcName := "Item" . Index
+
+    if (funcName) { ; Call the function if it exists
+        %funcName%.Call()
+    }
+    Sleep 250
 }
 
 MoveToFarmSpot() {
@@ -243,6 +247,8 @@ DoesProduceExist(x, y)
 }
 
 HarvestCrop() {
+    TimePassed := 0
+
     for square in FarmPositions {
         MouseMove square[1], square[2], 0
         Sleep 150
@@ -251,7 +257,12 @@ HarvestCrop() {
         {
             Send("{RButton down}")
             while (DoesCropExist(square[1], square[2])) {
+                if (TimePassed > 30000) {
+                    ;we might have a broken tool, try cycling
+                    CycleTool()
+                }
                 Sleep 100
+                TimePassed += 100
             }
             Send("{RButton up}")
             Sleep 100
