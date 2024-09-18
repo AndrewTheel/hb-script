@@ -183,11 +183,11 @@ CheckSeedsRemaining() {
     x := InventorySlotPos[12][1]
     y := InventorySlotPos[12][2]
 
-    Static X1 := x - 10, Y1 := y - 10, X2 := x + 10, Y2 := y + 10  ; Initial search area variables
+    Static X1 := x - 20, Y1 := y - 20, X2 := x + 20, Y2 := y + 20  ; Initial search area variables
 
     Px := 0, Py := 0
 
-    if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xE8976C)) {
+    if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xE8976C) || PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xFFC894)) {
         return true
     }
     else {
@@ -205,10 +205,11 @@ PlantCrop() {
         }
     }
     OpenBag()
+    Sleep 100
     for square in FarmPositions {
         Sleep Random(300,850)
         if (CheckSeedsRemaining()) {
-            Send "{Click " InventorySlotPos[12][1] " " InventorySlotPos[12][2] " 2}" ; Double click on the seed location
+            Send "{Click " InventorySlotPos[12][1] " " InventorySlotPos[12][2] " 4}" ; Double click on the seed location
             Send "{Click " square[1] " " square[2] "}" ; Click on crop location
         }
 
