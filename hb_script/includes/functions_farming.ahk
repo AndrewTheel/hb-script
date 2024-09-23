@@ -1,83 +1,106 @@
 global farmingActive := false  ; Initialize the farming status as inactive
 global bNeedSeeds := false
+global farmSpot := [0, 0]
 
 FarmPositions := [directions.Down, directions.LeftDown, directions.RightDown]
 FarmPositionsLtR := [directions.LeftDown, directions.Down, directions.RightDown]
-FarmSpot := [0, 0]
 
 StartFarming() {
     global farmingActive
     farmingActive := true
 
-    SendTextMessage("/shiftpickup")
-    SetTimer(FindFarmSpot,250)
+    if WinActive(WinTitle)
+	{
+		BlockInput "MouseMove"
+        EnableShiftPickup()
+        Sleep 500
+        MoveToGameCoords(148, 181) ; Farm location
+        Sleep 500
+        SetTimer(FindFarmSpot,200)
+        Sleep 1000
+        GetInFarmSpot()
+        Sleep 200
+        CycleTool()
+        Sleep 200
+        SowFields()
+        MoveToGameCoords(93, 179) ; Shop location
 
-    ;equip hoe 1
-    Item1()
-    
-    GetInFarmSpot()
-    Sleep 800
+        if (farmingActive) {
+            StopFarming()
 
-    SowFields()
-
-    ToolTip "Done sowing fields, out of seeds"
-    
-    Sleep 1500
-
-    ToolTip ""
-
-    StopFarming()
+            ;ToolTip "Done sowing fields, no longer farming"
+            Sleep 1500
+            ToolTip ""
+        }
+    }
 }
 
 StopFarming() {
-    global farmingActive, stopFlag
+    global farmSpot, farmingActive, stopFlag
 
-    SendTextMessage("/shiftpickup")
+    DisableShiftPickup()
     farmingActive := false
     stopFlag := false
+    FindFarmSpot()
     SetTimer(FindFarmSpot, 0)
+    farmSpot := [0, 0]
+    RemoveHolds()
+    ReturnInputs()
 }
 
 SowFields() {
     Static HoeIndex := 1
 
     Loop {
-        ClearEnemies() 
-        PlantCrop()
-        HarvestCrop()
-        PickupProduce()
-        GetInFarmSpot()
+        if (farmingActive) {
+            ClearEnemies() 
+            PlantCrop()
+            HarvestCrop()
+            PickupProduce()
+            GetInFarmSpot()
+            CycleTool() 
 
-        if (!Mod(A_Index, 2)) {
-            CycleTool() ; cycle tool every other loop
+            if (stopFlag) {
+                StopFarming()
+                Break
+            }
         }
-
-        if (stopFlag) {
-            StopFarming()
-            Break
+        else {
+            return
         }
     } Until (bNeedSeeds)
 }
 
 CycleTool() {
-    Static Index
+    if (!farmingActive) {
+        return
+    }
 
-    Index++
+    Static Index := 1
 
-    if (Index > 3) {
+    if (Index > 4) { ; Setup for 4 tools
         Index := 1
     }
+
     funcName := "Item" . Index
 
     if (funcName) { ; Call the function if it exists
         %funcName%.Call()
     }
+
+    BlockInput "MouseMove" ; Calling the equip item function will stop blocking mouse input, so we need to block it again here.
+
+    Index++
     Sleep 250
 }
 
 MoveToFarmSpot() {
-    if (FarmSpot[1] != 0 && FarmSpot[2] != 0) {
-        MouseMove FarmSpot[1], FarmSpot[2], 0
+    if (!farmingActive) {
+        return
+    }
+
+    if (farmSpot[1] != 0 && farmSpot[2] != 0) {
+        MouseMove farmSpot[1], farmSpot[2], 0
         Sleep 10
         Send("{LButton down}")
         Sleep 10
@@ -89,18 +112,30 @@ MoveToFarmSpot() {
 }
 
 GetInFarmSpot() {
+    if (!farmingActive) {
+        return
+    }
+
     attempts := 0
 
     Loop {
         MoveToFarmSpot()
+        if (attempts == 8) { ; Can get stuck trying to move 1 up, try moving left up 1
+            MoveNearby(1, "LeftUp")
+        }
+        if (attempts == 11) { ; Can get stuck trying to move 1 up, try letting up shift
+            Send("{Shift up}")
+        }
+        if (attempts > 18) {
+            StopFarming()
+            return
+        }
+        attempts++
+    } Until InPosition(farmSpot[1], farmSpot[2])
 
-        if (attempts > 5) { ; Can get stuck trying to move 1 up, try moving left 1
-            MoveNearby(1, "Left")
-        }
-        if (attempts > 10) {
-            ; stop farming 
-        }
-    } Until InPosition(FarmSpot[1], FarmSpot[2])   
+    ; There is a chance that we aren't in the farm spot, lets do it one more time after a bit of time
+    Sleep 800
+    MoveToFarmSpot()
 }
 
 InPosition(x, y) {
@@ -115,33 +150,22 @@ InPosition(x, y) {
 }
 
 FindFarmSpot() {
-    Global FarmSpot
+    Global farmSpot
 
     Px := 0, Py := 0
 
     Static X1 := 0, Y1 := 0, X2 := 800, Y2 := 600  ; Initial search area variables
     Static Dot := gGUI.Add("Text", "x0 y0 cLime Center", "X")
-    ;Tx1 := gGUI.Add("Text", "x0 y0 cWhite Center", "╔")
-    ;Tx2 := gGUI.Add("Text", "x0 y0 cWhite Center", "╗")
-    ;Ty1 := gGUI.Add("Text", "x0 y0 cWhite Center", "╚")
-    ;Ty2 := gGUI.Add("Text", "x0 y0 cWhite Center", "╝")
 
     if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0x754924) || PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0x613531)) {
-        Dot.Move(Px - 131, Py - 4)
-        FarmSpot[1] := Px - 131
-        FarmSpot[2] := Py - 4
+        farmSpot[1] := Px - 131
+        farmSpot[2] := Py - 4
 
         ; Adjust search area to a 100x100 square around the found pixel
-        X1 := Px - 50
-        Y1 := Py - 50
-        X2 := Px + 50
-        Y2 := Py + 50
+        X1 := Px - 50, Y1 := Py - 50, X2 := Px + 50, Y2 := Py + 50
 
         ; Ensure the search area stays within the bounds of the original area
-        X1 := Max(0, X1)
-        Y1 := Max(0, Y1)
-        X2 := Min(800, X2)
-        Y2 := Min(600, Y2)
+        X1 := Max(0, X1), Y1 := Max(0, Y1), X2 := Min(800, X2), Y2 := Min(600, Y2)
     } 
     else {
         ; If not found, reset the search area back to the full screen
@@ -149,14 +173,20 @@ FindFarmSpot() {
         X2 := 800, Y2 := 600
     }
 
-    ;Tx1.Move(X1, Y1)
-    ;Tx2.Move(X2, Y1)
-    ;Ty1.Move(X1, Y2)
-    ;Ty2.Move(X2, Y2)
+    if (!farmingActive) {
+        farmSpot[1] := 0
+        farmSpot[2] := 0
+    }
+
+    Dot.Move(farmSpot[1], farmSpot[2])
 }
 
 ClearEnemies() {
     i := 0
+
+    if (!farmingActive) {
+        return
+    }
 
     EnemyCoords := FindAdjacentEnemy()
     if (EnemyCoords) {
@@ -184,23 +214,42 @@ ClearEnemies() {
 CheckSeedsRemaining() {
     Global bNeedSeeds
 
+    if (!farmingActive) {
+        return
+    }    
+
     x := InventorySlotPos[12][1]
     y := InventorySlotPos[12][2]
 
-    Static X1 := x - 20, Y1 := y - 20, X2 := x + 20, Y2 := y + 20  ; Initial search area variables
+    Static X1 := x - 15, Y1 := y - 15, X2 := x + 15, Y2 := y + 15  ; Initial search area variables
 
     Px := 0, Py := 0
+
+    Tx1 := gGUI.Add("Text", "x0 y0 cWhite Center", "╔")
+    Tx2 := gGUI.Add("Text", "x0 y0 cWhite Center", "╗")
+    Ty1 := gGUI.Add("Text", "x0 y0 cWhite Center", "╚")
+    Ty2 := gGUI.Add("Text", "x0 y0 cWhite Center", "╝")
+
+    Tx1.Move(X1, Y1)
+    Tx2.Move(X2, Y1)
+    Ty1.Move(X1, Y2)
+    Ty2.Move(X2, Y2)
 
     if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xE8976C) || PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xFFC894)) {
         return true
     }
     else {
+        Tooltip "No more seeds found!!!"
         bNeedSeeds := true
         return false
     }      
 }
 
 PlantCrop() {
+    if (!farmingActive) {
+        return
+    }
+
     for square in FarmPositions { ; Check the 3 crop positions to make sure they are clear of enemies
         Sleep 250
         if (CanAttackCoord(square[1], square[2])) {
@@ -217,7 +266,7 @@ PlantCrop() {
             Send "{Click " square[1] " " square[2] "}" ; Click on crop location
         }
 
-        if (!InPosition(FarmSpot[1], FarmSpot[2])   ) { ; Sometimes the player accidently moves, lets make sure we are in the desire location again
+        if (!InPosition(farmSpot[1], farmSpot[2])) { ; Sometimes the player accidently moves, lets make sure we are in the desire location again
             GetInFarmSpot()
         }
     }
@@ -247,6 +296,10 @@ DoesProduceExist(x, y)
 }
 
 HarvestCrop() {
+    if (!farmingActive) {
+        return
+    }
+
     TimePassed := 0
 
     for square in FarmPositions {
@@ -257,12 +310,22 @@ HarvestCrop() {
         {
             Send("{RButton down}")
             while (DoesCropExist(square[1], square[2])) {
-                if (TimePassed > 30000) {
-                    ;we might have a broken tool, try cycling
+                if (TimePassed > 15000) { ;we might have a broken tool, try cycling
+                    TimePassed := 0
+                    Send("{RButton up}")
+                    Sleep 10
                     CycleTool()
+                    Send("{RButton down}")
+                    Sleep 1000
                 }
                 Sleep 100
                 TimePassed += 100
+
+                if (stopFlag) {
+                    Send("{RButton up}")
+                    StopFarming()
+                    return
+                }
             }
             Send("{RButton up}")
             Sleep 100
@@ -281,6 +344,10 @@ PickUp() {
 }
 
 PickupProduce() {
+    if (!farmingActive) {
+        return
+    }
+
     ProduceFoundArray := [0,0,0]
     MovedTimes := 0
 

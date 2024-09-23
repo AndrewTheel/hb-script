@@ -49,6 +49,10 @@ Global AutoPotManaAtPercent := IniRead(ConfigFile, "AutoPot", "AutoPotManaAtPerc
 ; Define the global array of inventory slot positions
 Global InventorySlotPos := []  ; Initialize as an empty array
 
+; Player and Game Variables
+Global playerGameCoords := [0,0]
+GameCoords := [0,0]
+
 ; Populate the global array with coordinates
 InventorySlotPos.Push([CtPixel(71.125, "X"), CtPixel(78.333, "Y")]) ; Item 1
 InventorySlotPos.Push([CtPixel(74.75, "X"), CtPixel(78.333, "Y")])  ; Item 2

@@ -13,6 +13,7 @@ HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB window
 SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was initially launched from as its working directory
 
 #Include includes\load_from_ini.ahk
+#Include includes\functions_common.ahk
 #Include includes\class_GUIManager.ahk
 #Include includes\class_commandinfo.ahk
 #Include includes\class_hotkeyunbind.ahk
@@ -20,9 +21,14 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #Include includes\class_spellinfo.ahk
 #Include includes\class_statuseffectindicator.ahk
 #Include includes\class_repbutton.ahk
+#Include includes\class_nodeinfo.ahk
+#Include includes\functions_minimap.ahk
+#Include includes\functions_navigation.ahk
+#Include includes\functions_shop.ahk
 #Include includes\functions_inventory.ahk
 #Include includes\functions_autopot.ahk
 #Include includes\functions_leveling.ahk
+#Include includes\functions_shop.ahk
 #Include includes\functions_farming.ahk
 #Include includes\functions_messages.ahk
 #Include includes\functions_traderep.ahk
@@ -222,14 +228,46 @@ OpenBag(*) => Send("{f6}")
 ToggleRunWalk(*) => Send("^r")
 OpenOptions(*) => Send("{F12}")
 
+ShiftPickup(bTurnOn := true) {
+    x := CtPixel(40.4, "X")
+    y := CtPixel(36.4, "Y")
+    hS := 8
+    X1 := x - hS, Y1 := y - hS, X2 := x + hS, Y2 := y + hS  ; Initial search area variables
+    Px := 0, Py := 0
+    targetColor := 0xC8C8C8  ; The checked color (enabled)
+
+    BlockInput true
+    Send("{F12}")
+    Sleep(10)
+    MouseClick "left", CtPixel(71, "X"), CtPixel(22, "Y"), 2
+    Sleep(10)
+
+	; If the pixel isn't the target color, perform the click action
+	if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, targetColor) != bTurnOn) {
+		MouseClick "left", x, y, 1
+	}
+
+    Send("{F12}")
+    Sleep(10)
+    BlockInput false
+}
+
+EnableShiftPickup() {
+    ShiftPickup(true)
+}
+
+DisableShiftPickup() {
+    ShiftPickup(false)
+}
+
 RequestMenu(*) {
     OptionsMenu(["1. AMP", "2. Zerk", "3. Invis", "4. Enemies!"],
                 ["APFMMessage", "BerserkMessage", "InvisMessage", "EnemiesMessage"])
 }
 
 LevelingMenu(*) {
-    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. Basic Leveling", "4. Farming"],
-                ["PretendCorpseLeveling", "ToggleMagicLeveling", "BeginBasicLeveling", "StartFarming"])
+    OptionsMenu(["1. PretendCorpse", "2. MagicLeveling", "3. Basic Leveling", "4. Farming", "5. TestMove"],
+                ["PretendCorpseLeveling", "ToggleMagicLeveling", "BeginBasicLeveling", "StartFarming", "TestMove"])
 }
 
 UncommonCommands(*) {

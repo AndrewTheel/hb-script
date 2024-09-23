@@ -19,7 +19,9 @@ EquipItem(index) {
     Sleep(10)
     Send("{Ctrl Down}{Click " InventorySlotPos[index][1] " " InventorySlotPos[index][2] "}{Ctrl up}") ; Click on the inventory slot specified by the index
     Sleep(10)
-    Send("{Click right}")
+    Send("{F6}")
+    ;Send("{Click right}")
+    Sleep(10)
     MouseMove(begin_x, begin_y, 0)
     BlockInput("MouseMoveOff")
 }
