@@ -1,9 +1,48 @@
 global farmingActive := false  ; Initialize the farming status as inactive
 global bNeedSeeds := false
 global farmSpot := [0, 0]
+global sellSpot := [CtPixel(33.3, "X"),CtPixel(33.3, "Y")]
 
 FarmPositions := [directions.Down, directions.LeftDown, directions.RightDown]
 FarmPositionsLtR := [directions.LeftDown, directions.Down, directions.RightDown]
+
+MessageDialogueBoxPixel := [CtPixel(0.1, "X"),CtPixel(88.75, "Y")]
+MessageDialogueBoxColor := 0x8C715A
+
+;NoItemImage := "images\node_images\NoItemImage.png"
+SellListAlreadyImage := "images\node_images\SellListAlready.png"
+
+; Nodes for farming
+;NodeInfo(1:NodeTitle, 2:Imagepath, 3:AltImagepath, 4:WorldCoordinates, 5:ClickOffset; 6:MarkerLabel, 7:ConnectedNodes)
+; Farm (outside)
+FarmPlot := NodeInfo("ShopKeeper", "images\node_images\FarmWagon_Day.png", "images\node_images\FarmWagon_Night.png", [148,181], [-14.8, 3])
+ShopEntrance := NodeInfo("ShopEntrance", "images\node_images\Shop_Entrance_Day.png", "images\node_images\Shop_Entrance_Night.png", [93,178], [10,24])
+BlackSmithEntrance := NodeInfo("BlacksmithEntrance", "images\node_images\Blacksmith_Entrance_Day.png", "images\node_images\Blacksmith_Entrance_Night.png", [111,193], [1.3,23.7])
+
+; Shop (for selling, buying, resting)
+ShopExit := NodeInfo("ShopExit", "images\node_images\Shop_Exit.png",,,[2,24])
+ShopKeeper := NodeInfo("ShopKeeper", "images\node_images\ShopKeeper.png",,,[-10,25])
+BuyMiscButton := NodeInfo("BuyMiscButton", "images\node_images\Buy_Misc.png",,,[2,1])
+QuantitySelect := NodeInfo("QuantitySelect", "images\node_images\Quantity.png",,,[11.3,1.2])
+PurchaseButton := NodeInfo("PurchaseButton", "images\node_images\Purchase_Button.png",,,[4.6,1.7])
+RestButton := NodeInfo("RestButton", "images\node_images\RestButton.png",,,[2,1])
+SellItemsButton := NodeInfo("SellButton", "images\node_images\SellItems_Button.png",,,[3.6,1])
+SellDialogueBox := NodeInfo("SellQuantityBox", "images\node_images\quantityBoxImage.png")
+SellConfirmButton := NodeInfo("SellConfirm", "images\node_images\Sell_Confirm_Button.png",,,[3.6,1.2])
+SellListMenu := NodeInfo("SellListMenu", "images\node_images\SellListMenu.png")
+InventoryMenu := NodeInfo("InventoryMenu", "images\node_images\InventoryMenu.png")
+ItemsForSaleMenu := NodeInfo("ItemsForSale", "images\node_images\ItemsForSale.png")
+
+; Blacksmith (for repairing)
+BlacksmithExit := NodeInfo("BlacksmithExit", "images\node_images\Blacksmith_Exit.png",,,[2,18.2])
+Blacksmith := NodeInfo("Blacksmith", "images\node_images\Blacksmith.png",,,[1.9,13.5])
+RepairAllButton := NodeInfo("RepairAllButton", "images\node_images\Repair_All.png",,,[2,1]) ; reused for confirmation
+;RepairConfirm := NodeInfo("RepairConfirm", "images\node_images\Repair_All.png",,,[2,1])
+
+;Produce
+Watermelon := ""
+Pumpkin := NodeInfo("PumpkinProduce", "images\node_images\Pumpkin_Produce.png",,,[1.5,2])
+Seed_Pumpkin := NodeInfo("Seed_Pumpkin", "images\node_images\Seed_Pumpkin.png",,,[8.4,1.2])
 
 StartFarming() {
     global farmingActive
@@ -13,22 +52,48 @@ StartFarming() {
 	{
 		BlockInput "MouseMove"
         EnableShiftPickup()
-        Sleep 500
-        MoveToGameCoords(148, 181) ; Farm location
-        Sleep 500
-        SetTimer(FindFarmSpot,200)
-        Sleep 1000
-        GetInFarmSpot()
-        Sleep 200
-        CycleTool()
-        Sleep 200
-        SowFields()
-        MoveToGameCoords(93, 179) ; Shop location
+
+        Loop {
+            Sleep 500
+            FarmPlot.MoveToLocation()
+            Sleep 500
+            SetTimer(FindFarmSpot,200)
+            Sleep 1000
+            GetInFarmSpot()
+            Sleep 200
+            CycleTool()
+            Sleep 200
+            SowFields()
+            ShopEntrance.MoveToLocation()
+            Sleep 500
+            if (!EnterShop()) {
+                break
+            }
+            Sleep 2000
+            RestAndShop()
+            Sleep 2000
+            if (!ExitShop()) {
+                break
+            }
+            Sleep 200
+
+            BlackSmithEntrance.MoveToLocation()
+            Sleep 500
+            if (!EnterBlackSmith()) {
+                break
+            }
+            Sleep 1000
+            RepairAll()
+            Sleep 1000
+            if (!ExitBlackSmith()) {
+                break
+            }
+        }
+
+        Sleep 5000
 
         if (farmingActive) {
             StopFarming()
-
-            ;ToolTip "Done sowing fields, no longer farming"
             Sleep 1500
             ToolTip ""
         }
@@ -48,7 +113,172 @@ StopFarming() {
     ReturnInputs()
 }
 
+EnterShop() {
+    Loop 10 {
+        ShopEntrance.Click()
+        Sleep 500
+        MouseMove CenterX, CenterY
+        if (ShopKeeper.IsOnScreen()) {
+            return true
+        }
+        Sleep 100
+    }
+    return false
+}
+
+ExitShop() {
+    Loop 10 {
+        ShopExit.Click()
+        Sleep 500
+        MouseMove CenterX, CenterY
+        if (ShopEntrance.IsOnScreen()) {
+            return true
+        }
+        Sleep 100
+    }
+    return false
+}
+
+EnterBlackSmith() {
+    Loop 10 {
+        BlackSmithEntrance.Click()
+        Sleep 500
+        MouseMove CenterX, CenterY
+        if (Blacksmith.IsOnScreen()) {
+            return true
+        }
+        Sleep 100
+    }
+    return false
+}
+
+ExitBlackSmith() {
+    Loop 10 {
+        BlackSmithExit.Click()
+        Sleep 500
+        MouseMove CenterX, CenterY
+        if (BlackSmithEntrance.IsOnScreen()) {
+            return true
+        }
+        Sleep 100
+    }
+    return false
+}
+
+RepairAll() {
+    Loop 10 {
+        if (Blacksmith.IsOnScreen()) {
+            Blacksmith.Click()
+            Sleep 200
+            RepairAllButton.Click()
+            Sleep 200
+            MouseMove CenterX, CenterY ; After clicking repair all the mouse lands on the repair confirmation changing it's color, so lets move our mouse away to make sure we find the right button
+            Sleep 200
+            if (RepairAllButton.IsOnScreen()) {
+                RepairAllButton.Click() ; there is a confirmation button that is also "repair" this node can therefore be repurposed
+            }
+            return
+        }
+        Sleep 1000
+    }
+    StopFarming() ; We never made it into shop
+}
+
+RestAndShop() {
+    Loop 10 {
+        if (ShopKeeper.IsOnScreen()) {
+            ShopKeeper.Click()
+            Sleep 200
+            RestButton.Click()
+            Sleep 200
+
+            ; Then lets sell produce
+            ShopKeeper.Click()
+            Sleep 200
+            SellItemsButton.Click()
+            Sleep 200
+            SellProduce()
+            Sleep 100
+            if (InventoryMenu.IsOnScreen()) {
+                OpenBag() ; closes the opened inventory menu
+            }
+            Sleep 100
+            ShopKeeper.Click()
+            Sleep 200
+            BuyMiscButton.Click()
+            Sleep 200
+            BuySeeds()
+            Sleep 200
+            if (ItemsForSaleMenu.IsOnScreen()) {
+                ItemsForSaleMenu.Click("right")
+            }
+            Sleep 100
+            OpenBag()
+            Sleep 100
+            MoveSeedsToPosition()
+            if (InventoryMenu.IsOnScreen()) {
+                OpenBag() ; closes the opened inventory menu
+            }
+            return
+        }
+        Sleep 1000
+    }
+    StopFarming() ; We never made it into shop
+}
+
+MoveSeedsToPosition() {
+    Send("{Shift down}")
+    MouseClickDrag "L", DefaultItemLandingPos[1], DefaultItemLandingPos[2], InventorySlotPos[12][1], InventorySlotPos[12][2], 3
+    Send("{Shift up}")
+    Sleep 50
+}
+
+BuySeeds() {
+    Loop 10 {
+        if (Seed_Pumpkin.IsOnScreen()) {
+            Seed_Pumpkin.Click()
+            break
+        }
+    }
+    Sleep 200
+    QuantitySelect.Click(, 4)
+    Sleep 200
+    PurchaseButton.Click()
+}
+
+SellProduce() {
+    PreSellSpotX := DefaultItemLandingPos[1] - CtPixel(7, "X")
+    X1 := CtPixel(1, "X"), Y1 := CtPixel(75, "Y"), X2 := CtPixel(22, "X"), Y2 := CtPixel(91, "Y")
+
+    Loop 18 {
+        MouseClick "left", DefaultItemLandingPos[1], DefaultItemLandingPos[2], 2       
+        Sleep 50
+        if (ImageSearch(&X, &Y, X1, Y1, X2, Y2, "*TransBlack " SellListAlreadyImage)) {
+            MouseClickDrag "L", DefaultItemLandingPos[1], DefaultItemLandingPos[2], PreSellSpotX, DefaultItemLandingPos[2], 2
+            Sleep 50
+        }
+
+        if (SellDialogueBox.IsOnScreen() || PixelGetColor(MessageDialogueBoxPixel[1], MessageDialogueBoxPixel[2]) == MessageDialogueBoxColor) {
+            Send("{Enter}")
+        }
+    }
+
+    Loop 5 {
+        if (SellConfirmButton.IsOnScreen()) {
+            SellConfirmButton.Click()
+            return
+        }
+        Sleep 100
+    }
+
+    if (SellListMenu.IsOnScreen()) {
+        MouseClick "right", sellSpot[1], sellSpot[2], 1 ;rightclick area to close
+    }
+}
+
 SowFields() {
+    Global bNeedSeeds
+
     Static HoeIndex := 1
 
     Loop {
@@ -69,6 +299,8 @@ SowFields() {
             return
         }
     } Until (bNeedSeeds)
+
+    bNeedSeeds := false
 }
 
 CycleTool() {
@@ -155,7 +387,7 @@ FindFarmSpot() {
     Px := 0, Py := 0
 
     Static X1 := 0, Y1 := 0, X2 := 800, Y2 := 600  ; Initial search area variables
-    Static Dot := gGUI.Add("Text", "x0 y0 cLime Center", "X")
+    ;Static Dot := gGUI.Add("Text", "x0 y0 cLime Center", "X")
 
     if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0x754924) || PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0x613531)) {
         farmSpot[1] := Px - 131
@@ -178,7 +410,7 @@ FindFarmSpot() {
         farmSpot[2] := 0
     }
 
-    Dot.Move(farmSpot[1], farmSpot[2])
+    ;Dot.Move(farmSpot[1], farmSpot[2])
 }
 
 ClearEnemies() {
@@ -221,25 +453,14 @@ CheckSeedsRemaining() {
     x := InventorySlotPos[12][1]
     y := InventorySlotPos[12][2]
 
-    Static X1 := x - 15, Y1 := y - 15, X2 := x + 15, Y2 := y + 15  ; Initial search area variables
+    Static X1 := x - 20, Y1 := y - 20, X2 := x + 20, Y2 := y + 20  ; Initial search area variables
 
     Px := 0, Py := 0
 
-    Tx1 := gGUI.Add("Text", "x0 y0 cWhite Center", "╔")
-    Tx2 := gGUI.Add("Text", "x0 y0 cWhite Center", "╗")
-    Ty1 := gGUI.Add("Text", "x0 y0 cWhite Center", "╚")
-    Ty2 := gGUI.Add("Text", "x0 y0 cWhite Center", "╝")
-
-    Tx1.Move(X1, Y1)
-    Tx2.Move(X2, Y1)
-    Ty1.Move(X1, Y2)
-    Ty2.Move(X2, Y2)
-
-    if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xE8976C) || PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xFFC894)) {
+    if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xC8C8C8)) { ; || PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0xFFC894)) {
         return true
     }
     else {
-        Tooltip "No more seeds found!!!"
         bNeedSeeds := true
         return false
     }      
@@ -262,7 +483,7 @@ PlantCrop() {
     for square in FarmPositions {
         Sleep Random(300,850)
         if (CheckSeedsRemaining()) {
-            Send "{Click " InventorySlotPos[12][1] " " InventorySlotPos[12][2] " 4}" ; Double click on the seed location
+            Send "{Click " InventorySlotPos[12][1] " " InventorySlotPos[12][2] " 3}" ; Double click on the seed location
             Send "{Click " square[1] " " square[2] "}" ; Click on crop location
         }
 
@@ -337,7 +558,7 @@ PickUp() {
     Sleep 100
     Send("{Shift down}")
     Send("{RButton down}")
-    Sleep 200
+    Sleep 150
     Send("{RButton up}")
     Send("{Shift up}")
     Sleep 500
@@ -353,7 +574,6 @@ PickupProduce() {
 
     MouseMove CenterX, CenterY ; Pick up produce under feet
     PickUp()
-
     ClearEnemies()
 
     ; Check crop positions and record which ones have produce to pickup

@@ -77,30 +77,3 @@ IsOnScreen(screenX, screenY) {
 CreateMarker(1, 148, 181, "Farm")
 CreateMarker(2, 89, 178, "Shop")
 CreateMarker(3, 112, 192, "Blacksmith")
-
-; Set a timer to update the marker positions every 250 ms
-SetTimer(UpdateMarkers, 250)
-
-; Define an empty list of images with their corresponding values
-imageList := []
-
-AddImage(imagePath, NavX, NavY) {
-    NewImage := []                 ; Create a new array
-    NewImage.Push(imagePath)        ; Assign image path to index 1
-    NewImage.Push(NavX)             ; Assign xPos to index 3 (default is 0)
-    NewImage.Push(NavY)             ; Assign xPos to index 3 (default is 0)
-    imageList.Push(NewImage)        ; Add the new image entry to the imageList
-}
-
-AddImage("images\BlackSmith.png", 112, 192)
-
-CheckForBlackSmith() {
-    if (ImageSearch(&X, &Y, 0, 0, 800, 600, "*TransBlack images\BlackSmith.png"))
-    {
-        Tooltip "Found!"
-        Sleep 1000
-        Tooltip "" 
-    }
-}
-
-SetTimer(CheckForBlackSmith, 100)

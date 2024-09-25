@@ -266,42 +266,6 @@ MoveToPosition(x, y, distance := 1)
 	Sleep 300 * distance
 }
 
-MoveDirection(direction, distance := 2) {
-    ; Calculate pixel offsets for each direction based on the distance
-    XOffset := CtPixel(SquarePercentageX * distance, "X")
-    YOffset := CtPixel(SquarePercentageY * distance, "Y")
-
-    ; Create offset arrays
-    XOffsets := [-XOffset, 0, XOffset]
-    YOffsets := [-YOffset, 0, YOffset]
-
-    ; Define coordinates for each direction
-    directions := Object()
-    directions.RightDown := [CenterX + XOffsets[3], CenterY + YOffsets[3]]
-    directions.LeftDown := [CenterX + XOffsets[1], CenterY + YOffsets[3]]
-    directions.LeftUp := [CenterX + XOffsets[1], CenterY + YOffsets[1]]
-    directions.RightUp := [CenterX + XOffsets[3], CenterY + YOffsets[1]]
-    directions.Up := [CenterX + XOffsets[2], CenterY + YOffsets[1]]
-    directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
-    directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
-    directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
-
-    ; Get coordinates for the specified direction
-    Coords := directions.%direction%
-    
-    ; Debug: show calculated offset and coordinates
-    ;Tooltip "Direction: " direction "`nDistance: " distance "`nMove to: " Coords[1] ", " Coords[2]
-    ;Sleep 1000  ; Display tooltip for 1 second (adjust if needed)
-
-    ; Move the mouse to the calculated coordinates
-    MouseMove Coords[1], Coords[2], 0
-    Sleep 10
-    Send("{LButton down}")
-    Sleep 300
-    Send("{LButton up}")
-    Sleep 10
-}
-
 MoveCastBerserk()
 {
 	MoveNearby(distance := 6, direction := "Right")

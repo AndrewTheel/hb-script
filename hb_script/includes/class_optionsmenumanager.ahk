@@ -40,9 +40,9 @@ class OptionsMenuManager {
 
             WinSetTransColor(this.optionsGui.BackColor " 150", this.optionsGui)
 
-            MouseGetPos &xPos, &yPos ; Get the position of the mouse
-            X := xPos + (CtPixel(SquarePercentageX, "X") / 2)
-            Y := yPos + (CtPixel(SquarePercentageY, "Y") / 2)
+            ;MouseGetPos &xPos, &yPos ; Get the position of the mouse
+            X := CenterX + (CtPixel(SquarePercentageX, "X") / 2)
+            Y := CenterY + (CtPixel(SquarePercentageY, "Y") / 2)
 
             this.optionsGui.Show("x" X " y" Y " NA NoActivate")
         }
