@@ -1,8 +1,8 @@
 ﻿#Requires AutoHotkey v2.0
 
 ; AHK settings
-CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
-CoordMode "ToolTip", "Client"
+CoordMode "Mouse", "Screen" ; Client / Window / Screen (Client might be best)
+CoordMode "ToolTip", "Screen"
 SendMode "Event"
 
 #Include includes\global_variables.ahk
