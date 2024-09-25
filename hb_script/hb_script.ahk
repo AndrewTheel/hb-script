@@ -23,12 +23,9 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #Include includes\class_repbutton.ahk
 #Include includes\class_nodeinfo.ahk
 #Include includes\functions_minimap.ahk
-;#Include includes\functions_navigation.ahk
-#Include includes\functions_shop.ahk
 #Include includes\functions_inventory.ahk
 #Include includes\functions_autopot.ahk
 #Include includes\functions_leveling.ahk
-#Include includes\functions_shop.ahk
 #Include includes\functions_farming.ahk
 #Include includes\functions_messages.ahk
 #Include includes\functions_traderep.ahk

@@ -386,7 +386,7 @@ FindFarmSpot() {
 
     Px := 0, Py := 0
 
-    Static X1 := 0, Y1 := 0, X2 := 800, Y2 := 600  ; Initial search area variables
+    Static X1 := 0, Y1 := 0, X2 := ScreenResolution[1], Y2 := ScreenResolution[2]  ; Initial search area variables
     ;Static Dot := gGUI.Add("Text", "x0 y0 cLime Center", "X")
 
     if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0x754924) || PixelSearch(&Px, &Py, X1, Y1, X2, Y2, 0x613531)) {
