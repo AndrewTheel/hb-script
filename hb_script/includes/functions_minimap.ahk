@@ -16,7 +16,7 @@ gameHeight := 256
 scaleX := gameWidth / minimapWidth
 scaleY := gameHeight / minimapHeight
 
-SetTimer(UpdatePlayerCoords, 10)
+SetTimer(UpdatePlayerCoords, 200)
 
 ; Convert game coordinates to minimap coordinates
 GameToMinimap(gameX, gameY) {
@@ -109,14 +109,13 @@ UpdatePlayerCoords() {
 
     local tempX, tempY
 
-    oldBlueDotCoords := blueDotCoords
-
     ; Search for the blue dot's color within the minimap
     if PixelSearch(&tempX, &tempY, minimapX1, minimapY1, minimapX2, minimapY2, blueDotColor) {
         blueDotCoords[1] := tempX - 0.5
         blueDotCoords[2] := tempY - 0.5  ; Adjust Y to center the dot if necessary
 
         ; Convert minimap coordinates to game coordinates
+        oldBlueDotCoords := blueDotCoords
         playerGameCoords := MinimapToGame(blueDotCoords, oldBlueDotCoords)
     }
     ; Show no error, because sometimes we won't have minimap ex- The Shop
