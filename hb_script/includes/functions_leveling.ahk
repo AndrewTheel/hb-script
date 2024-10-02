@@ -33,8 +33,8 @@ ToggleMagicLeveling(*)
 	if (bIsLvling) {
 		MouseMove(400, 290)
 		Sleep 100
-		MagicMissileSpell := SpellInfo("^{1}", "86", "!F1")
-		CreateFoodSpell := SpellInfo("^{1}", "116", "!F1")
+		MagicMissileSpell := SpellInfo("MagicMissile", "^{1}", "86", "!F1")
+		CreateFoodSpell := SpellInfo("CreateFood", "^{1}", "116", "!F1")
 
 		MagicLevelingFuncBound := MagicLeveling.Bind(400, 290, MagicMissileSpell, CreateFoodSpell)
 		SetTimer(MagicLevelingFuncBound, 100)
@@ -199,13 +199,8 @@ FindAndMove(distance := 3) {
 		Sleep 2
 
 		if (CanAttackCoord(coord[1], coord[2])) {
-			; Move the mouse and click at the detected coordinate
-			MouseMove coord[1], coord[2], 0
-			Sleep 10
-			Send("{LButton down}")
-			Sleep 10
-			Send("{LButton up}")
-            Sleep 200
+			MouseClick("L", coord[1], coord[2])
+			Sleep 200
             MouseMove CenterX, CenterY
             Loop distance {
 				Sleep 300
@@ -256,11 +251,7 @@ MoveNearby(distance := 3, direction := "any") {
 
 MoveToPosition(x, y, distance := 1)
 {
-	MouseMove x, y, 0
-	Sleep 10
-	Send("{LButton down}")
-	Sleep 10
-	Send("{LButton up}")
+	MouseClick("L", x, y)
 	Sleep 10
 	MouseMove CenterX, CenterY	
 	Sleep 300 * distance
@@ -279,16 +270,11 @@ CastInvis(*)
 
 	Send "^{4}" ; Open Magic menu tab
 	Sleep 10
-	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(41.73, "Y"), 0
-	Sleep 5
-	Send("{LButton down}")
+	MouseClick("L", CtPixel(SpellHorizontalPos, "X"), CtPixel(41.73, "Y"))
 	Sleep 10
-	Send("{LButton up}")
 	MouseMove CenterX, CenterY
 	Sleep 1800
-	Send("{LButton down}")
-	Sleep 10
-	Send("{LButton up}")
+	MouseClick("L", CenterX, CenterY)
 	Sleep 500
 
 	Effects.Push(StatusEffectIndicator("images\Invis.png", 60, ""))
@@ -300,16 +286,11 @@ CastPFM(*)
 
 	Send "^{4}" ; Open Magic menu tab
 	Sleep 10
-	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(44.72, "Y"), 0
-	Sleep 5
-	Send("{LButton down}")
+	MouseClick("L", CtPixel(SpellHorizontalPos, "X"), CtPixel(44.72, "Y"))
 	Sleep 10
-	Send("{LButton up}")
 	MouseMove CenterX, CenterY
 	Sleep 1800
-	Send("{LButton down}")
-	Sleep 10
-	Send("{LButton up}")
+	MouseClick("L", CenterX, CenterY)
 	Sleep 500
 
 	Effects.Push(StatusEffectIndicator("images\PFM.png", 60, ""))
@@ -321,16 +302,11 @@ CastBerserk(*)
 
 	Send "^{6}" ; Open Magic menu tab
 	Sleep 10
-	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(35.7638, "Y"), 0
-	Sleep 5
-	Send("{LButton down}")
+	MouseClick("L", CtPixel(SpellHorizontalPos, "X"), CtPixel(35.7638, "Y"))
 	Sleep 10
-	Send("{LButton up}")
 	MouseMove CenterX, CenterY
 	Sleep 1800
-	Send("{LButton down}")
-	Sleep 10
-	Send("{LButton up}")
+	MouseClick("L", CenterX, CenterY)
 	Sleep 500
 
 	Effects.Push(StatusEffectIndicator("images\Berserk.png", 60, ""))
@@ -340,16 +316,11 @@ CastRecall(*)
 {
 	Send "^{2}" ; Open Magic menu tab
 	Sleep 10
-	MouseMove CtPixel(SpellHorizontalPos, "X"), CtPixel(41.8055, "Y"), 0
-	Sleep 5
-	Send("{LButton down}")
+	MouseClick("L", CtPixel(SpellHorizontalPos, "X"), CtPixel(41.8055, "Y"))
 	Sleep 10
-	Send("{LButton up}")
 	MouseMove CenterX, CenterY
 	Sleep 1800
-	Send("{LButton down}")
-	Sleep 10
-	Send("{LButton up}")
+	MouseClick("L", CenterX, CenterY)
 	Sleep 500
 }
 

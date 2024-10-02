@@ -54,9 +54,6 @@ class NodeInfo {
     }
 
     Click(button := "left", clickTimes := 1, bUseOffset := true) {
-        ; Validate button input (default to "left" or "right")
-        mouseButton := (button = "right") ? "{RButton" : "{LButton"
-
         ; Loop to attempt finding the image for a maximum of 5 tries
         Loop 5 {
             X := 0
@@ -72,19 +69,10 @@ class NodeInfo {
                 offsetX := bUseOffset ? this.ClickOffset[1] : 0
                 offsetY := bUseOffset ? this.ClickOffset[2] : 0
 
-                ; Move mouse to the correct location, with or without offset
-                MouseMove this.Location[1] + offsetX, this.Location[2] + offsetY, 0
+                ; Handle click
                 Sleep 20
-
-                ; Perform the click the specified number of times
-                Loop clickTimes {
-                    ; Simulate button press and release for the selected mouse button
-                    Send(mouseButton " down}")
-                    Sleep 20
-                    Send(mouseButton " up}")
-                    Sleep 200
-                }
-
+                MouseClick(button, this.Location[1] + offsetX, this.Location[2] + offsetY, clickTimes)
+                Sleep 100
                 return true
             } 
             else {
@@ -130,8 +118,6 @@ class NodeInfo {
             distanceX := Min(Abs(deltaX), 3)
             distanceY := Min(Abs(deltaY), 3)
 
-            Send("{LButton down}")
-            Sleep 100
             ; Prioritize straight movement if one delta is much larger than the other
             if (Abs(deltaX) > Abs(deltaY) * 2) {
                 ; Prioritize horizontal movement
@@ -160,7 +146,9 @@ class NodeInfo {
                     this.MoveDirection("LeftUp", Min(distanceX, distanceY))
                 }
             }
-            Sleep(50)  ; Adjust sleep time for movement speed
+
+            Sleep 200
+            Send("{LButton down}")
         }
 
         Send("{LButton up}")

@@ -90,11 +90,8 @@ SwitchToPeaceMode()
         BlockInput "MouseMove"
         MouseGetPos &begin_x, &begin_y ; Get the position of the mouse
         Sleep 10
-        MouseMove CtPixel(58, "X"), CtPixel(96, "Y"), 0
-        Sleep 5
-        Send("{LButton down}")
+        MouseClick("L", CtPixel(58, "X"), CtPixel(96, "Y"))
         Sleep 10
-        Send("{LButton up}")
         MouseMove begin_x, begin_y, 0 ; Move mouse back to original position
         BlockInput "MouseMoveOff"        
     }
@@ -144,12 +141,10 @@ AutoTradeRep(*) {
         ; Lets check to see if we have a trade request dialog we should accept
         if (CheckPixelColors()) {
             BlockInput "MouseMove"
+            Sleep 20
 			MouseGetPos &begin_x, &begin_y ; Get the position of the mouse
-			MouseMove CtPixel(45, "X"), CtPixel(63, "Y"), 0
-			Sleep 800
-			Send("{LButton down}")
-			Sleep 10
-			Send("{LButton up}")
+            MouseClick("L", CtPixel(45, "X"), CtPixel(63, "Y"))
+			Sleep 700
 			MouseMove begin_x, begin_y, 0 ; Move mouse back to original position
 			BlockInput "MouseMoveOff"
 

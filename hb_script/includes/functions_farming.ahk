@@ -18,6 +18,9 @@ FarmPlot := NodeInfo("ShopKeeper", "images\node_images\FarmWagon_Day.png", "imag
 ShopEntrance := NodeInfo("ShopEntrance", "images\node_images\Shop_Entrance_Day.png", "images\node_images\Shop_Entrance_Night.png", [93,178], [10,24])
 BlackSmithEntrance := NodeInfo("BlacksmithEntrance", "images\node_images\Blacksmith_Entrance_Day.png", "images\node_images\Blacksmith_Entrance_Night.png", [111,193], [1.3,23.7])
 
+Shop_WP1 := NodeInfo("Shop_WP1",,, [118,170])
+BM_WP1 := NodeInfo("BM_WP1",,, [108,196])
+
 ; Shop (for selling, buying, resting)
 ShopExit := NodeInfo("ShopExit", "images\node_images\Shop_Exit.png",,,[2,24])
 ShopKeeper := NodeInfo("ShopKeeper", "images\node_images\ShopKeeper.png",,,[-10,25])
@@ -65,6 +68,7 @@ StartFarming() {
             CycleTool()
             Sleep 200
             SowFields()
+            Shop_WP1.MoveToLocation()
             ShopEntrance.MoveToLocation()
             Sleep 500
             if (!EnterShop()) {
@@ -77,7 +81,7 @@ StartFarming() {
                 break
             }
             Sleep 200
-
+            BM_WP1.MoveToLocation()
             BlackSmithEntrance.MoveToLocation()
             Sleep 500
             if (!EnterBlackSmith()) {
@@ -339,11 +343,8 @@ MoveToFarmSpot() {
     }
 
     if (farmSpot[1] != 0 && farmSpot[2] != 0) {
-        MouseMove farmSpot[1], farmSpot[2], 0
         Sleep 10
-        Send("{LButton down}")
-        Sleep 10
-        Send("{LButton up}")
+        MouseClick("L", farmSpot[1], farmSpot[2])
         Sleep 10
         MouseMove CenterX, CenterY	
         Sleep 1000

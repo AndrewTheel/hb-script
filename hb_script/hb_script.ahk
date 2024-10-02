@@ -5,6 +5,7 @@ CoordMode "Mouse", "Screen" ; Client / Window / Screen (Client might be best)
 CoordMode "ToolTip", "Screen"
 SendMode "Event"
 SetMouseDelay 20 ; 10 is default (this adds more delay to help mouseclick commands to work better)
+SetDefaultMouseSpeed 5 ; 2 is default 
 
 #Include includes\global_variables.ahk
 
