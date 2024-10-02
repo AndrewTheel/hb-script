@@ -14,7 +14,6 @@ SellListAlreadyImage := "images\node_images\SellListAlready.png"
 
 ; Nodes for farming
 ;NodeInfo(1:NodeTitle, 2:Imagepath, 3:AltImagepath, 4:WorldCoordinates, 5:ClickOffset; 6:MarkerLabel, 7:ConnectedNodes)
-; Farm (outside)
 FarmPlot := NodeInfo("ShopKeeper", "images\node_images\FarmWagon_Day.png", "images\node_images\FarmWagon_Night.png", [148,181], [-14.8, 3])
 ShopEntrance := NodeInfo("ShopEntrance", "images\node_images\Shop_Entrance_Day.png", "images\node_images\Shop_Entrance_Night.png", [93,178], [10,24])
 BlackSmithEntrance := NodeInfo("BlacksmithEntrance", "images\node_images\Blacksmith_Entrance_Day.png", "images\node_images\Blacksmith_Entrance_Night.png", [111,193], [1.3,23.7])
@@ -39,9 +38,11 @@ Blacksmith := NodeInfo("Blacksmith", "images\node_images\Blacksmith.png",,,[1.9,
 RepairAllButton := NodeInfo("RepairAllButton", "images\node_images\Repair_All.png",,,[2,1]) ; reused for confirmation
 ;RepairConfirm := NodeInfo("RepairConfirm", "images\node_images\Repair_All.png",,,[2,1])
 
-;Produce
-Watermelon := ""
-Pumpkin := NodeInfo("PumpkinProduce", "images\node_images\Pumpkin_Produce.png",,,[1.5,2])
+; Produce
+;Watermelon := ""
+;Pumpkin := NodeInfo("PumpkinProduce", "images\node_images\Pumpkin_Produce.png",,,[1.5,2])
+
+; Seeds
 Seed_Pumpkin := NodeInfo("Seed_Pumpkin", "images\node_images\Seed_Pumpkin.png",,,[8.4,1.2])
 
 StartFarming() {
@@ -209,13 +210,19 @@ RestAndShop() {
             Sleep 200
             BuySeeds()
             Sleep 200
-            if (ItemsForSaleMenu.IsOnScreen()) {
-                ItemsForSaleMenu.Click("right")
+            MouseMove CenterX, CenterY
+            Sleep 200
+            Loop 10 {
+                if (ItemsForSaleMenu.IsOnScreen()) {
+                    ItemsForSaleMenu.Click("right")
+                    break
+                }
+                Sleep 100
             }
-            Sleep 100
             OpenBag()
             Sleep 100
             MoveSeedsToPosition()
+            Sleep 300
             if (InventoryMenu.IsOnScreen()) {
                 OpenBag() ; closes the opened inventory menu
             }
