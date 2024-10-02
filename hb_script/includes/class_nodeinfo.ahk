@@ -53,23 +53,6 @@ class NodeInfo {
         return this.MarkerLabel != ""
     }
 
-    SearchScreenUpdate() {
-        X := 0, Y := 0
-
-        if (ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.Imagepath))
-        {
-            this.Location := [X, Y]         
-        }
-    }
-
-    StartImageSearchTimer() {
-        SetTimer(this.SearchScreenUpdate.Bind(this), 500)
-    }
-
-    StopImageSearchTimer() {
-        SetTimer(this.SearchScreenUpdate.Bind(this), 0)
-    }
-
     Click(button := "left", clickTimes := 1, bUseOffset := true) {
         ; Validate button input (default to "left" or "right")
         mouseButton := (button = "right") ? "{RButton" : "{LButton"
@@ -91,13 +74,13 @@ class NodeInfo {
 
                 ; Move mouse to the correct location, with or without offset
                 MouseMove this.Location[1] + offsetX, this.Location[2] + offsetY, 0
-                Sleep 10
+                Sleep 20
 
                 ; Perform the click the specified number of times
                 Loop clickTimes {
                     ; Simulate button press and release for the selected mouse button
                     Send(mouseButton " down}")
-                    Sleep 10
+                    Sleep 20
                     Send(mouseButton " up}")
                     Sleep 200
                 }
