@@ -1,49 +1,25 @@
+Global LowHPPos := [CtPixel(13.5, "X"), CtPixel(94.1, "Y")]
+Global MidHPPos := [CtPixel(13.0 + (12.5 * (AutoPotLifeAtPercent * 0.01)), "X"), CtPixel(93.3, "Y")] 
+Global HighHPPos := [CtPixel(25.0, "X"), CtPixel(94.1, "Y")]
+Global LowManaPos := [CtPixel(13.5, "X"), CtPixel(97.8, "Y")]
+Global MidManaPos := [CtPixel(13.0 + (12.5 * (AutoPotManaAtPercent * 0.01)), "X"), CtPixel(97.8, "Y")]
+Global HighManaPos := [CtPixel(25.0, "X"), CtPixel(97.8, "Y")]
+
+; 12.5 is roughly the horizontal % of screen the healthbar takes up, 13% is where it starts, 25.5% is where it ends
+; 93.3 may need tweaking depending on res (we can't use the middle value as "poisoned" status can get in the way!)
+
+LifeRed := "0xd83c2b"
+ManaBlue := "0x3e45d8"
+EmptyGrey := "0x5e5b58"
+
 AutoPot() {
 	Global bTryHPPotting, bTryManaPotting
 
-	Static bCalculatedPixelLocations := false
-	Static LowHPPos := [0, 0]
-	Static MidHPPos := [0, 0]
-	Static HighHPPos := [0, 0]
-
-	Static LowManaPos := [0, 0]
-	Static MidManaPos := [0, 0]
-	Static HighManaPos := [0, 0]
-
-	if (!bCalculatedPixelLocations) ; avoid calc these so often
-	{
-		LowHPPos[1] := CtPixel(13.5, "X")
-		LowHPPos[2] := CtPixel(94.1, "Y")
-
-		MidHPPos[1] := CtPixel(13.0 + (12.5 * (AutoPotLifeAtPercent * 0.01)), "X") ; 12.5 is roughly the horizontal % of screen the healthbar takes up, 13% is where it starts, 25.5% is where it ends
-		MidHPPos[2] := CtPixel(93.3, "Y") ;93.3 may need tweaking depending on res (we can't use the middle value as "poisoned" status can get in the way!)
-
-		HighHPPos[1] := CtPixel(25.0, "X")
-		HighHPPos[2] := CtPixel(94.1, "Y")
-
-		;mana
-
-		LowManaPos[1] := CtPixel(13.5, "X")
-		LowManaPos[2] := CtPixel(97.8, "Y")
-
-		MidManaPos[1] := CtPixel(13.0 + (12.5 * (AutoPotManaAtPercent * 0.01)), "X") ; 12.5 is roughly the horizontal % of screen the healthbar takes up, 13% is where it starts, 25.5% is where it ends
-		MidManaPos[2] := CtPixel(97.8, "Y") ;93.3 may need tweaking depending on res
-
-		HighManaPos[1] := CtPixel(25.0, "X")
-		HighManaPos[2] := CtPixel(97.8, "Y")
-
-		bCalculatedPixelLocations := true
-	}
+	static LowHPDuration := 0
+	static LowManaDuration := 0
 
 	if WinActive(WinTitle)
 	{
-		static LowHPDuration := 0
-		static LowManaDuration := 0
-
-		LifeRed := "0xd83c2b"
-		ManaBlue := "0x3e45d8"
-		EmptyGrey := "0x5e5b58"
-		
 		;ToolTip "HP_Start: " . PixelGetColor(StartAutoPotManaPos[1], StartAutoPotManaPos[2]) . " HP_High: " . PixelGetColor(HighManaPos[1], HighManaPos[2])
 		;A_Clipboard := PixelGetColor(StartAutoPotManaPos[1], StartAutoPotManaPos[2]) . " " . PixelGetColor(HighManaPos[1], HighManaPos[2])
 
