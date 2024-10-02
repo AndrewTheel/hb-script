@@ -2,7 +2,7 @@
 
 if (IniRead(ConfigFile, "Settings", "UseAutoPotting") == "true")
 {
-	SetTimer(AutoPot, 100)
+	SetTimer(AutoPot, 200)
 }
 
 if (IniRead(ConfigFile, "Settings", "UnbindKeys") == "true")
