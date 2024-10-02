@@ -4,8 +4,13 @@
 CoordMode "Mouse", "Screen" ; Client / Window / Screen (Client might be best)
 CoordMode "ToolTip", "Screen"
 SendMode "Event"
+SetMouseDelay 20 ; 10 is default (this adds more delay to help mouseclick commands to work better)
 
 #Include includes\global_variables.ahk
+
+; TODO screen vs client only matters if windowed, but windowed isn't even supported anymore
+; Need to put in requirements for automated stuff (like neutral attack mode enabled)
+; Start cleaning up and perfecting, no more features for awhile
 
 ; AHK initiatives
 WinWaitActive WinTitle ;Script waits until HB window is active/front
@@ -99,12 +104,14 @@ CheckWindowState() {
 	if (Style & 0x01000000)  ; WS_MAXIMIZE style
 	{
 		bMinimizedTipOpen := false
-		gGUI.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate")
-		WinSetAlwaysOnTop(1, gGUI.Hwnd)          
+		gGUI.Maximize()
+		;gGUI.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate")
+		;WinSetAlwaysOnTop(1, gGUI.Hwnd)          
 	} 
 	else if (WinState == -1)  ; Minimized state
 	{
-		gGUI.Hide()
+		;gGUI.Hide()
+		gGUI.Minimize()
 
 		if (activeMenuManager != "") {
 			activeMenuManager.DestroyOptionsGUI()
