@@ -5,8 +5,8 @@ Persistent
 CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
 CoordMode "ToolTip", "Client"
 SendMode "Event"
-SetMouseDelay 20 ; 10 is default (this adds more delay to help mouseclick commands to work better)
-SetDefaultMouseSpeed 5 ; 2 is default 
+SetMouseDelay 30 ; 10 is default (this adds more delay to help mouseclick commands to work better)
+SetDefaultMouseSpeed 4 ; 2 is default 
 
 #Include includes\global_variables.ahk
 
@@ -108,14 +108,14 @@ CheckWindowState() {
 	if (Style & 0x01000000)  ; WS_MAXIMIZE style
 	{
 		bMinimizedTipOpen := false
-		gGUI.Maximize()
-		;gGUI.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate")
-		;WinSetAlwaysOnTop(1, gGUI.Hwnd)          
+		;gGUI.Maximize()
+		gGUI.Show("x0 y0 w" ScreenResolution[1] " h" ScreenResolution[2] " NA NoActivate")
+		WinSetAlwaysOnTop(1, gGUI.Hwnd)          
 	} 
 	else if (WinState == -1)  ; Minimized state
 	{
-		;gGUI.Hide()
-		gGUI.Minimize()
+		gGUI.Hide()
+		;gGUI.Minimize()
 
 		if (activeMenuManager != "") {
 			activeMenuManager.DestroyOptionsGUI()
