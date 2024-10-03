@@ -39,12 +39,12 @@ class NodeInfo {
         Y := 0
 
         ; Check if the main image is found
-        if (this.Imagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.Imagepath) = 0) {
+        if (this.Imagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.Imagepath) != false) {
             ; If the main image is found, return X and Y
             return [X, Y]
         }
         ; If the main image is not found, check for the alternative image
-        else if (this.AltImagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.AltImagepath) = 0) {
+        else if (this.AltImagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.AltImagepath) != false) {
             ; If the alternative image is found, return X and Y
             return [X, Y]
         }

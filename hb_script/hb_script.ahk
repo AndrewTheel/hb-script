@@ -169,27 +169,34 @@ OpenBag(*) => Send("{f6}")
 ToggleRunWalk(*) => Send("^r")
 OpenOptions(*) => Send("{F12}")
 
+Input_Button := NodeInfo("Input_Button", "images\node_images\Input_Button.png", "images\node_images\Input_Button_Clicked.png",, [2.6,1.3])
+Shift_Pickup := NodeInfo("Shift_Pickup", "images\node_images\Shift_To_Pickup.png",,, [-2,0.8])
+Input_Checked_Img := "images\node_images\Settings_Checked.png"
+
 ShiftPickup(bTurnOn := true) {
-    x := CtPixel(40.4, "X")
-    y := CtPixel(36.4, "Y")
-    hS := 8
-    X1 := x - hS, Y1 := y - hS, X2 := x + hS, Y2 := y + hS  ; Initial search area variables
-    Px := 0, Py := 0
-    targetColor := 0xC8C8C8  ; The checked color (enabled)
-
     BlockInput true
-    Send("{F12}")
-    Sleep(10)
-    MouseClick "left", CtPixel(71, "X"), CtPixel(22, "Y"), 2
-    Sleep(10)
-
-	; If the pixel isn't the target color, perform the click action
-	if (PixelSearch(&Px, &Py, X1, Y1, X2, Y2, targetColor) != bTurnOn) {
-		MouseClick "left", x, y, 1
+	MouseMove 0, 0, 0
+    Send "{F12}"
+    Sleep 50
+	Input_Button.Click()
+	Sleep 50	
+	if (Settings_Location := Shift_Pickup.GetScreenLocation()) {
+		X1 := Settings_Location[1] - CtPixel(2.9, "X")
+		Y1 := Settings_Location[2] - CtPixel(0.5, "Y")
+		X2 := X1 + CtPixel(1.9, "X")
+		Y2 := Y1 + CtPixel(2.5, "Y")
+	}
+	else {
+		Tooltip "Failed to find setting"
+		return
 	}
 
-    Send("{F12}")
-    Sleep(10)
+	if (ImageSearch(&X, &Y, X1, Y1, X2, Y2, "*TransBlack " Input_Checked_Img) != bTurnOn) {
+		Shift_Pickup.Click()
+	}
+    Sleep 50
+    Send "{F12}"
+    Sleep 10
     BlockInput false
 }
 
