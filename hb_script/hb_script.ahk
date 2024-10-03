@@ -1,8 +1,9 @@
 ﻿#Requires AutoHotkey v2.0
 
 ; AHK settings
-CoordMode "Mouse", "Screen" ; Client / Window / Screen (Client might be best)
-CoordMode "ToolTip", "Screen"
+Persistent
+CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
+CoordMode "ToolTip", "Client"
 SendMode "Event"
 SetMouseDelay 20 ; 10 is default (this adds more delay to help mouseclick commands to work better)
 SetDefaultMouseSpeed 5 ; 2 is default 
@@ -42,6 +43,8 @@ Global RepButtonInst := RepButton(60) ; in minutes
 
 #SuspendExempt
 !K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)
+
+!J:: Send("{PrintScreen}")
 
 ; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
 *F1:: A_IsSuspended ? Suspend(false) : Suspend(true)
@@ -139,45 +142,11 @@ CheckWindowState() {
 
 SetTimer(CheckWindowState, 1000)
 
-CalculateFontSize(percentOfHeight) {
-    ScreenHeight := ScreenResolution[2] + 0  ; Get the screen height
-    return Round((percentOfHeight / 100) * ScreenHeight)  ; Calculate font size as a percentage of height
-}
-
 ToggleDebugMode(*)
 {
 	Global bDebugMode
 
 	bDebugMode := !bDebugMode
-}
-
-CtPixel(percent, axis) {
-    ScreenResolutionX := ScreenResolution[1] + 0  ; Cast to number
-    ScreenResolutionY := ScreenResolution[2] + 0  ; Cast to number
-
-    if (axis = "X") {
-        return Round((percent / 100) * ScreenResolutionX)
-    } else if (axis = "Y") {
-        return Round((percent / 100) * ScreenResolutionY)
-    }
-}
-
-CtPercent(pixel, axis) {
-    ScreenResolutionX := ScreenResolution[1] + 0  ; Cast to number
-    ScreenResolutionY := ScreenResolution[2] + 0  ; Cast to number
-
-    if (axis = "X") {
-        return (pixel / ScreenResolutionX) * 100
-    } else if (axis = "Y") {
-        return (pixel / ScreenResolutionY) * 100
-    }
-}
-
-; CctPixels function: Converts percentage coordinates to pixel coordinates
-CctPixels(x, y) {
-    pixelX := CtPixel(x, "X")  ; Convert x percentage to pixels
-    pixelY := CtPixel(y, "Y")  ; Convert y percentage to pixels
-    return [pixelX, pixelY]    ; Return array with both pixel values
 }
 
 DoNothing(*) => { } ; A placeholder function used when a method is required, but no action is needed.
@@ -191,39 +160,6 @@ OptionsMenu(optionNames, optionFunctionNames) {
     } else {
         activeMenuManager.DestroyOptionsGUI()
     }
-}
-
-; add this function to the beginning of functions that will often be used in combat
-RemoveHolds(*) {
-    Send("{Ctrl up}")
-    Send("{Alt up}")
-    Send("{Shift up}")
-}
-
-PretendCorpse(*) {
-	RemoveHolds()
-
-	BlockInput true
-	MouseClick "right"
-	Sleep 10
-	MouseClick "right"
-	Sleep 10
-	Send "{F8}"
-	Sleep 10
-	MouseClick "left", CtPixel(67, "X"), CtPixel(48, "Y")
-	Sleep 10
-	Send "{F8}"
-	BlockInput false
-}
-
-TakeInvisPot(*) {
-	BlockInput true
-	Send "{F6}"
-	Sleep 10
-	MouseClick "left", CtPixel(90, "X"), CtPixel(55.2, "Y"), 2
-	Sleep 10
-	Send "{F6}"
-	BlockInput false
 }
 
 ; ══════════════════════════════════════════════════════  Hotkeys and Game Actions ══════════════════════════════════════════════════════ ;

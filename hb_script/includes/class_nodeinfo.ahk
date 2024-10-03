@@ -29,6 +29,10 @@ class NodeInfo {
         return false
     }
 
+    GetNodeTitle() {
+        return this.NodeTitle
+    }
+
     GetScreenLocation() {
         ; Initialize variables to store found X and Y coordinates
         X := 0
@@ -48,6 +52,17 @@ class NodeInfo {
         ; Return false if no image is found
         return false
     }
+
+    PositionIsCenter() {
+        ; Determine the boundaries of the square
+        LeftBoundary := CenterX - XOffset
+        RightBoundary := CenterX + XOffset
+        TopBoundary := CenterY - YOffset
+        BottomBoundary := CenterY + YOffset
+
+        ; Check if the point (x, y) is within the boundaries
+        return (this.Location[1] + this.ClickOffset[1] >= LeftBoundary && this.Location[1] + this.ClickOffset[1] <= RightBoundary && this.Location[2] + this.ClickOffset[2] >= TopBoundary && this.Location[2] + this.ClickOffset[2] <= BottomBoundary)
+    }    
 
     IsMarker() {
         return this.MarkerLabel != ""
@@ -84,7 +99,6 @@ class NodeInfo {
         ; Return false if image was not found after 10 attempts
         return false
     }
-
 
     MoveToLocation() {
         ; Convert the game coordinates to minimap coordinates
