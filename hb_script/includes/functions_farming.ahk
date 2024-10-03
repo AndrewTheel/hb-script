@@ -1,3 +1,4 @@
+global FarmingState := ""
 global farmingActive := false  ; Initialize the farming status as inactive
 global bNeedSeeds := false
 global FarmedSeed := ""
@@ -97,7 +98,7 @@ StartFarming() {
 }
 
 FarmingButtonSubmit(farmGui) {
-    Global seedIndex, farmPlotIndex, FarmingIndicator
+    Global seedIndex, farmPlotIndex, FarmingIndicator, FarmingState
 
     farmPlotIndex := farmGui["PlotChoice"].Value
     seedIndex := farmGui["SeedChoice"].Value ; Retrieve the selected seed name from the ListBox
@@ -118,128 +119,108 @@ FarmingButtonSubmit(farmGui) {
         FarmingIndicator.Visible := true
     }
 
+    FarmingState := "travel_farm_plot"
+
     FarmingCycle()
 }
 
 FarmingCycle() {
-    global farmingActive
+    global farmingActive, FarmingState
     farmingActive := true
 
-    if WinActive(WinTitle)
-	{
-        if (farmPlotIndex == 0 || seedIndex == 0) {
-            Tooltip "Error"
+    if (!WinActive(WinTitle)) {
+        return
+    }
+
+    if (farmPlotIndex == 0 || seedIndex == 0) {
+        Tooltip "Error in plot or seed index"
+        return
+    }
+
+    BlockInput "MouseMove"
+    EnableShiftPickup()
+    Sleep 500
+
+    Loop {
+        if stopFlag {
+            break
         }
 
-		BlockInput "MouseMove"
-        EnableShiftPickup()
-        Sleep 500
+        Sleep 200
 
-        Loop {
-            if stopFlag {
-                break
-            }
+        switch FarmingState {
+            case "travel_farm_plot":
+                farmPlots[farmPlotIndex].MoveToLocation()
+                FarmingState := "get_in_farm_plot"
 
-            ; Head to farm plot location
-            farmPlots[farmPlotIndex].MoveToLocation()
-            if stopFlag {
-                break
-            }
-            Sleep 1000
+            case "get_in_farm_plot":
+                GetInFarmSpot()
+                FarmingState := "change_tools"
+            
+            case "change_tools":
+                CycleTool()
+                FarmingState := "sow_fields"
 
-            ; Get in exact spot
-            GetInFarmSpot()
-            if stopFlag {
-                break
-            }
-            Sleep 200
+            case "sow_fields":
+                SowFields()
+                FarmingState := "move_to_shop_wp1"
+            
+            case "move_to_shop_wp1":
+                Shop_WP1.MoveToLocation()
+                FarmingState := "move_to_shop"
 
-            ; Change tools
-            CycleTool()
-            if stopFlag {
-                break
-            }
-            Sleep 200
+            case "move_to_shop":
+                ShopEntrance.MoveToLocation()
+                FarmingState := "enter_shop"
 
-            ; Sow fields
-            SowFields()
-            if stopFlag {
-                break
-            }
-            Sleep 100
+            case "enter_shop":
+                if (!EnterShop()) {
+                    Tooltip "Error in farming trying to enter shop"
+                }
+                FarmingState := "rest_and_shop"
 
-            ; Move to Shop waypoint (this hopefully avoids accidently going into blacksmith)
-            Shop_WP1.MoveToLocation()
-            if stopFlag {
-                break
-            }
-            Sleep 100
+            case "rest_and_shop":
+                RestAndShop()
+                FarmingState := "exit_shop"
 
-            ; Move to shop location
-            ShopEntrance.MoveToLocation()
-            if stopFlag {
-                break
-            }
-            Sleep 200
+            case "exit_shop":
+                if (!ExitShop()) {
+                    Tooltip "Error in farming trying to exit shop"
+                }
+                FarmingState := "move_to_blacksmith_wp1"
 
-            ; Enter the shop
-            if (!EnterShop()) {
-                break
-            }
-            Sleep 2000
+            case "move_to_blacksmith_wp1":
+                BM_WP1.MoveToLocation()
+                FarmingState := "move_to_blacksmith"
 
-            ; Do the shopping stuff
-            RestAndShop()
-            if stopFlag {
-                break
-            }
-            Sleep 1000
+            case "move_to_blacksmith":
+                BlackSmithEntrance.MoveToLocation()
+                FarmingState := "enter_blacksmith"
 
-            ; Exit shop
-            if (!ExitShop()) {
-                break
-            }
-            Sleep 200
+            case "enter_blacksmith":
+                if (!EnterBlackSmith()) {
+                    Tooltip "Error in farming entering blacksmith"
+                }
+                FarmingState := "repair_all"
 
-            ; Move to Blacksmith waypoint (avoid getting stuck along building)
-            BM_WP1.MoveToLocation()
-            if stopFlag {
-                break
-            }
+            case "repair_all":
+                RepairAll()
+                FarmingState := "exit_blacksmith"
 
-            ; Move to Blacksmith entrance
-            BlackSmithEntrance.MoveToLocation()
-            if stopFlag {
-                break
-            }
-            Sleep 500
-
-            ; Enter Blacksmith
-            if (!EnterBlackSmith()) {
-                break
-            }
-            Sleep 1000
-
-            ; Repair stuff
-            RepairAll()
-            if stopFlag {
-                break
-            }
-            Sleep 1000
-
-            ; Exit Blacksmith
-            if (!ExitBlackSmith()) {
-                break
-            }
+            case "exit_blacksmith":
+                if (!ExitBlackSmith()) {
+                    Tooltip "Error in farming exiting blacksmith"
+                }
+                FarmingState := "travel_farm_plot"
         }
+    }
 
-        Sleep 1000
+    Sleep 1000
 
-        if (farmingActive) {
-            StopFarming()
-            Sleep 1500
-            ToolTip ""
-        }
+    if (farmingActive) {
+        StopFarming()
+        Sleep 1500
+        ToolTip ""
     }
 }
 
