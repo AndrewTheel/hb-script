@@ -375,6 +375,8 @@ BuySeeds() {
             break
         }
     }
+    Sleep 100
+    MouseMove CenterX, CenterY
     Sleep 200
     QuantitySelect.Click(, 4)
     Sleep 200
