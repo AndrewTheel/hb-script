@@ -33,7 +33,7 @@ BM_WP1 := NodeInfo("BM_WP1",,, [108,196])
 
 ; Shop Interior (for selling, buying, resting)
 ShopExit := NodeInfo("ShopExit", "images\node_images\Shop_Exit.png",,,[2,17])
-ShopKeeper := NodeInfo("ShopKeeper", "images\node_images\ShopKeeper.png",,,[-10,25])
+ShopKeeper := NodeInfo("ShopKeeper", "images\node_images\ShopKeeper.png",,,[5,11])
 BuyMiscButton := NodeInfo("BuyMiscButton", "images\node_images\Buy_Misc.png",,,[2,1])
 QuantitySelect := NodeInfo("QuantitySelect", "images\node_images\Quantity.png",,,[11.3,1.2])
 PurchaseButton := NodeInfo("PurchaseButton", "images\node_images\Purchase_Button.png",,,[4.6,1.7])
