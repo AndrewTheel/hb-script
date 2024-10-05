@@ -313,7 +313,6 @@ RepairAll() {
 RestAndShop() {
     Loop 10 {
         if (ShopKeeper.IsOnScreen()) {
-            Tooltip "Inside RestAndShop and found shop keeper"
             ShopKeeper.Click()
             Sleep 200
             RestButton.Click()
