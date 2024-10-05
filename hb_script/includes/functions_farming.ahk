@@ -224,7 +224,7 @@ FarmingCycle() {
     if (farmingActive) {
         StopFarming()
         Sleep 1500
-        ToolTip ""
+        ;ToolTip ""
     }
 }
 
@@ -313,6 +313,7 @@ RepairAll() {
 RestAndShop() {
     Loop 10 {
         if (ShopKeeper.IsOnScreen()) {
+            Tooltip "Inside RestAndShop and found shop keeper"
             ShopKeeper.Click()
             Sleep 200
             RestButton.Click()
