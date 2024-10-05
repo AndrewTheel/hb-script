@@ -46,7 +46,7 @@ InventoryMenu := NodeInfo("InventoryMenu", "images\node_images\InventoryMenu.png
 ItemsForSaleMenu := NodeInfo("ItemsForSale", "images\node_images\ItemsForSale.png")
 
 ; Blacksmith Interior (for repairing)
-BlacksmithExit := NodeInfo("BlacksmithExit", "images\node_images\Blacksmith_Exit.png",,,[2,18.2])
+BlacksmithExit := NodeInfo("BlacksmithExit", "images\node_images\Blacksmith_Exit.png",,,[2,11.5])
 Blacksmith := NodeInfo("Blacksmith", "images\node_images\Blacksmith.png",,,[1.9,13.5])
 RepairAllButton := NodeInfo("RepairAllButton", "images\node_images\Repair_All.png",,,[2,1]) ; reused for confirmation
 
