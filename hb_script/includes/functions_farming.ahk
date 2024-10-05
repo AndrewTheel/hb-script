@@ -43,7 +43,7 @@ SellDialogueBox := NodeInfo("SellQuantityBox", "images\node_images\quantityBoxIm
 SellConfirmButton := NodeInfo("SellConfirm", "images\node_images\Sell_Confirm_Button.png",,,[3.6,1.2])
 SellListMenu := NodeInfo("SellListMenu", "images\node_images\SellListMenu.png")
 InventoryMenu := NodeInfo("InventoryMenu", "images\node_images\InventoryMenu.png")
-ItemsForSaleMenu := NodeInfo("ItemsForSale", "images\node_images\ItemsForSale.png")
+ItemsForSaleMenu := NodeInfo("ItemsForSale", "images\node_images\ItemsForSale.png",,,[2,0])
 
 ; Blacksmith Interior (for repairing)
 BlacksmithExit := NodeInfo("BlacksmithExit", "images\node_images\Blacksmith_Exit.png",,,[2,11.5])
@@ -125,7 +125,7 @@ FarmingButtonSubmit(farmGui) {
 }
 
 FarmingCycle() {
-    global farmingActive, FarmingState
+    global farmingActive, FarmingState, stopFlag
     farmingActive := true
 
     if (!WinActive(WinTitle)) {
@@ -176,6 +176,7 @@ FarmingCycle() {
             case "enter_shop":
                 if (!EnterShop()) {
                     Tooltip "Error in farming trying to enter shop"
+                    stopFlag := true
                 }
                 FarmingState := "rest_and_shop"
 
@@ -186,6 +187,7 @@ FarmingCycle() {
             case "exit_shop":
                 if (!ExitShop()) {
                     Tooltip "Error in farming trying to exit shop"
+                    stopFlag := true
                 }
                 FarmingState := "move_to_blacksmith_wp1"
 
@@ -200,6 +202,7 @@ FarmingCycle() {
             case "enter_blacksmith":
                 if (!EnterBlackSmith()) {
                     Tooltip "Error in farming entering blacksmith"
+                    stopFlag := true
                 }
                 FarmingState := "repair_all"
 
@@ -210,6 +213,7 @@ FarmingCycle() {
             case "exit_blacksmith":
                 if (!ExitBlackSmith()) {
                     Tooltip "Error in farming exiting blacksmith"
+                    stopFlag := true
                 }
                 FarmingState := "travel_farm_plot"
         }
@@ -334,11 +338,10 @@ RestAndShop() {
             MouseMove CenterX, CenterY
             Sleep 200
             Loop 10 {
-                if (ItemsForSaleMenu.IsOnScreen()) {
-                    ItemsForSaleMenu.Click("right")
+                if (ItemsForSaleMenu.Click("right")) {
                     break
                 }
-                Sleep 100
+                Sleep 1000
             }
             OpenBag()
             Sleep 100
@@ -351,6 +354,7 @@ RestAndShop() {
         }
         Sleep 1000
     }
+
     StopFarming() ; We never made it into shop
 }
 
