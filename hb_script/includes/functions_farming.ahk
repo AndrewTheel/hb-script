@@ -368,17 +368,19 @@ MoveSeedsToPosition() {
 BuySeeds() {
     MouseMove CenterX, CenterY
 
-    ; scroll down 3 times
-    Loop 3 {
-        Send("{WheelDown}")
+    if (seedIndex == 0) {
+        Tooltip "No seed index assigned"
+        return
     }
 
-    Loop 10 {
-        if (seedIndex != 0 && seedList[seedIndex].IsOnScreen()) {
-            seedList[seedIndex].Click()
-            break
-        }
-    }
+    ; scroll down until we see our seed
+    Loop {
+        Send("{WheelDown}")
+        Sleep 500
+    } Until (seedList[seedIndex].IsOnScreen())
+
+    Sleep 100
+    seedList[seedIndex].Click()
     Sleep 100
     MouseMove CenterX, CenterY
     Sleep 200
