@@ -298,7 +298,7 @@ RepairAll() {
             Sleep 200
             RepairAllButton.Click()
             Sleep 200
-            MouseMove CenterX, CenterY ; After clicking repair all the mouse lands on the repair confirmation changing it's color, so lets move our mouse away to make sure we find the right button
+            MouseMove 0, 0, 0 ; After clicking repair all the mouse lands on the repair confirmation changing it's color, so lets move our mouse away to make sure we find the right button
             Sleep 200
             if (RepairAllButton.IsOnScreen()) {
                 RepairAllButton.Click() ; there is a confirmation button that is also "repair" this node can therefore be repurposed
@@ -334,9 +334,9 @@ RestAndShop() {
             BuyMiscButton.Click()
             Sleep 200
             BuySeeds()
-            Sleep 200
-            MouseMove CenterX, CenterY
-            Sleep 200
+            Sleep 100
+            MouseMove 0, 0, 0
+            Sleep 100
             Loop 10 {
                 if (ItemsForSaleMenu.Click("right")) {
                     break
@@ -366,7 +366,7 @@ MoveSeedsToPosition() {
 }
 
 BuySeeds() {
-    MouseMove CenterX, CenterY
+    MouseMove 0, 0, 0
 
     if (seedIndex == 0) {
         Tooltip "No seed index assigned"
@@ -382,7 +382,7 @@ BuySeeds() {
     Sleep 100
     seedList[seedIndex].Click()
     Sleep 100
-    MouseMove CenterX, CenterY
+    MouseMove 0, 0, 0
     Sleep 200
     QuantitySelect.Click(, 4)
     Sleep 200
