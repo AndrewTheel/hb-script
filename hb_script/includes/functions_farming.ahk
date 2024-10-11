@@ -20,12 +20,12 @@ SellListAlreadyImage := "images\node_images\SellListAlready.png"
 ; Farm Navigation to Farm Plots
 farmPlotIndex := 0
 farmPlots := []
-farmPlots.Push(NodeInfo("ShopKeeper", "images\node_images\FarmWagon_Day.png", "images\node_images\FarmWagon_Night.png", [148,181], [-15.1, -2.7]))
+farmPlots.Push(NodeInfo("FarmWagon", "images\node_images\FarmWagon_Day.png", "images\node_images\FarmWagon_Night.png", [148,181], [-15.1, -2.7]))
 farmPlots.Push(NodeInfo("ShopKeeper", "images\node_images\FarmWagon_Day.png", "images\node_images\FarmWagon_Night.png", [158,185], [24.6, 18]))
 
 ; Farm Navigation to Shop
 ShopEntrance := NodeInfo("ShopEntrance", "images\node_images\Shop_Entrance_Day.png", "images\node_images\Shop_Entrance_Night.png", [93,178], [10,24])
-Shop_WP1 := NodeInfo("Shop_WP1",,, [118,170])
+Shop_WP1 := NodeInfo("Shop_WP1",,, [118,175])
 
 ; Farm Navigation to Blacksmith
 BlackSmithEntrance := NodeInfo("BlacksmithEntrance", "images\node_images\Blacksmith_Entrance_Day.png", "images\node_images\Blacksmith_Entrance_Night.png", [111,193], [1.3,23.7])

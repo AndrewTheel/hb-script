@@ -38,7 +38,7 @@ class SpellInfo {
 
 			Send this.MagicPage ; Open Magic menu tab
 			Sleep 10
-			MouseClick("L", CtPixel(SpellHorizontalPos, "X"), CtPixel(this.YCoord, "Y"))
+			MouseClick("L", CtPixel(SpellHorizontalPos, "X"), CtPixel(this.YCoord, "Y"),, 0)
 			Sleep 10
 			MouseMove begin_x, begin_y, 0 ; Move mouse back to original position
 			BlockInput "MouseMoveOff"
