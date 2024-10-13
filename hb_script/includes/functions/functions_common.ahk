@@ -2,6 +2,17 @@ Lerp(Start, End, Alpha) {
     return Start + (End - Start) * Alpha
 }
 
+; Function to shuffle an array
+RandomizeArray(&arr) {
+	for i, _ in arr {
+        rndIndex := Random(1, arr.Length) ; Generate a random index between 1 and the length of the array
+        ; Swap the current element with the random one
+        temp := arr[i]
+        arr[i] := arr[rndIndex]
+        arr[rndIndex] := temp
+    }
+}
+
 CalculateFontSize(percentOfHeight) {
     ScreenHeight := ScreenResolution[2] + 0  ; Get the screen height
     return Round((percentOfHeight / 100) * ScreenHeight)  ; Calculate font size as a percentage of height

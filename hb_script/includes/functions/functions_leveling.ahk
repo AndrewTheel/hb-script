@@ -95,17 +95,6 @@ MagicLeveling(begin_x := 0, begin_y := 0, MagicMissileSpell := "", CreateFoodSpe
     }
 }
 
-; Function to shuffle an array
-RandomizeArray(&arr) {
-	for i, _ in arr {
-        rndIndex := Random(1, arr.Length) ; Generate a random index between 1 and the length of the array
-        ; Swap the current element with the random one
-        temp := arr[i]
-        arr[i] := arr[rndIndex]
-        arr[rndIndex] := temp
-    }
-}
-
 RandomAdjacent() {
 	AdjacentSquares := [directions.RightDown, directions.LeftDown, directions.LeftUp, directions.RightUp, directions.Up, directions.Down, directions.Left, directions.Right]
     RandomIndex := Random(1, AdjacentSquares.Length)
@@ -155,7 +144,6 @@ CanAttackCoord(x, y)
 	}
 	return false
 }
-
 
 FindAndMove(distance := 3) {
 	TempGui := Gui()

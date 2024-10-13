@@ -74,6 +74,10 @@ seedList.Push(NodeInfo("Seed_BlueGrapes", "images\node_images\Seed_BlueGrapes.pn
 seedList.Push(NodeInfo("Seed_Mushroom", "images\node_images\Seed_Mushroom.png",,,[0,1.2], 4))
 seedList.Push(NodeInfo("Seed_Ginseng", "images\node_images\Seed_Ginseng.png",,,[0,1.2], 2))
 
+Test() {
+    FarmPlot_WP1.MoveToLocation()
+}
+
 StartFarming() {
     farmGui := Gui("+AlwaysOnTop +ToolWindow -Caption E0x8000000 +OwnDialogs")
     farmGui.BackColor := "9b908d" ; Makes the GUI transparent
@@ -404,10 +408,6 @@ BuySeeds() {
     QuantitySelect.Click(, seedList[seedIndex].Value)
     Sleep 200
     PurchaseButton.Click()
-}
-
-Test() {
-    SellProduce()
 }
 
 SellProduce() {

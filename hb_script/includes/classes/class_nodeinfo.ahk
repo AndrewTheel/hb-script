@@ -102,7 +102,18 @@ class NodeInfo {
         targetX := targetCoords[1]
         targetY := targetCoords[2]
 
+        ; Initialize variables for tracking progress
+        prevBlueDotX := ""
+        prevBlueDotY := ""
+        noProgressCounter := 0  ; Counts how many times no significant progress is made
+        maxNoProgress := 3      ; Max allowed iterations without progress before triggering random movement
+        noProgresssCounterForFail := 0
+
         loop {
+            if stopFlag {
+                break
+            }
+
             ; Ensure that blueDotCoords array is valid and contains valid X and Y values
             if (!IsObject(blueDotCoords) || blueDotCoords.Length != 2 || blueDotCoords[1] == "" || blueDotCoords[2] == "") {
                 Tooltip "Error: Blue dot coordinates not found!"
@@ -123,6 +134,38 @@ class NodeInfo {
             if (Abs(deltaX) < 2 && Abs(deltaY) < 2) {
                 break
             }
+
+            ; Check if progress is being made
+            if (prevBlueDotX != "" && prevBlueDotY != "") {
+                if (Abs(prevBlueDotX - blueDotX) < 1 && Abs(prevBlueDotY - blueDotY) < 1) {
+                    noProgressCounter++
+                } else {
+                    noProgressCounter := 0  ; Reset counter if progress is made
+                }
+
+                ; If no progress for too long, trigger random movement
+                if (noProgressCounter >= maxNoProgress) {
+                    this.MoveDirection("Random", 3)
+                    prevBlueDotX := blueDotX
+                    prevBlueDotY := blueDotY   
+                    noProgressCounter := 0  ; Reset after random movement
+                    Sleep 2000
+                    noProgresssCounterForFail++
+
+                    if (noProgresssCounterForFail > 5) {
+                        Tooltip "Failed to move to location: " this.GetNodeTitle() 
+                        Send "{LButton up}"
+                        Send "{Escape}"
+                        return
+                    }
+
+                    continue
+                }
+            }
+
+            ; Update previous blue dot position
+            prevBlueDotX := blueDotX
+            prevBlueDotY := blueDotY           
 
             ; Normalize deltaX and deltaY to a range
             distanceX := Min(Abs(deltaX), 3)
@@ -184,6 +227,8 @@ class NodeInfo {
         directions.Down := [CenterX + XOffsets[2], CenterY + YOffsets[3]]
         directions.Left := [CenterX + XOffsets[1], CenterY + YOffsets[2]]
         directions.Right := [CenterX + XOffsets[3], CenterY + YOffsets[2]]
+
+        directions.Random := [CenterX + XOffsets[Random(1, 3)], CenterY + YOffsets[Random(1, 3)]]
 
         Coords := directions.%direction% ; Get coordinates for the specified direction
         MouseMove Coords[1], Coords[2], 0 ; Move the mouse to the calculated coordinates

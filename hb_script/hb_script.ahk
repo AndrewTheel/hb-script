@@ -33,6 +33,7 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #Include includes\functions\functions_inventory.ahk
 #Include includes\functions\functions_autopot.ahk
 #Include includes\functions\functions_leveling.ahk
+;#Include includes\functions\functions_farmleveling.ahk
 #Include includes\functions\functions_farming.ahk
 #Include includes\functions\functions_messages.ahk
 #Include includes\functions\functions_traderep.ahk
@@ -85,6 +86,10 @@ Global RepButtonInst := RepButton(60) ; in minutes
 	Global CastingEffectSpell
 
 	CastingEffectSpell := ""
+}
+
+RemoveToolTip(*) {
+	Tooltip ""
 }
 
 ToggleSuspendScript(*) => Send("{F1}") ; unused, consider removing?

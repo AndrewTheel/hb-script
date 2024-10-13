@@ -25,7 +25,9 @@ Global ScreenResolution := StrSplit(IniRead(ConfigFile, "Coords", "ScreenResolut
 Global CenterX := ScreenResolution[1] / 2
 Global CenterY := ScreenResolution[2] / 2
 
-; Calculate pixel offsets for adjacent square positions
+; Calculate pixel offsets for square positions
+GridSquaresX := 25
+GridSquaresY := 17
 XOffset := CtPixel(SquarePercentageX, "X")
 YOffset := CtPixel(SquarePercentageY, "Y")
 XOffsets := [-XOffset, 0, XOffset]
