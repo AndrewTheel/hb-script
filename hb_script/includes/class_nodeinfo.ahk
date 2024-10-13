@@ -6,19 +6,19 @@ class NodeInfo {
     WorldCoordinates := [0,0] ; In cases where we don't use an image we can apply world coordintes (useful for traveling)
 	Location := [0,0] ; World location of the Image found
     ClickOffset := [0,0] ; If applicable, the offset from the location, useful for when we need to click an area offset from the image (converted to pixels in constructor)
-    MarkerLabel := ""
+    Value := ""
     
     ConnectedNodes := [] ; Array of NodeTitles that this node can navigate to
 
     ; Constructor
-    __New(NodeTitle := "", Imagepath := "", AltImagepath := "", WorldCoordinates := [0, 0], ClickOffset := [0, 0], MarkerLabel := "", ConnectedNodes := []) {
+    __New(NodeTitle := "", Imagepath := "", AltImagepath := "", WorldCoordinates := [0, 0], ClickOffset := [0, 0], Value := "", ConnectedNodes := []) {
         ; Initialize member variables
         this.NodeTitle := NodeTitle
         this.Imagepath := Imagepath
         this.AltImagepath := AltImagepath
         this.WorldCoordinates := WorldCoordinates
         this.ClickOffset := [CtPixel(ClickOffset[1], "X"), CtPixel(ClickOffset[2], "Y")]
-        this.MarkerLabel := MarkerLabel
+        this.Value := Value
         this.ConnectedNodes := ConnectedNodes
     }
 
@@ -63,10 +63,6 @@ class NodeInfo {
         ; Check if the point (x, y) is within the boundaries
         return (this.Location[1] + this.ClickOffset[1] >= LeftBoundary && this.Location[1] + this.ClickOffset[1] <= RightBoundary && this.Location[2] + this.ClickOffset[2] >= TopBoundary && this.Location[2] + this.ClickOffset[2] <= BottomBoundary)
     }    
-
-    IsMarker() {
-        return this.MarkerLabel != ""
-    }
 
     Click(button := "left", clickTimes := 1, bUseOffset := true) {
         ; Loop to attempt finding the image for a maximum of 5 tries

@@ -90,10 +90,6 @@ GetCursorGameCoords() {
     return cursorGameCoords  ; Return the game coordinates of the cursor
 }
 
-Test() {
-    RepairAll()
-}
-
 DebugCursorCoords() {
     ; Ensure that blueDotCoords array is valid and contains valid X and Y values
     if (IsObject(blueDotCoords) && blueDotCoords.Length = 2 && blueDotCoords[1] != "" && blueDotCoords[2] != "") {
@@ -108,6 +104,10 @@ UpdatePlayerCoords() {
     global blueDotCoords, playerGameCoords
 
     local tempX, tempY
+
+    if !WinActive(WinTitle) {
+        return
+    }
 
     ; Search for the blue dot's color within the minimap
     if PixelSearch(&tempX, &tempY, minimapX1, minimapY1, minimapX2, minimapY2, blueDotColor) {

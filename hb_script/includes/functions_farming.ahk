@@ -15,7 +15,7 @@ MessageDialogueBoxColor := 0x8C715A
 SellListAlreadyImage := "images\node_images\SellListAlready.png"
 
 ; Nodes for farming
-;NodeInfo(1:NodeTitle, 2:Imagepath, 3:AltImagepath, 4:WorldCoordinates, 5:ClickOffset; 6:MarkerLabel, 7:ConnectedNodes)
+;NodeInfo(1:NodeTitle, 2:Imagepath, 3:AltImagepath, 4:WorldCoordinates, 5:ClickOffset; 6:Value, 7:ConnectedNodes)
 
 ; Farm Navigation to Farm Plots
 farmPlotIndex := 0
@@ -38,6 +38,7 @@ BuyMiscButton := NodeInfo("BuyMiscButton", "images\node_images\Buy_Misc.png",,,[
 QuantitySelect := NodeInfo("QuantitySelect", "images\node_images\Quantity.png",,,[11.3,1.2])
 PurchaseButton := NodeInfo("PurchaseButton", "images\node_images\Purchase_Button.png",,,[4.6,1.7])
 RestButton := NodeInfo("RestButton", "images\node_images\RestButton.png",,,[2,1])
+SellMaximum := NodeInfo("SellMaximum", "images\node_images\SellMaximum.png")
 SellItemsButton := NodeInfo("SellButton", "images\node_images\SellItems_Button.png",,,[3.6,1])
 SellDialogueBox := NodeInfo("SellQuantityBox", "images\node_images\quantityBoxImage.png")
 SellConfirmButton := NodeInfo("SellConfirm", "images\node_images\Sell_Confirm_Button.png",,,[3.6,1.2])
@@ -45,28 +46,30 @@ SellListMenu := NodeInfo("SellListMenu", "images\node_images\SellListMenu.png")
 InventoryMenu := NodeInfo("InventoryMenu", "images\node_images\InventoryMenu.png")
 ItemsForSaleMenu := NodeInfo("ItemsForSale", "images\node_images\ItemsForSale.png",,,[2,0])
 
+
 ; Blacksmith Interior (for repairing)
 BlacksmithExit := NodeInfo("BlacksmithExit", "images\node_images\Blacksmith_Exit.png",,,[2,11.5])
 Blacksmith := NodeInfo("Blacksmith", "images\node_images\Blacksmith.png",,,[1.9,13.5])
 RepairAllButton := NodeInfo("RepairAllButton", "images\node_images\Repair_All.png",,,[2,1]) ; reused for confirmation
 
 ; Seeds 
+Seed_Img := "images\node_images\Seed_Img.png"
 seedIndex := 0
 seedList := []
-seedList.Push(NodeInfo("Seed_Watermelon", "images\node_images\Seed_Watermelon.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Pumpkin", "images\node_images\Seed_Pumpkin.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Garlic", "images\node_images\Seed_Garlic.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Barley", "images\node_images\Seed_Barley.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Carrot", "images\node_images\Seed_Carrot.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Radish", "images\node_images\Seed_Radish.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Corn", "images\node_images\Seed_Corn.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Chinese", "images\node_images\Seed_Chinese.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Melon", "images\node_images\Seed_Melon.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Tomato", "images\node_images\Seed_Tomato.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Grapes", "images\node_images\Seed_Grapes.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_BlueGrapes", "images\node_images\Seed_BlueGrapes.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Mushroom", "images\node_images\Seed_Mushroom.png",,,[0,1.2]))
-seedList.Push(NodeInfo("Seed_Ginseng", "images\node_images\Seed_Ginseng.png",,,[0,1.2]))
+seedList.Push(NodeInfo("Seed_Watermelon", "images\node_images\Seed_Watermelon.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Pumpkin", "images\node_images\Seed_Pumpkin.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Garlic", "images\node_images\Seed_Garlic.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Barley", "images\node_images\Seed_Barley.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Carrot", "images\node_images\Seed_Carrot.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Radish", "images\node_images\Seed_Radish.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Corn", "images\node_images\Seed_Corn.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Chinese", "images\node_images\Seed_Chinese.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Melon", "images\node_images\Seed_Melon.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Tomato", "images\node_images\Seed_Tomato.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Grapes", "images\node_images\Seed_Grapes.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_BlueGrapes", "images\node_images\Seed_BlueGrapes.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Mushroom", "images\node_images\Seed_Mushroom.png",,,[0,1.2], 4))
+seedList.Push(NodeInfo("Seed_Ginseng", "images\node_images\Seed_Ginseng.png",,,[0,1.2], 4))
 
 StartFarming() {
     farmGui := Gui("+AlwaysOnTop +ToolWindow -Caption E0x8000000 +OwnDialogs")
@@ -319,15 +322,7 @@ RestAndShop() {
             Sleep 200
 
             ; Then lets sell produce
-            ShopKeeper.Click()
-            Sleep 200
-            SellItemsButton.Click()
-            Sleep 200
             SellProduce()
-            Sleep 100
-            if (InventoryMenu.IsOnScreen()) {
-                OpenBag() ; closes the opened inventory menu
-            }
             Sleep 100
             ShopKeeper.Click()
             Sleep 200
@@ -346,7 +341,6 @@ RestAndShop() {
             OpenBag()
             Sleep 100
             MoveSeedsToPosition()
-            Sleep 300
             if (InventoryMenu.IsOnScreen()) {
                 OpenBag() ; closes the opened inventory menu
             }
@@ -359,10 +353,14 @@ RestAndShop() {
 }
 
 MoveSeedsToPosition() {
-    Send("{Shift down}")
-    MouseClickDrag "L", DefaultItemLandingPos[1], DefaultItemLandingPos[2], InventorySlotPos[12][1], InventorySlotPos[12][2], 3
-    Send("{Shift up}")
-    Sleep 50
+    X1 := DefaultItemLandingPos[1] - 10, Y1 := DefaultItemLandingPos[2] - 10, X2 := DefaultItemLandingPos[1] + 10, Y2 := DefaultItemLandingPos[2] + 10
+
+    if (ImageSearch(&X, &Y, X1, Y1, X2, Y2, "*TransBlack " Seed_Img)) {
+        Send("{Shift down}")
+        MouseClickDrag "L", DefaultItemLandingPos[1], DefaultItemLandingPos[2], InventorySlotPos[12][1], InventorySlotPos[12][2], 3
+        Send("{Shift up}")
+        Sleep 300
+    }
 }
 
 BuySeeds() {
@@ -384,19 +382,38 @@ BuySeeds() {
     Sleep 100
     MouseMove 0, 0, 0
     Sleep 200
-    QuantitySelect.Click(, 4)
+    QuantitySelect.Click(, seedList[seedIndex].Value)
     Sleep 200
     PurchaseButton.Click()
 }
 
+Test() {
+    SellProduce()
+}
+
 SellProduce() {
+    Loop {
+        ShopKeeper.Click()
+        Sleep 200
+        SellItemsButton.Click()
+        Sleep 200
+    } Until (SellItemsOnDefaultSlot())
+
+    if (SellListMenu.IsOnScreen()) {
+        MouseClick "right", sellSpot[1], sellSpot[2], 1 ;rightclick area to close
+    }
+}
+
+SellItemsOnDefaultSlot() {
+    local bHitMaximumItems := false
+
     PreSellSpotX := DefaultItemLandingPos[1] - CtPixel(7, "X")
     X1 := CtPixel(1, "X"), Y1 := CtPixel(75, "Y"), X2 := CtPixel(22, "X"), Y2 := CtPixel(91, "Y")
 
     Loop 18 {
         MouseClick "left", DefaultItemLandingPos[1], DefaultItemLandingPos[2], 2       
         Sleep 50
-        if (ImageSearch(&X, &Y, X1, Y1, X2, Y2, "*TransBlack " SellListAlreadyImage)) {
+        if (ImageSearch(&X, &Y, X1, Y1, X2, Y2, "*TransBlack " SellListAlreadyImage)) {  
             MouseClickDrag "L", DefaultItemLandingPos[1], DefaultItemLandingPos[2], PreSellSpotX, DefaultItemLandingPos[2], 2
             Sleep 50
         }
@@ -404,19 +421,25 @@ SellProduce() {
         if (SellDialogueBox.IsOnScreen() || PixelGetColor(MessageDialogueBoxPixel[1], MessageDialogueBoxPixel[2]) == MessageDialogueBoxColor) {
             Send("{Enter}")
         }
+
+        if (!bHitMaximumItems && SellMaximum.IsOnScreen()) {
+            bHitMaximumItems := true
+        }
     }
 
     Loop 5 {
         if (SellConfirmButton.IsOnScreen()) {
             SellConfirmButton.Click()
-            return
+            break
         }
         Sleep 100
     }
 
-    if (SellListMenu.IsOnScreen()) {
-        MouseClick "right", sellSpot[1], sellSpot[2], 1 ;rightclick area to close
+    if (InventoryMenu.IsOnScreen()) {
+        OpenBag() ; closes the opened inventory menu
     }
+
+    return !bHitMaximumItems
 }
 
 SowFields() {
