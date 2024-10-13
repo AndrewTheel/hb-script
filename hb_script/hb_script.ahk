@@ -20,22 +20,22 @@ HotIfWinActive WinTitle ;Attempt to make Hotkeys only work inside the HB window
 SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was initially launched from as its working directory
 
 #Include includes\load_from_ini.ahk
-#Include includes\functions_common.ahk
-#Include includes\class_GUIManager.ahk
-#Include includes\class_commandinfo.ahk
-#Include includes\class_hotkeyunbind.ahk
-#Include includes\class_optionsmenumanager.ahk
-#Include includes\class_spellinfo.ahk
-#Include includes\class_statuseffectindicator.ahk
-#Include includes\class_repbutton.ahk
-#Include includes\class_nodeinfo.ahk
-#Include includes\functions_minimap.ahk
-#Include includes\functions_inventory.ahk
-#Include includes\functions_autopot.ahk
-#Include includes\functions_leveling.ahk
-#Include includes\functions_farming.ahk
-#Include includes\functions_messages.ahk
-#Include includes\functions_traderep.ahk
+#Include includes\functions\functions_common.ahk
+#Include includes\classes\class_GUIManager.ahk
+#Include includes\classes\class_commandinfo.ahk
+#Include includes\classes\class_hotkeyunbind.ahk
+#Include includes\classes\class_optionsmenumanager.ahk
+#Include includes\classes\class_spellinfo.ahk
+#Include includes\classes\class_statuseffectindicator.ahk
+#Include includes\classes\class_repbutton.ahk
+#Include includes\classes\class_nodeinfo.ahk
+#Include includes\functions\functions_minimap.ahk
+#Include includes\functions\functions_inventory.ahk
+#Include includes\functions\functions_autopot.ahk
+#Include includes\functions\functions_leveling.ahk
+#Include includes\functions\functions_farming.ahk
+#Include includes\functions\functions_messages.ahk
+#Include includes\functions\functions_traderep.ahk
 
 ; GUI (cannot reside in global_variables as thes require all includes)
 Global HUD := GUIManager()
