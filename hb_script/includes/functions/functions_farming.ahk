@@ -13,6 +13,7 @@ MessageDialogueBoxColor := 0x8C715A
 
 ;NoItemImage := "images\node_images\NoItemImage.png"
 SellListAlreadyImage := "images\node_images\SellListAlready.png"
+Okay_Menu_Prompt := NodeInfo("Okay_Menu", "images\node_images\Okay_Menu_Prompt.png",,,[1,1])
 
 ; Nodes for farming
 ;NodeInfo(1:NodeTitle, 2:Imagepath, 3:AltImagepath, 4:WorldCoordinates, 5:ClickOffset; 6:Value, 7:ConnectedNodes)
@@ -51,7 +52,6 @@ SellConfirmButton := NodeInfo("SellConfirm", "images\node_images\Sell_Confirm_Bu
 SellListMenu := NodeInfo("SellListMenu", "images\node_images\SellListMenu.png")
 InventoryMenu := NodeInfo("InventoryMenu", "images\node_images\InventoryMenu.png")
 ItemsForSaleMenu := NodeInfo("ItemsForSale", "images\node_images\ItemsForSale.png",,,[2,0])
-
 
 ; Blacksmith Interior (for repairing)
 BlacksmithExit := NodeInfo("BlacksmithExit", "images\node_images\Blacksmith_Exit.png",,,[2,11.5])
@@ -163,6 +163,8 @@ FarmingCycle() {
         if stopFlag {
             break
         }
+
+        Okay_Menu_Prompt.Click() ; Click okay if a menu has popped up on the screen (like crusade)
 
         Sleep 200
 
