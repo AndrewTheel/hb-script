@@ -28,6 +28,9 @@ FarmPlot_WP2 := NodeInfo("FarmPlot_WP2",,, [83,82])
 
 ; Farm Navigation to Shop
 ShopEntrance := NodeInfo("ShopEntrance", "images\node_images\Shop_Entrance_Day.png", "images\node_images\Shop_Entrance_Night.png", [93,178], [10,24])
+ShopEntrance2 := NodeInfo("ShopEntrance2", "images\node_images\Shop_Entrance_Day2.png", "images\node_images\Shop_Entrance_Night2.png", [89,181], [-6.5,11])
+ShopEntrance3 := NodeInfo("ShopEntrance3", "images\node_images\Shop_Entrance_Day3.png", "images\node_images\Shop_Entrance_Night3.png", [91,180], [-3,38])
+ShopEntrance4 := NodeInfo("ShopEntrance4", "images\node_images\Shop_Entrance_Day4.png", "images\node_images\Shop_Entrance_Night4.png", [90,178], [-25.5,14])
 Shop_WP1 := NodeInfo("Shop_WP1",,, [118,172])
 
 ; Farm Navigation to Blacksmith
@@ -75,7 +78,7 @@ seedList.Push(NodeInfo("Seed_Mushroom", "images\node_images\Seed_Mushroom.png",,
 seedList.Push(NodeInfo("Seed_Ginseng", "images\node_images\Seed_Ginseng.png",,,[0,1.2], 4))
 
 Test() {
-    FarmPlot_WP1.MoveToLocation()
+    EnterShop()
 }
 
 StartFarming() {
@@ -266,14 +269,18 @@ StopFarming() {
 }
 
 EnterShop() {
-    Loop 10 {
-        ShopEntrance.Click()
-        Sleep 500
-        MouseMove CenterX, CenterY
-        if (ShopKeeper.IsOnScreen()) {
-            return true
+    ShopEntrances := [ShopEntrance, ShopEntrance2, ShopEntrance3, ShopEntrance4]  ; Array of shop entrances
+
+    Loop 5 {
+        for each, entrance in ShopEntrances {
+            entrance.Click()
+            Sleep(1000)
+            MouseMove(CenterX, CenterY)
+            if (ShopKeeper.IsOnScreen()) {
+                return true
+            }
+            Sleep(100)
         }
-        Sleep 100
     }
     return false
 }
