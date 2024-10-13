@@ -208,6 +208,11 @@ DisableShiftPickup() {
     ShiftPickup(false)
 }
 
+MainMenu(*) {
+    OptionsMenu(["1. Leveling", "2. Tools"],
+                ["LevelingMenu", "UncommonCommands"])
+}
+
 RequestMenu(*) {
     OptionsMenu(["1. AMP", "2. Zerk", "3. Invis", "4. Enemies!"],
                 ["APFMMessage", "BerserkMessage", "InvisMessage", "EnemiesMessage"])

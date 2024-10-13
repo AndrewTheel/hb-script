@@ -231,7 +231,8 @@ FarmingCycle() {
                 RepairAll()
                 FarmingState := "recall_start"
 
-            case "exit_blacksmith":
+            case "exit_blacksmith": 
+                ; NOT CURRENTLY USED
                 if (!ExitBlackSmith()) {
                     Tooltip "Error in farming exiting blacksmith"
                     stopFlag := true

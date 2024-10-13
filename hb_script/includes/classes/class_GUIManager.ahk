@@ -27,6 +27,10 @@ class GUIManager {
         this.AutoTradeRepText.Move(CtPixel(90, "X"), CtPixel(90, "Y"))
         this.AutoTradeRepText.Visible := false
 
+        this.OptionsMenuButton := gGUI.Add("Button", "x" CtPixel(1, "X") " y" CtPixel(94, "Y") " w30 h20", "Menu")
+        this.OptionsMenuButton.SetFont("s" CalculateFontSize(1) " bold", "Segoe UI")
+        this.OptionsMenuButton.OnEvent("Click", MainMenu)
+
         ;this.MyBtn := gGUI.Add("Button", "x400 y570 w30 h20", "TradeRep")
         ;this.MyBtn.SetFont("s" CalculateFontSize(1) " bold", "Segoe UI")
         ;this.MyBtn.OnEvent("Click", ToggleDebugMode)
