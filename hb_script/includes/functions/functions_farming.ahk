@@ -489,9 +489,9 @@ SowFields() {
 
 FarmingRecall() {
     Item8()
-    BlockInput "MouseMove" ; Calling the equip item function will stop blocking mouse input, so we need to block it again here.
     RecallSpell := SpellInfo("Recall", "^{2}", "41.8055", "!F1")
     RecallSpell.CastSpell()
+    BlockInput "MouseMove"
     MouseMove CenterX, CenterY
     Sleep 1800
     MouseClick("L", CenterX, CenterY)
