@@ -14,6 +14,7 @@ MessageDialogueBoxColor := 0x8C715A
 ;NoItemImage := "images\node_images\NoItemImage.png"
 SellListAlreadyImage := "images\node_images\SellListAlready.png"
 Okay_Menu_Prompt := NodeInfo("Okay_Menu", "images\node_images\Okay_Menu_Prompt.png",,,[1,1])
+Okay_Menu_Prompt.SetSearchCoords(CtPixel(23, "X"), CtPixel(63, "Y"), CtPixel(52, "X"), CtPixel(82, "Y"))
 
 ; Nodes for farming
 ;NodeInfo(1:NodeTitle, 2:Imagepath, 3:AltImagepath, 4:WorldCoordinates, 5:ClickOffset; 6:Value, 7:ConnectedNodes)
@@ -57,6 +58,9 @@ ItemsForSaleMenu := NodeInfo("ItemsForSale", "images\node_images\ItemsForSale.pn
 BlacksmithExit := NodeInfo("BlacksmithExit", "images\node_images\Blacksmith_Exit.png",,,[2,11.5])
 Blacksmith := NodeInfo("Blacksmith", "images\node_images\Blacksmith.png",,,[1.9,13.5])
 RepairAllButton := NodeInfo("RepairAllButton", "images\node_images\Repair_All.png",,,[2,1]) ; reused for confirmation
+
+; Recall Landing Spot
+RecallLandingSpot := NodeInfo("RecallLandingSpot",,,[125, 151])
 
 ; Seeds 
 Seed_Img := "images\node_images\Seed_Img.png"
@@ -143,7 +147,7 @@ FarmingButtonSubmit(farmGui) {
 }
 
 FarmingCycle() {
-    global farmingActive, FarmingState, stopFlag
+    global farmingActive, FarmingState
     farmingActive := true
 
     if (!WinActive(WinTitle)) {
@@ -164,13 +168,18 @@ FarmingCycle() {
             break
         }
 
-        Okay_Menu_Prompt.Click() ; Click okay if a menu has popped up on the screen (like crusade)
+        if (Okay_Menu_Prompt.IsOnScreen()) {
+            Okay_Menu_Prompt.Click() ; Click okay if a menu has popped up on the screen (like crusade)
+        }
 
         Sleep 200
 
         switch FarmingState {
             case "recall_start":
-                FarmingRecall()
+                if (!FarmingRecall()) {
+                    Tooltip "Error in 'recall_start': trying to recall"
+                    Send "{Escape}"
+                }
                 FarmingState := "travel_farm_plot"
 
             case "travel_farm_plot":
@@ -192,7 +201,10 @@ FarmingCycle() {
                 FarmingState := "recall_for_shop"
 
             case "recall_for_shop":
-                FarmingRecall()
+                if (!FarmingRecall()) {
+                    Tooltip "Error in 'recall_for_shop': trying to recall"
+                    Send "{Escape}"
+                }
                 FarmingState := "move_to_shop_wp1"
             
             case "move_to_shop_wp1":
@@ -206,7 +218,7 @@ FarmingCycle() {
             case "enter_shop":
                 if (!EnterShop()) {
                     Tooltip "Error in farming trying to enter shop"
-                    stopFlag := true
+                    Send "{Escape}"
                 }
                 FarmingState := "rest_and_shop"
 
@@ -217,7 +229,7 @@ FarmingCycle() {
             case "exit_shop":
                 if (!ExitShop()) {
                     Tooltip "Error in farming trying to exit shop"
-                    stopFlag := true
+                    Send "{Escape}"
                 }
                 FarmingState := "move_to_blacksmith_wp1"
 
@@ -232,7 +244,7 @@ FarmingCycle() {
             case "enter_blacksmith":
                 if (!EnterBlackSmith()) {
                     Tooltip "Error in farming entering blacksmith"
-                    stopFlag := true
+                    Send "{Escape}"
                 }
                 FarmingState := "repair_all"
 
@@ -244,7 +256,7 @@ FarmingCycle() {
                 ; NOT CURRENTLY USED
                 if (!ExitBlackSmith()) {
                     Tooltip "Error in farming exiting blacksmith"
-                    stopFlag := true
+                    Send "{Escape}"
                 }
                 FarmingState := "recall_start"
         }
@@ -497,14 +509,34 @@ SowFields() {
 }
 
 FarmingRecall() {
-    Item8()
+    local Attempts := 0
+    local MaxAttempts := 10
+
     RecallSpell := SpellInfo("Recall", "^{2}", "41.8055", "!F1")
-    RecallSpell.CastSpell()
-    BlockInput "MouseMove"
-    MouseMove CenterX, CenterY
-    Sleep 1800
-    MouseClick("L", CenterX, CenterY)
-    Sleep 500
+    Item8()
+
+    Loop {
+        RecallSpell.CastSpell()
+        BlockInput "MouseMove"
+        MouseMove CenterX, CenterY
+        Sleep 1800
+        MouseClick("L", CenterX, CenterY)
+        Sleep 500
+
+        if (RecallLandingSpot.IsCoordsNearby(playerGameCoords[1], playerGameCoords[2])) {
+            return true
+        }
+        else {
+            ClearEnemies()
+        }
+
+        if (Attempts > MaxAttempts) {
+            break
+        }
+        Attempts++
+    } 
+
+    return false
 }
 
 CycleTool() {

@@ -7,6 +7,10 @@ class NodeInfo {
 	Location := [0,0] ; World location of the Image found
     ClickOffset := [0,0] ; If applicable, the offset from the location, useful for when we need to click an area offset from the image (converted to pixels in constructor)
     Value := ""
+    StartX := 0
+    StartY := 0
+    EndX := ScreenResolution[1]
+    EndY := ScreenResolution[2]
     
     ConnectedNodes := [] ; Array of NodeTitles that this node can navigate to
 
@@ -22,8 +26,22 @@ class NodeInfo {
         this.ConnectedNodes := ConnectedNodes
     }
 
+    SetSearchCoords(StartX, StartY, EndX, EndY) {
+        this.StartX := StartX
+        this.StartY := StartY
+        this.EndX := EndX
+        this.EndY := EndY
+    }
+
+    IsCoordsNearby(WorldCoordX, WorldCoordY, NearbyThresholdX := 25, NearbyThresholdY := 17) {
+        XDiff := Abs(this.WorldCoordinates[1] - WorldCoordX)
+        YDiff := Abs(this.WorldCoordinates[2] - WorldCoordY)
+
+        return (XDiff <= NearbyThresholdX && YDiff <= NearbyThresholdY)
+    }
+
     IsOnScreen() {
-        if (this.Imagepath != "" && (ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.Imagepath) || (this.AltImagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.AltImagepath))) ) {
+        if (this.Imagepath != "" && (ImageSearch(&X, &Y, this.StartX, this.StartY, this.EndX, this.EndY, "*TransBlack " this.Imagepath) || (this.AltImagepath != "" && ImageSearch(&X, &Y, this.StartX, this.StartY, this.EndX, this.EndY, "*TransBlack " this.AltImagepath))) ) {
             return true       
         }
         return false
@@ -39,12 +57,12 @@ class NodeInfo {
         Y := 0
 
         ; Check if the main image is found
-        if (this.Imagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.Imagepath) != false) {
+        if (this.Imagepath != "" && ImageSearch(&X, &Y, this.StartX, this.StartY, this.EndX, this.EndY, "*TransBlack " this.Imagepath) != false) {
             ; If the main image is found, return X and Y
             return [X, Y]
         }
         ; If the main image is not found, check for the alternative image
-        else if (this.AltImagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.AltImagepath) != false) {
+        else if (this.AltImagepath != "" && ImageSearch(&X, &Y, this.StartX, this.StartY, this.EndX, this.EndY, "*TransBlack " this.AltImagepath) != false) {
             ; If the alternative image is found, return X and Y
             return [X, Y]
         }
@@ -71,8 +89,8 @@ class NodeInfo {
             Y := 0
 
             ; Check for the primary image and, if necessary, the alternative image
-            if (this.Imagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.Imagepath)
-                || (this.AltImagepath != "" && ImageSearch(&X, &Y, 0, 0, ScreenResolution[1], ScreenResolution[2], "*TransBlack " this.AltImagepath))) {
+            if (this.Imagepath != "" && ImageSearch(&X, &Y, this.StartX, this.StartY, this.EndX, this.EndY, "*TransBlack " this.Imagepath)
+                || (this.AltImagepath != "" && ImageSearch(&X, &Y, this.StartX, this.StartY, this.EndX, this.EndY, "*TransBlack " this.AltImagepath))) {
                 
                 this.Location := [X, Y]
 
