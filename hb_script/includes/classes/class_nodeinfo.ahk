@@ -124,7 +124,7 @@ class NodeInfo {
         prevBlueDotX := ""
         prevBlueDotY := ""
         noProgressCounter := 0  ; Counts how many times no significant progress is made
-        maxNoProgress := 3      ; Max allowed iterations without progress before triggering random movement
+        maxNoProgress := 5      ; Max allowed iterations without progress before triggering random movement
         noProgresssCounterForFail := 0
 
         loop {

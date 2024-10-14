@@ -2,8 +2,8 @@
 
 ; AHK settings
 Persistent
-CoordMode "Mouse", "Client" ; Client / Window / Screen (Client might be best)
-CoordMode "ToolTip", "Client"
+CoordMode "Mouse", "Window" ; Client / Window / Screen (Client might be best)
+CoordMode "ToolTip", "Window"
 SendMode "Event"
 SetMouseDelay 30 ; 10 is default (this adds more delay to help mouseclick commands to work better)
 SetDefaultMouseSpeed 4 ; 2 is default 
