@@ -36,8 +36,8 @@ MinimapToGame(coords) {
     }
 
     ; Adjust for minimap bounds before scaling
-    gx := (coords - minimapX1) * scaleX
-    gy := (coords - minimapY1) * scaleY
+    gx := (coords[1] - minimapX1) * scaleX
+    gy := (coords[2] - minimapY1) * scaleY
 
     return [gx, gy]  ; Return game world coordinates
 }
