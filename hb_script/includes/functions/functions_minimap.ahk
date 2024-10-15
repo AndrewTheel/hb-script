@@ -26,7 +26,7 @@ GameToMinimap(gameX, gameY) {
 }
 
 ; Function to convert minimap coordinates to game world coordinates
-MinimapToGame(coords, oldcoords) {
+MinimapToGame(coords) {
     ; Ensure the argument passed is an array and has exactly 2 number elements
     if (!IsObject(coords) || coords.Length != 2 || !IsNumber(coords[1]) || !IsNumber(coords[2])) {
         Tooltip "Invalid minimap coordinates or array length: " coords[1] ", " coords[2]
@@ -35,12 +35,9 @@ MinimapToGame(coords, oldcoords) {
         return ["", ""]  ; Return empty values for invalid input
     }
 
-    mx := Lerp(oldcoords[1], coords[1], 0.1)
-    my := Lerp(oldcoords[2], coords[2], 0.1)
-
     ; Adjust for minimap bounds before scaling
-    gx := (mx - minimapX1) * scaleX
-    gy := (my - minimapY1) * scaleY
+    gx := (coords - minimapX1) * scaleX
+    gy := (coords - minimapY1) * scaleY
 
     return [gx, gy]  ; Return game world coordinates
 }
@@ -115,8 +112,7 @@ UpdatePlayerCoords() {
         blueDotCoords[2] := tempY - 0.5  ; Adjust Y to center the dot if necessary
 
         ; Convert minimap coordinates to game coordinates
-        oldBlueDotCoords := blueDotCoords
-        playerGameCoords := MinimapToGame(blueDotCoords, oldBlueDotCoords)
+        playerGameCoords := MinimapToGame(blueDotCoords)
     }
     ; Show no error, because sometimes we won't have minimap ex- The Shop
 }
