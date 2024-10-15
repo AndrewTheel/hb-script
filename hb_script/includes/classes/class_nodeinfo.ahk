@@ -71,7 +71,7 @@ class NodeInfo {
         return false
     }
 
-    PositionIsCenter() {
+    IsCenterOnWorldLocation() {
         ; Determine the boundaries of the square
         LeftBoundary := CenterX - XOffset
         RightBoundary := CenterX + XOffset
@@ -79,7 +79,7 @@ class NodeInfo {
         BottomBoundary := CenterY + YOffset
 
         ; Check if the point (x, y) is within the boundaries
-        return (this.Location[1] + this.ClickOffset[1] >= LeftBoundary && this.Location[1] + this.ClickOffset[1] <= RightBoundary && this.Location[2] + this.ClickOffset[2] >= TopBoundary && this.Location[2] + this.ClickOffset[2] <= BottomBoundary)
+        return (this.WorldCoordinates[1] + this.ClickOffset[1] >= LeftBoundary && this.WorldCoordinates[1] + this.ClickOffset[1] <= RightBoundary && this.WorldCoordinates[2] + this.ClickOffset[2] >= TopBoundary && this.WorldCoordinates[2] + this.ClickOffset[2] <= BottomBoundary)
     }    
 
     Click(button := "left", clickTimes := 1, bUseOffset := true) {
@@ -104,14 +104,33 @@ class NodeInfo {
                 Sleep 100
                 return true
             } 
+            else if (this.Imagepath == "" && this.AltImagepath == "") {
+                pPos := ReadCoordinates()
+
+                if (AreArraysEqual(pPos, this.WorldCoordinates)) {
+                    return true
+                }
+
+                CoordsToClick := this.CalculateClickScreenSpaceOffet(pPos[1], pPos[2], this.WorldCoordinates[1], this.WorldCoordinates[2])
+                MouseClick(button, CoordsToClick[1], CoordsToClick[2], clickTimes)
+                return false
+            }
             else {
                 ; Wait before retrying
-                Sleep 1000
+                Sleep 500
             }
         }
 
         ; Return false if image was not found after 10 attempts
         return false
+    }
+
+    CalculateClickScreenSpaceOffet(playerX, playerY, targetX, targetY) {
+        deltaX := targetX - playerX  ; Coord difference in X
+        deltaY := targetY - playerY  ; Coord difference in Y
+        ScreenSpaceOffsetX := CenterX + (XOffset * deltaX) ; Calcs the X offset from center
+        ScreenSpaceOffsetY := CenterY + (YOffset * deltaY) ; Calcs the Y offset from center 
+        return [ScreenSpaceOffsetX, ScreenSpaceOffsetY]
     }
 
     MoveToLocation() {
@@ -121,11 +140,19 @@ class NodeInfo {
         targetY := targetCoords[2]
 
         ; Initialize variables for tracking progress
-        prevBlueDotX := ""
-        prevBlueDotY := ""
-        lastProgressTime := A_TickCount  ; Track the last time progress was made
-        maxNoProgressTime := 5000  ; Max time in milliseconds without progress before triggering random movement
+        startDeltaX := ""
+        startDeltaY := ""
+        prevDeltaX := 0
+        prevDeltaY := 0
+        NoProgress_StartTime := 0
+        NoProgress_ElapsedTime := 0
+        MaxNoProgressDuration := 2000
         noProgressCounterForFail := 0
+
+        ;First Lets call in order the attached node info's MoveToLocation()
+        for node in this.ConnectedNodes {
+            node.MoveToLocation()
+        }
 
         loop {
             if stopFlag {
@@ -135,48 +162,58 @@ class NodeInfo {
             ; Ensure that blueDotCoords array is valid and contains valid X and Y values
             if (!IsObject(blueDotCoords) || blueDotCoords.Length != 2 || blueDotCoords[1] == "" || blueDotCoords[2] == "") {
                 Tooltip "Error: Blue dot coordinates not found!"
-                Sleep(1000)
-                Tooltip ""  ; Clear the tooltip after displaying
                 break
             }
 
-            ; Extract X and Y coordinates from blueDotCoords
-            blueDotX := blueDotCoords[1]
-            blueDotY := blueDotCoords[2]
+            if (startDeltaX == "" && startDeltaY == "") {
+                startDeltaX := Abs(targetX - blueDotCoords[1])
+                startDeltaY := Abs(targetY - blueDotCoords[2])
+            }
 
             ; Calculate the difference between the current blue dot position and the target
-            deltaX := targetX - blueDotX
-            deltaY := targetY - blueDotY
+            deltaX := targetX - blueDotCoords[1]
+            deltaY := targetY - blueDotCoords[2]
 
             ; Stop when the blue dot is close enough to the target (within 2 coords)
             if (Abs(deltaX) < 2 && Abs(deltaY) < 2) {
                 break
             }
 
-            ; Check if progress is being made
-            if (prevBlueDotX != "" && prevBlueDotY != "") {
-                if (Abs(prevBlueDotX - blueDotX) < 1 && Abs(prevBlueDotY - blueDotY) < 1) {
-                    if ((A_TickCount - lastProgressTime) >= maxNoProgressTime) { ; Check the time since last progress
-                        this.MoveDirection("Random", 3)
-                        Sleep 3000
-                        noProgressCounterForFail++
+            ProgressX := (startDeltaX * (Abs(prevDeltaX) - Abs(deltaX)))
+            ProgressY := (startDeltaY * (Abs(prevDeltaY) - Abs(deltaY)))
 
-                        if (noProgressCounterForFail > 5) {
-                            Tooltip "Failed to move to location: " this.GetNodeTitle() 
-                            Send "{LButton up}"
-                            Send "{Escape}"
-                            return
-                        }
+            if (ProgressX <= 0 && ProgressY <= 0) {
+                if (NoProgress_StartTime == 0) {
+                    NoProgress_StartTime := A_TickCount
+                }
+
+                NoProgress_ElapsedTime := A_TickCount - NoProgress_StartTime
+
+                if (NoProgress_ElapsedTime >= MaxNoProgressDuration) {
+                    MoveNearby(3)
+                    NoProgress_StartTime := 0
+                    NoProgress_ElapsedTime := 0
+                    noProgressCounterForFail++
+
+                    if (noProgressCounterForFail > 5) {
+                        Tooltip "Failed to move to location: " this.GetNodeTitle() 
+                        Send "{LButton up}"
+                        Send "{Escape}"
+                        return
                     }
                 }
             }
+            else {
+                NoProgress_StartTime := 0
+                NoProgress_ElapsedTime := 0
+            }
+            
+            if (Mod(A_Index, 2)) { ; This might not be needed
+                prevDeltaX := deltaX
+                prevDeltaY := deltaY
+            }
 
-            ; Store current blue dot position for the next iteration
-            prevBlueDotX := blueDotX
-            prevBlueDotY := blueDotY
-            lastProgressTime := A_TickCount
-
-            ; Normalize deltaX and deltaY to a range
+             ; Normalize deltaX and deltaY to a range
             distanceX := Min(Abs(deltaX), 3)
             distanceY := Min(Abs(deltaY), 3)
 

@@ -33,7 +33,7 @@ SetWorkingDir A_InitialWorkingDir ;Forces the script to use the folder it was in
 #Include includes\functions\functions_inventory.ahk
 #Include includes\functions\functions_autopot.ahk
 #Include includes\functions\functions_leveling.ahk
-;#Include includes\functions\functions_farmleveling.ahk
+#Include includes\functions\functions_screenreading.ahk
 #Include includes\functions\functions_farming.ahk
 #Include includes\functions\functions_messages.ahk
 #Include includes\functions\functions_traderep.ahk
@@ -44,8 +44,6 @@ Global RepButtonInst := RepButton(60) ; in minutes
 
 #SuspendExempt
 !K::ExitApp ; Kill the app (useful if mouse gets locked or program is not responding)
-
-!J:: Send("{PrintScreen}")
 
 ; F1 should only be used to suspend or unsuspend the script, the * designates this (aka it prevents the HB F1 help menu from popping up)
 *F1:: A_IsSuspended ? Suspend(false) : Suspend(true)

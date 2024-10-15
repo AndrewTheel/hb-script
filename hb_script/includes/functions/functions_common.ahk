@@ -13,6 +13,18 @@ RandomizeArray(&arr) {
     }
 }
 
+AreArraysEqual(arr1, arr2) {
+    if (arr1.Length != arr2.Length)
+        return false
+
+    for index, value in arr1 {
+        if (value != arr2[index])
+            return false
+    }
+
+    return true
+}
+
 CalculateFontSize(percentOfHeight) {
     ScreenHeight := ScreenResolution[2] + 0  ; Get the screen height
     return Round((percentOfHeight / 100) * ScreenHeight)  ; Calculate font size as a percentage of height

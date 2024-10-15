@@ -5,6 +5,22 @@ global FarmedSeed := ""
 global sellSpot := [CtPixel(33.3, "X"),CtPixel(33.3, "Y")]
 global FarmingIndicator := ""
 
+farmingStates := ["recall_start", 
+                  "travel_farm_plot", 
+                  "get_in_farm_plot", 
+                  "change_tools", 
+                  "sow_fields", 
+                  "recall_for_shop", 
+                  "move_to_shop_wp1", 
+                  "move_to_shop",
+                  "enter_shop",
+                  "rest_and_shop",
+                  "exit_shop",
+                  "move_to_blacksmith_wp1",
+                  "move_to_blacksmith",
+                  "enter_blacksmith",
+                  "repair_all"]
+
 FarmPositions := [directions.Down, directions.LeftDown, directions.RightDown]
 FarmPositionsLtR := [directions.LeftDown, directions.Down, directions.RightDown]
 
@@ -22,21 +38,44 @@ Okay_Menu_Prompt.SetSearchCoords(CtPixel(23, "X"), CtPixel(63, "Y"), CtPixel(52,
 ; Farm Navigation to Farm Plots
 farmPlotIndex := 0
 farmPlots := []
-farmPlots.Push(NodeInfo("FarmWagon_Slot1", "images\node_images\FarmWagon_Day.png", "images\node_images\FarmWagon_Night.png", [75, 79], [-11, -30]))
-farmPlots.Push(NodeInfo("FarmWagon_Slot2", "images\node_images\FarmWagon_Day.png", "images\node_images\FarmWagon_Night.png", [81, 79], [13, -30]))
-farmPlots.Push(NodeInfo("FarmWagon_Slot3", "images\node_images\FarmWagon_Day.png", "images\node_images\FarmWagon_Night.png", [83, 82], [21, -13]))
-FarmPlot_WP1 := NodeInfo("FarmPlot_WP1",,, [90,95])
-FarmPlot_WP2 := NodeInfo("FarmPlot_WP2",,, [83,82])
+
+North_FarmWagon_WP1 := NodeInfo("North_FarmWagon_WP1",,, [90,95])
+North_FarmWagon_WP2 := NodeInfo("North_FarmWagon_WP2",,, [83,82])
+farmPlots.Push(NodeInfo("North_FarmWagon_Slot1",,, [75, 79],,,[North_FarmWagon_WP1, North_FarmWagon_WP2]))
+farmPlots.Push(NodeInfo("North_FarmWagon_Slot2",,, [81, 79],,,[North_FarmWagon_WP1, North_FarmWagon_WP2]))
+farmPlots.Push(NodeInfo("North_FarmWagon_Slot3",,, [83, 82],,,[North_FarmWagon_WP1, North_FarmWagon_WP2]))
+
+SW_BigFarm_WP1 := NodeInfo("SW_BigFarm_WP1",,, [110,125])
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot1",,, [77, 113],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot2",,, [71, 108],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot3",,, [64, 105],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot4",,, [60, 102],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot5",,, [55, 98],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot6",,, [55, 93],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot7",,, [73, 93],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot8",,, [81, 94],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot9",,, [87, 97],,,[SW_BigFarm_WP1]))
+farmPlots.Push(NodeInfo("SW_BigFarm_Slot10",,, [93, 110],,,[SW_BigFarm_WP1]))
+
+;East_BigFarm_WP1 := NodeInfo("East_BigFarm_WP1",,, [110,125])
+farmPlots.Push(NodeInfo("East_BigFarm_Slot1",,, [157, 169]))
+farmPlots.Push(NodeInfo("East_BigFarm_Slot2",,, [159, 186])) ;good
+farmPlots.Push(NodeInfo("East_BigFarm_Slot3",,, [170, 180])) ;good
+farmPlots.Push(NodeInfo("East_BigFarm_Slot4",,, [178, 168])) ;good
+farmPlots.Push(NodeInfo("East_BigFarm_Slot5",,, [180, 154])) ;good
+farmPlots.Push(NodeInfo("East_BigFarm_Slot6",,, [198, 151])) ;good
+farmPlots.Push(NodeInfo("East_BigFarm_Slot7",,, [199, 141])) ;good
+farmPlots.Push(NodeInfo("East_BigFarm_Slot8",,, [187, 141])) ;good
 
 ; Farm Navigation to Shop
-ShopEntrance := NodeInfo("ShopEntrance", "images\node_images\Shop_Entrance_Day.png", "images\node_images\Shop_Entrance_Night.png", [93,178], [10,24])
-ShopEntrance2 := NodeInfo("ShopEntrance2", "images\node_images\Shop_Entrance_Day2.png", "images\node_images\Shop_Entrance_Night2.png", [89,181], [-6.5,11])
-ShopEntrance3 := NodeInfo("ShopEntrance3", "images\node_images\Shop_Entrance_Day3.png", "images\node_images\Shop_Entrance_Night3.png", [91,180], [-3,38])
-ShopEntrance4 := NodeInfo("ShopEntrance4", "images\node_images\Shop_Entrance_Day4.png", "images\node_images\Shop_Entrance_Night4.png", [90,178], [-25.5,14])
+ShopEntrance := NodeInfo("ShopEntrance",,, [93,178])
+ShopEntrance2 := NodeInfo("ShopEntrance2",,, [89,181])
+ShopEntrance3 := NodeInfo("ShopEntrance3",,, [91,180])
+ShopEntrance4 := NodeInfo("ShopEntrance4",,, [90,178])
 Shop_WP1 := NodeInfo("Shop_WP1",,, [118,172])
 
 ; Farm Navigation to Blacksmith
-BlackSmithEntrance := NodeInfo("BlacksmithEntrance", "images\node_images\Blacksmith_Entrance_Day.png", "images\node_images\Blacksmith_Entrance_Night.png", [111,193], [1.3,23.7])
+BlackSmithEntrance := NodeInfo("BlacksmithEntrance",,, [111,193])
 BM_WP1 := NodeInfo("BM_WP1",,, [108,196])
 
 ; Shop Interior (for selling, buying, resting)
@@ -55,7 +94,6 @@ InventoryMenu := NodeInfo("InventoryMenu", "images\node_images\InventoryMenu.png
 ItemsForSaleMenu := NodeInfo("ItemsForSale", "images\node_images\ItemsForSale.png",,,[2,0])
 
 ; Blacksmith Interior (for repairing)
-BlacksmithExit := NodeInfo("BlacksmithExit", "images\node_images\Blacksmith_Exit.png",,,[2,11.5])
 Blacksmith := NodeInfo("Blacksmith", "images\node_images\Blacksmith.png",,,[1.9,13.5])
 RepairAllButton := NodeInfo("RepairAllButton", "images\node_images\Repair_All.png",,,[2,1]) ; reused for confirmation
 
@@ -82,7 +120,7 @@ seedList.Push(NodeInfo("Seed_Mushroom", "images\node_images\Seed_Mushroom.png",,
 seedList.Push(NodeInfo("Seed_Ginseng", "images\node_images\Seed_Ginseng.png",,,[0,1.2], 4))
 
 Test() {
-    EnterShop()
+    North_FarmWagon_WP1.MoveToLocation()
 }
 
 StartFarming() {
@@ -107,10 +145,13 @@ StartFarming() {
 
     ; Add the UpDown control and other components to the GUI
     farmGui.Add("Text",, "Select seed to farm:")
-    farmGui.Add("ListBox", "vSeedChoice Choose1 r" seedList.Length, seedNames)
+    farmGui.Add("ListBox", "vSeedChoice Choose1 r" 5, seedNames)
     
     farmGui.Add("Text",, "Select farm plot:")
-    farmGui.Add("ListBox", "vPlotChoice Choose1 r" plotNames.Length, plotNames)
+    farmGui.Add("ListBox", "vPlotChoice Choose1 r" 5, plotNames)
+
+    farmGui.Add("Text",, "Select state:")
+    farmGui.Add("ListBox", "vFarmingState Choose1 r" 5, farmingStates)
 
     OKButton := farmGui.Add("Button", "Default vOKButton", "OK")
     OKButton.OnEvent("Click", (*) => FarmingButtonSubmit(farmGui))
@@ -124,14 +165,8 @@ FarmingButtonSubmit(farmGui) {
 
     farmPlotIndex := farmGui["PlotChoice"].Value
     seedIndex := farmGui["SeedChoice"].Value ; Retrieve the selected seed name from the ListBox
+    FarmingState := farmingStates[farmGui["FarmingState"].Value]
     farmGui.Destroy()
-
-    Loop 10 {
-        if (seedIndex != 0 && seedList[seedIndex].IsOnScreen()) {
-            seedList[seedIndex].Click()
-            break
-        }
-    }
 
     if (FarmingIndicator == "") {
         FarmingIndicator := gGUI.Add("Text", "x" CtPixel(0, "X") " y" CtPixel(97, "Y") " cWhite", "Farming " seedList[seedIndex].GetNodeTitle())
@@ -141,13 +176,11 @@ FarmingButtonSubmit(farmGui) {
         FarmingIndicator.Visible := true
     }
 
-    FarmingState := "recall_start"
-
     FarmingCycle()
 }
 
 FarmingCycle() {
-    global farmingActive, FarmingState
+    global farmingActive, FarmingState, farmPlotIndex
     farmingActive := true
 
     if (!WinActive(WinTitle)) {
@@ -161,7 +194,7 @@ FarmingCycle() {
 
     BlockInput "MouseMove"
     EnableShiftPickup()
-    Sleep 500
+    Sleep 200
 
     Loop {
         if stopFlag {
@@ -175,99 +208,89 @@ FarmingCycle() {
         Sleep 200
 
         switch FarmingState {
-            case "recall_start":
+            case farmingStates[1]:
                 if (!FarmingRecall()) {
                     Tooltip "Error in 'recall_start': trying to recall"
                     Send "{Escape}"
                 }
-                FarmingState := "travel_farm_plot"
+                FarmingState := farmingStates[2]
 
-            case "travel_farm_plot":
-                FarmPlot_WP1.MoveToLocation()
-                FarmPlot_WP2.MoveToLocation()
+            case farmingStates[2]:
                 farmPlots[farmPlotIndex].MoveToLocation()
-                FarmingState := "get_in_farm_plot"
+                FarmingState := farmingStates[3]
 
-            case "get_in_farm_plot":
+            case farmingStates[3]:
                 GetInFarmSpot()
-                FarmingState := "change_tools"
+                FarmingState := farmingStates[4]
             
-            case "change_tools":
+            case farmingStates[4]:
                 CycleTool()
-                FarmingState := "sow_fields"
+                FarmingState := farmingStates[5]
 
-            case "sow_fields":
+            case farmingStates[5]:
                 SowFields()
-                FarmingState := "recall_for_shop"
+                FarmingState := farmingStates[6]
 
-            case "recall_for_shop":
+            case farmingStates[6]:
                 if (!FarmingRecall()) {
                     Tooltip "Error in 'recall_for_shop': trying to recall"
                     Send "{Escape}"
                 }
-                FarmingState := "move_to_shop_wp1"
+                FarmingState := farmingStates[7]
             
-            case "move_to_shop_wp1":
+            case farmingStates[7]:
                 Shop_WP1.MoveToLocation()
-                FarmingState := "move_to_shop"
+                FarmingState := farmingStates[8]
 
-            case "move_to_shop":
+            case farmingStates[8]:
                 ShopEntrance.MoveToLocation()
-                FarmingState := "enter_shop"
+                FarmingState := farmingStates[9]
 
-            case "enter_shop":
+            case farmingStates[9]:
                 if (!EnterShop()) {
                     Tooltip "Error in farming trying to enter shop"
                     Send "{Escape}"
                 }
-                FarmingState := "rest_and_shop"
+                FarmingState := farmingStates[10]
 
-            case "rest_and_shop":
+            case farmingStates[10]:
                 RestAndShop()
-                FarmingState := "exit_shop"
+                FarmingState := farmingStates[11]
 
-            case "exit_shop":
+            case farmingStates[11]:
                 if (!ExitShop()) {
                     Tooltip "Error in farming trying to exit shop"
                     Send "{Escape}"
                 }
-                FarmingState := "move_to_blacksmith_wp1"
+                FarmingState := farmingStates[12]
 
-            case "move_to_blacksmith_wp1":
+            case farmingStates[12]:
                 BM_WP1.MoveToLocation()
-                FarmingState := "move_to_blacksmith"
+                FarmingState := farmingStates[13]
 
-            case "move_to_blacksmith":
+            case farmingStates[13]:
                 BlackSmithEntrance.MoveToLocation()
-                FarmingState := "enter_blacksmith"
+                FarmingState := farmingStates[14]
 
-            case "enter_blacksmith":
+            case farmingStates[14]:
                 if (!EnterBlackSmith()) {
                     Tooltip "Error in farming entering blacksmith"
                     Send "{Escape}"
                 }
-                FarmingState := "repair_all"
+                FarmingState := farmingStates[15]
 
-            case "repair_all":
+            case farmingStates[15]:
                 RepairAll()
-                FarmingState := "recall_start"
-
-            case "exit_blacksmith": 
-                ; NOT CURRENTLY USED
-                if (!ExitBlackSmith()) {
-                    Tooltip "Error in farming exiting blacksmith"
-                    Send "{Escape}"
-                }
-                FarmingState := "recall_start"
+                farmPlotIndex := Random(1, farmPlots.Length) ; randomize the plot we goto
+                FarmingState := farmingStates[1]
         }
     }
 
-    Sleep 1000
+    Sleep 500
 
     if (farmingActive) {
         StopFarming()
-        Sleep 1500
-        ;ToolTip ""
+        Sleep 500
     }
 }
 
@@ -288,12 +311,12 @@ EnterShop() {
     Loop 5 {
         for each, entrance in ShopEntrances {
             entrance.Click()
-            Sleep(1000)
+            Sleep 500
             MouseMove(CenterX, CenterY)
             if (ShopKeeper.IsOnScreen()) {
                 return true
             }
-            Sleep(100)
+            Sleep 100
         }
     }
     return false
@@ -304,7 +327,7 @@ ExitShop() {
         ShopExit.Click()
         Sleep 500
         MouseMove CenterX, CenterY
-        if (ShopEntrance.IsOnScreen()) {
+        if (ShopEntrance.IsCoordsNearby(playerGameCoords[1], playerGameCoords[2])) {
             return true
         }
         Sleep 100
@@ -318,19 +341,6 @@ EnterBlackSmith() {
         Sleep 500
         MouseMove CenterX, CenterY
         if (Blacksmith.IsOnScreen()) {
-            return true
-        }
-        Sleep 100
-    }
-    return false
-}
-
-ExitBlackSmith() {
-    Loop 10 {
-        BlackSmithExit.Click()
-        Sleep 500
-        MouseMove CenterX, CenterY
-        if (BlackSmithEntrance.IsOnScreen()) {
             return true
         }
         Sleep 100
@@ -352,7 +362,7 @@ RepairAll() {
             }
             return
         }
-        Sleep 1000
+        Sleep 500
     }
     StopFarming() ; We never made it into shop
 }
@@ -562,25 +572,22 @@ CycleTool() {
     Sleep 250
 }
 
-MoveToFarmSpot() {
-    if (!farmingActive) {
-        return
-    }
-
-    if (farmPlotIndex != 0) {
-        farmPlots[farmPlotIndex].Click()
-    }
-}
-
 GetInFarmSpot() {
     local attempts := 0
 
     if (!farmingActive || farmPlotIndex == 0) {
-        return
+        return false
     }  
 
     Loop {
-        MoveToFarmSpot()
+        MouseMove CenterX, CenterY
+        MouseClick "right" ; stop moving
+        Sleep 50
+ 
+        if (farmPlots[farmPlotIndex].Click()) {
+            return true
+        }
+
         if (attempts == 8) { ; Can get stuck trying to move 1 up, try moving left up 1
             MoveNearby(1, "LeftUp")
         }
@@ -588,12 +595,13 @@ GetInFarmSpot() {
             Send("{Shift up}")
         }
         if (attempts > 18) {
-            StopFarming()
-            return
+            break
         }
         attempts++
-        Sleep 1000
-    } Until farmPlots[farmPlotIndex].PositionIsCenter()
+        Sleep 2000
+    } 
+
+    return false
 }
 
 ClearEnemies() {
@@ -664,15 +672,15 @@ PlantCrop() {
     OpenBag()
     Sleep 100
     for square in FarmPositions {
-        Sleep Random(300,850)
+        Sleep Random(100,250)
         if (CheckSeedsRemaining()) {
             Send "{Click " InventorySlotPos[12][1] " " InventorySlotPos[12][2] " 3}" ; Double click on the seed location
             Send "{Click " square[1] " " square[2] "}" ; Click on crop location
         }
+    }
 
-        if (!farmPlots[farmPlotIndex].PositionIsCenter()) { ; Sometimes the player accidently moves, lets make sure we are in the desire location again
-            GetInFarmSpot()
-        }
+    if (!farmPlots[farmPlotIndex].IsCenterOnWorldLocation()) { ; Sometimes the player accidently moves, lets make sure we are in the desire location again
+        GetInFarmSpot()
     }
     OpenBag() ; Close bag
 }
@@ -685,6 +693,15 @@ DoesCropExist(x, y)
 		return true
 	}
 	return false
+}
+
+DoesSummonExist(x, y)
+{
+    X1 := CenterX, Y1 := CenterY
+    X2 := CenterX + (2 * XOffset)
+    Y2 := CenterY + (2 * YOffset)
+
+    return PixelSearch(&OutputVarX, &OutputVarY, X1, Y1, X2, Y2, 0x00d700)
 }
 
 DoesProduceExist(x, y)
@@ -700,6 +717,8 @@ DoesProduceExist(x, y)
 }
 
 HarvestCrop() {
+    global bNeedSeeds
+
     if (!farmingActive) {
         return
     }
@@ -732,6 +751,10 @@ HarvestCrop() {
             }
             Send("{RButton up}")
             Sleep 100
+        }
+        else if (DoesSummonExist(square[1], square[2])) { ;Some assholes summon creatures to stop the bot, lets detect if this has occurred and change course
+            bNeedSeeds := true
+            return
         }
     }
 }
