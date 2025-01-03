@@ -1,2 +1,2 @@
-# hb-script
-Script for handling ease of play for HB
+# ahk-scripts
+Scripts for various things
